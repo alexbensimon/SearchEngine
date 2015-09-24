@@ -19,7 +19,7 @@ namespace SearchEngineProject
 
 
             // The inverted index
-            NaiveInvertedIndex index = new NaiveInvertedIndex();
+            var index = new NaiveInvertedIndex();
 
             // The list of file name strings.
             IList<string> fileNames = new List<string>();
@@ -44,13 +44,13 @@ namespace SearchEngineProject
 
             while (true)
             {
-                Console.Write("What word are you looking for? ");
+                Console.Write("What word are you looking for?");
                 string word = Console.ReadLine();
 
                 if (word == "quit")
                     break;
 
-                IList<int> postings = index.GetPostings(PorterStemmer.ProcessToken(word));
+                var postings = index.GetPostings(PorterStemmer.ProcessToken(word));
 
                 if (postings == null)
                     Console.WriteLine("This word does not exist in the documents.\n");
