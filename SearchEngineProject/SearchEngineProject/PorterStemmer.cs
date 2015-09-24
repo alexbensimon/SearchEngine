@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Cecs429
+namespace SearchEngineProject
 {
     class PorterStemmer
     {
@@ -105,7 +105,7 @@ namespace Cecs429
 
 
             // step 1b
-            bool doStep1bb = false;
+            bool doStep1Bb = false;
             //		step 1b
             if (token.EndsWith("eed"))
             {
@@ -126,7 +126,7 @@ namespace Cecs429
                 if (vowel.IsMatch(stem))
                 {
                     token = stem;
-                    doStep1bb = true;
+                    doStep1Bb = true;
                 }
             }
             else if (token.EndsWith("ing"))
@@ -135,12 +135,12 @@ namespace Cecs429
                 if (vowel.IsMatch(stem))
                 {
                     token = stem;
-                    doStep1bb = true;
+                    doStep1Bb = true;
                 }
             }
 
             // step 1b*, only if the 1b.2 or 1b.3 were performed.
-            if (doStep1bb)
+            if (doStep1Bb)
             {
                 if (token.EndsWith("at") || token.EndsWith("bl") || token.EndsWith("iz"))
                 {
@@ -183,12 +183,12 @@ namespace Cecs429
             // "suffix"/"replacement" pairs might be helpful. It could look like
             // string[][] step2pairs = {  new string[] {"ational", "ate"}, 
             //										new string[] {"tional", "tion"}, ....
-            token = step23(token, suffixListS2);
+            token = Step23(token, suffixListS2);
 
             // step 3
             // program this step. the rules are identical to step 2 and you can use
             // the same helper method. you may also want a matrix here.
-            token = step23(token, suffixListS3);
+            token = Step23(token, suffixListS3);
 
 
             // step 4
@@ -239,7 +239,7 @@ namespace Cecs429
             return token;
         }
 
-        private static string step23(string token, Dictionary<string, string> suffixList)
+        private static string Step23(string token, Dictionary<string, string> suffixList)
         {
             foreach (string suffix in suffixList.Keys)
             {

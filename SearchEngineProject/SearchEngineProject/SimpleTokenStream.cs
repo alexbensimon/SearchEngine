@@ -4,18 +4,18 @@ using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Cecs429 {
+namespace SearchEngineProject {
 	public class SimpleTokenStream : ITokenStream {
-		private IEnumerable<string> mFileLines;
-		private IEnumerator<string> mWordsEnumerator;
+		private IEnumerable<string> _mFileLines;
+		private IEnumerator<string> _mWordsEnumerator;
 
 		public SimpleTokenStream(String filePath) {
-			mFileLines =
+			_mFileLines =
 				from line in File.ReadLines(filePath)
-				from word in line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+				from word in line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
 				select word;
-			mWordsEnumerator = mFileLines.GetEnumerator();
-			HasNextToken = mWordsEnumerator.MoveNext();
+			_mWordsEnumerator = _mFileLines.GetEnumerator();
+			HasNextToken = _mWordsEnumerator.MoveNext();
 		}
 
 		public bool HasNextToken {
@@ -25,14 +25,14 @@ namespace Cecs429 {
 		public string NextToken() {
 			if (!HasNextToken)
 				return null;
-			string token = Regex.Replace(mWordsEnumerator.Current, @"[^\w\s]*", "").ToLower();
-			HasNextToken = mWordsEnumerator.MoveNext();
+			string token = Regex.Replace(_mWordsEnumerator.Current, @"[^\w\s]*", "").ToLower();
+			HasNextToken = _mWordsEnumerator.MoveNext();
 			return token;
 		}
 
 		public void Close() {
-			mWordsEnumerator = null;
-			mFileLines = null;
+			_mWordsEnumerator = null;
+			_mFileLines = null;
 		}
 	}
 }

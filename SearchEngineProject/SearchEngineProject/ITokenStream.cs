@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Cecs429 {
+﻿namespace SearchEngineProject {
 	public interface ITokenStream	 {
 		/// <summary>
 		/// Returns true if the stream has more tokens remaining.

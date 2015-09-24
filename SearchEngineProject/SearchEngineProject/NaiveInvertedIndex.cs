@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cecs429
+namespace SearchEngineProject
 {
     public class NaiveInvertedIndex
     {
-        private Dictionary<string, IList<int>> mIndex = new Dictionary<string, IList<int>>();
+        private readonly Dictionary<string, IList<int>> _mIndex = new Dictionary<string, IList<int>>();
 
         /// <summary>
         /// Associates the given term with the given document ID in the index.
         /// </summary>
-        public void AddTerm(string term, int documentID)
+        public void AddTerm(string term, int documentId)
         {
             // TO-DO: add the term to the index Dictionary. If the index does not have
             // an entry for the term, initialize a new List<int>, add the 
@@ -19,16 +19,16 @@ namespace Cecs429
             // to the list that already exists in the Dictionary, but ONLY IF the list does
             // not already contain the docID.
 
-            if (mIndex.ContainsKey(term))
+            if (_mIndex.ContainsKey(term))
             {
-                if (mIndex[term].Last() < documentID)
-                    mIndex[term].Add(documentID);
+                if (_mIndex[term].Last() < documentId)
+                    _mIndex[term].Add(documentId);
             }
             else
             {
                 IList<int> liste = new List<int>();
-                liste.Add(documentID);
-                mIndex.Add(term, liste);
+                liste.Add(documentId);
+                _mIndex.Add(term, liste);
             }
 
         }
@@ -42,7 +42,7 @@ namespace Cecs429
             {
                 // TO-DO: return the number of terms in the index.
 
-                return mIndex.Count;
+                return _mIndex.Count;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Cecs429
             // TO-DO: return the postings list for the given term from the index Dictionary.
             try
             {
-                return mIndex[term];
+                return _mIndex[term];
             }
             catch (KeyNotFoundException)
             {
@@ -69,7 +69,7 @@ namespace Cecs429
         {
             // TO-DO: fill an array of strings with all the keys from the Dictionary.
             // Sort the array and return it.
-            string[] terms = mIndex.Keys.ToArray();
+            string[] terms = _mIndex.Keys.ToArray();
             Array.Sort(terms);
 
             return terms;
