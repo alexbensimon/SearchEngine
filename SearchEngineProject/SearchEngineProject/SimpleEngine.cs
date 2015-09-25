@@ -21,8 +21,8 @@ namespace SearchEngineProject
             // TO-DO: finish this method for indexing a particular file.
             // Construct a SimpleTokenStream for the given File.
             // Read each token from the stream and add it to the index.
-            SimpleTokenStream simpleTokenStream = new SimpleTokenStream(fileName);
-            int position = 0;
+            var simpleTokenStream = new SimpleTokenStream(fileName);
+            var position = 0;
 
             while (simpleTokenStream.HasNextToken)
             {
