@@ -25,7 +25,7 @@ namespace SearchEngineProject {
 		public string NextToken() {
 			if (!HasNextToken)
 				return null;
-			string token = Regex.Replace(_mWordsEnumerator.Current, @"[^\w\s]*", "").ToLower();
+			var token = Regex.Replace(_mWordsEnumerator.Current, @"[^\w\s]*", "").ToLower();
 			HasNextToken = _mWordsEnumerator.MoveNext();
 			return token;
 		}

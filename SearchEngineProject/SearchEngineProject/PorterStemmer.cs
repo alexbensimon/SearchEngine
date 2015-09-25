@@ -248,17 +248,15 @@ namespace SearchEngineProject
 
         private static string Step23(string token, Dictionary<string, string> suffixList)
         {
-            foreach (string suffix in suffixList.Keys)
+            foreach (var suffix in suffixList.Keys)
             {
-                if (token.EndsWith(suffix))
+                if (!token.EndsWith(suffix)) continue;
+                var stem = token.Substring(0, token.Length - suffix.Length);
+                if (MGr0.IsMatch(stem))
                 {
-                    string stem = token.Substring(0, token.Length - suffix.Length);
-                    if (MGr0.IsMatch(stem))
-                    {
-                        return stem + suffixList[suffix];
-                    }
-                    return token;
+                    return stem + suffixList[suffix];
                 }
+                return token;
             }
             return token;
         }
