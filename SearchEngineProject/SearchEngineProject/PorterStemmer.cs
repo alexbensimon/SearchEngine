@@ -3,91 +3,99 @@ using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
 {
-    class PorterStemmer
+    internal class PorterStemmer
     {
         // a single consonant
-        private static string c = "[^aeiou]";
+        private const string c = "[^aeiou]";
         // a single vowel
-        private static string v = "[aeiouy]";
+        private const string v = "[aeiouy]";
 
         // a sequence of consonants; the second/third/etc consonant cannot be 'y'
-        private static string C = c + "[^aeiouy]*";
+        private const string C = c + "[^aeiouy]*";
         // a sequence of vowels; the second/third/etc cannot be 'y'
-        private static string V = v + "[aeiou]*";
+        private const string V = v + "[aeiou]*";
 
 
         // this regex tests if the token has measure > 0 [at least one VC].
-        private static Regex mGr0 = new Regex("^(" + C + ")?" + V + C);
+        private static readonly Regex MGr0 = new Regex("^(" + C + ")?" + V + C);
 
 
         // add more Regex variables for the following patterns:
         // m equals 1: token has measure == 1
-        private static Regex mEq1 = new Regex("^(" + C + ")?" + V + C + "(" + V + ")?$");
+        private static readonly Regex MEq1 = new Regex("^(" + C + ")?" + V + C + "(" + V + ")?$");
 
         // m greater than 1: token has measure > 1
-        private static Regex mGr1 = new Regex("^(" + C + ")?" + V + C + V + C);
+        private static readonly Regex MGr1 = new Regex("^(" + C + ")?" + V + C + V + C);
 
         // vowel: token has a vowel after the first (optional) C
-        private static Regex vowel = new Regex("^(" + C + ")?" + V);
+        private static readonly Regex Vowel = new Regex("^(" + C + ")?" + V);
 
         // double consonant: token ends in two consonants that are the same, 
         //			unless they are L, S, or Z. (look up "backreferencing" to help 
         //			with this)
-        private static Regex dbcons = new Regex(@"([^aeioulszy])\1$");
+        private static readonly Regex Dbcons = new Regex(@"([^aeioulszy])\1$");
 
         // m equals 1, Cvc: token is in Cvc form, where the last c is not w, x, 
         //			or y.
-        private static Regex mEq1Cvc = new Regex("^(" + C + ")" + v + "[^aeiouwxy]$");
+        private static readonly Regex MEq1Cvc = new Regex("^(" + C + ")" + v + "[^aeiouwxy]$");
 
-        private static Dictionary<string, string> suffixListS2 = new Dictionary<string, string>() {   { "ational", "ate" },
-                                                                                                { "tional", "tion" },
-                                                                                                {"enci", "ence" },
-                                                                                                { "anci", "ance"},
-                                                                                                { "izer", "ize"},
-                                                                                                { "bli", "ble"},
-                                                                                                {"logi", "log" },
-                                                                                                { "alli", "al"},
-                                                                                                { "entli", "ent"},
-                                                                                                { "eli", "e"},
-                                                                                                { "ousli", "ous"},
-                                                                                                { "ization", "ize"},
-                                                                                                { "ation", "ate"},
-                                                                                                { "ator", "ate"},
-                                                                                                { "alism", "al"},
-                                                                                                { "iveness", "ive"},
-                                                                                                { "fulness", "ful"},
-                                                                                                { "ousness", "ous"},
-                                                                                                { "aliti", "al"},
-                                                                                                { "iviti", "ive"},
-                                                                                                { "biliti", "ble"}};
+        private static readonly Dictionary<string, string> SuffixListS2 = new Dictionary<string, string>
+        {
+            {"ational", "ate"},
+            {"tional", "tion"},
+            {"enci", "ence"},
+            {"anci", "ance"},
+            {"izer", "ize"},
+            {"bli", "ble"},
+            {"logi", "log"},
+            {"alli", "al"},
+            {"entli", "ent"},
+            {"eli", "e"},
+            {"ousli", "ous"},
+            {"ization", "ize"},
+            {"ation", "ate"},
+            {"ator", "ate"},
+            {"alism", "al"},
+            {"iveness", "ive"},
+            {"fulness", "ful"},
+            {"ousness", "ous"},
+            {"aliti", "al"},
+            {"iviti", "ive"},
+            {"biliti", "ble"}
+        };
 
-        private static Dictionary<string, string> suffixListS3 = new Dictionary<string, string>() {   { "icate", "ic" },
-                                                                                                { "ative", "" },
-                                                                                                {"alize", "al" },
-                                                                                                { "iciti", "ic"},
-                                                                                                { "ical", "ic"},
-                                                                                                { "ful", ""},
-                                                                                                { "ness", ""}};
+        private static readonly Dictionary<string, string> SuffixListS3 = new Dictionary<string, string>
+        {
+            {"icate", "ic"},
+            {"ative", ""},
+            {"alize", "al"},
+            {"iciti", "ic"},
+            {"ical", "ic"},
+            {"ful", ""},
+            {"ness", ""}
+        };
 
-        private static string[] suffixListS4 = new string[] { "al",
-                                                            "ance",
-                                                            "ence",
-                                                            "er",
-                                                            "ic",
-                                                            "able",
-                                                            "ible",
-                                                            "ant",
-                                                            "ement",
-                                                            "ment",
-                                                            "ent",
-                                                            "ion",
-                                                            "ou",
-                                                            "ism",
-                                                            "ate",
-                                                            "iti",
-                                                            "ous",
-                                                            "ive",
-                                                            "ize"};
+        private static readonly string[] SuffixListS4 = {
+            "al",
+            "ance",
+            "ence",
+            "er",
+            "ic",
+            "able",
+            "ible",
+            "ant",
+            "ement",
+            "ment",
+            "ent",
+            "ion",
+            "ou",
+            "ism",
+            "ate",
+            "iti",
+            "ous",
+            "ive",
+            "ize"
+        };
 
         public static string ProcessToken(string token)
         {
@@ -113,7 +121,7 @@ namespace SearchEngineProject
                 // token.Substring(0, token.Length - 3) is the stem prior to "eed".
                 // if that has m>0, then remove the "d".
                 string stem = token.Substring(0, token.Length - 3);
-                if (mGr0.IsMatch(stem))
+                if (MGr0.IsMatch(stem))
                 {
                     token = stem + "ee";
                 }
@@ -123,7 +131,7 @@ namespace SearchEngineProject
             else if (token.EndsWith("ed"))
             {
                 string stem = token.Substring(0, token.Length - 2);
-                if (vowel.IsMatch(stem))
+                if (Vowel.IsMatch(stem))
                 {
                     token = stem;
                     doStep1Bb = true;
@@ -132,7 +140,7 @@ namespace SearchEngineProject
             else if (token.EndsWith("ing"))
             {
                 string stem = token.Substring(0, token.Length - 3);
-                if (vowel.IsMatch(stem))
+                if (Vowel.IsMatch(stem))
                 {
                     token = stem;
                     doStep1Bb = true;
@@ -146,11 +154,11 @@ namespace SearchEngineProject
                 {
                     token = token + "e";
                 }
-                else if (dbcons.IsMatch(token))
+                else if (Dbcons.IsMatch(token))
                 {
                     token = token.Substring(0, token.Length - 1);
                 }
-                else if (mEq1Cvc.IsMatch(token))
+                else if (MEq1Cvc.IsMatch(token))
                 {
                     token = token + "e";
                 }
@@ -163,7 +171,7 @@ namespace SearchEngineProject
             if (token.EndsWith("y"))
             {
                 string stem = token.Substring(0, token.Length - 1);
-                if (vowel.IsMatch(stem))
+                if (Vowel.IsMatch(stem))
                 {
                     token = stem + "i";
                 }
@@ -183,12 +191,12 @@ namespace SearchEngineProject
             // "suffix"/"replacement" pairs might be helpful. It could look like
             // string[][] step2pairs = {  new string[] {"ational", "ate"}, 
             //										new string[] {"tional", "tion"}, ....
-            token = Step23(token, suffixListS2);
+            token = Step23(token, SuffixListS2);
 
             // step 3
             // program this step. the rules are identical to step 2 and you can use
             // the same helper method. you may also want a matrix here.
-            token = Step23(token, suffixListS3);
+            token = Step23(token, SuffixListS3);
 
 
             // step 4
@@ -198,14 +206,14 @@ namespace SearchEngineProject
             // which would leave the S or T.
             // as before, if one suffix matches, do not try any others even if the 
             // stem does not have measure > 1.
-            foreach (string suffix in suffixListS4)
+            foreach (string suffix in SuffixListS4)
             {
                 if (token.EndsWith(suffix))
                 {
                     string stem = token.Substring(0, token.Length - suffix.Length);
-                    if (mGr1.IsMatch(stem))
+                    if (MGr1.IsMatch(stem))
                     {
-                        if (!(suffix == "ion") || stem.EndsWith("s") || stem.EndsWith("t"))
+                        if (suffix != "ion" || stem.EndsWith("s") || stem.EndsWith("t"))
                         {
                             token = stem;
                         }
@@ -221,17 +229,16 @@ namespace SearchEngineProject
             if (token.EndsWith("e"))
             {
                 string stem = token.Substring(0, token.Length - 1);
-                if (mGr1.IsMatch(stem) || (mEq1.IsMatch(stem) && !mEq1Cvc.IsMatch(stem)))
+                if (MGr1.IsMatch(stem) || (MEq1.IsMatch(stem) && !MEq1Cvc.IsMatch(stem)))
                 {
                     token = stem;
                 }
             }
 
-            if (token.EndsWith("ll") && mGr1.IsMatch(token))
+            if (token.EndsWith("ll") && MGr1.IsMatch(token))
             {
                 token = token.Substring(0, token.Length - 1);
             }
-
 
 
             // all your code should change the variable token, which represents
@@ -246,7 +253,7 @@ namespace SearchEngineProject
                 if (token.EndsWith(suffix))
                 {
                     string stem = token.Substring(0, token.Length - suffix.Length);
-                    if (mGr0.IsMatch(stem))
+                    if (MGr0.IsMatch(stem))
                     {
                         return stem + suffixList[suffix];
                     }
@@ -255,6 +262,5 @@ namespace SearchEngineProject
             }
             return token;
         }
-
     }
 }
