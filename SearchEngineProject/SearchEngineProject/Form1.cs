@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SearchEngineProject.Properties;
 
@@ -14,10 +9,10 @@ namespace SearchEngineProject
 {
     public partial class Form1 : Form
     {
-        //The inverted index
-        private readonly NaiveInvertedIndex _index = new NaiveInvertedIndex();
         // The list of file name strings.
         private readonly IList<string> _fileNames = new List<string>();
+        //The inverted index
+        private readonly NaiveInvertedIndex _index = new NaiveInvertedIndex();
 
         public Form1()
         {
@@ -25,7 +20,7 @@ namespace SearchEngineProject
             var documentId = 0;
 
             // Iterate through all .txt files in the current directory.
-            foreach (var fileName in Directory.EnumerateFiles(Environment.CurrentDirectory, "*.txt"))
+            foreach (var fileName in Directory.EnumerateFiles(Environment.CurrentDirectory + @"\Corpus", "*.txt"))
             {
                 // for each file, open the file and index it.
                 SimpleEngine.IndexFile(fileName, _index, documentId);
@@ -40,13 +35,12 @@ namespace SearchEngineProject
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             richTextBox1.Clear();
-            
+
             var word = textBox1.Text;
 
             var postings = _index.GetPostings(PorterStemmer.ProcessToken(word));

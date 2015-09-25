@@ -23,17 +23,17 @@ namespace SearchEngineProject
             if (_mIndex.ContainsKey(term))
             {
                 //If the index contains the docID
-                if (_mIndex[term].Keys.Last() > documentId)
+                if (_mIndex[term].Keys.Last() >= documentId)
                     _mIndex[term][documentId].Add(position);
                 //If not
                 else
-                    _mIndex[term].Add(documentId, new List<int>(position));
+                    _mIndex[term].Add(documentId, new List<int> { position});
 
             }
             else
             {
-                Dictionary < int, IList < int >> dict = new Dictionary<int, IList<int>> ();
-                dict.Add(documentId, new List<int>(position));
+                var list = new List<int> {position};
+                var dict = new Dictionary<int, IList<int>> {{documentId, list}};
                 _mIndex.Add(term, dict);
             }
 
@@ -42,13 +42,7 @@ namespace SearchEngineProject
         /// <summary>
         /// Gets the number of terms in the index dictionary.
         /// </summary>
-        public int TermCount
-        {
-            get
-            {
-                return _mIndex.Count;
-            }
-        }
+        public int TermCount => _mIndex.Count;
 
         /// <summary>
         /// Retrieves the postings list for the given term.

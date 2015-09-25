@@ -6,16 +6,22 @@ namespace SearchEngineProject
     public class SimpleEngine
     {
         /// <summary>
-        /// Indexes a file by reading a series of tokens from the file, treating each
-        /// token read as a term, and then adding the given document's ID to the inverted
-        /// index for the term.
+        ///     Indexes a file by reading a series of tokens from the file, treating each
+        ///     token read as a term, and then adding the given document's ID to the inverted
+        ///     index for the term.
         /// </summary>
-        /// <param name="fileName">the name of the file to open, which can be used as a parameter
-        /// to the SimpleTokenStream constructor.</param>
-        /// <param name="index">the current state of the index for the files that have
-        /// already been processed.</param>
-        /// <param name="documentId">the integer ID of the current document, needed when
-        /// indexing each term from the document.</param>
+        /// <param name="fileName">
+        ///     the name of the file to open, which can be used as a parameter
+        ///     to the SimpleTokenStream constructor.
+        /// </param>
+        /// <param name="index">
+        ///     the current state of the index for the files that have
+        ///     already been processed.
+        /// </param>
+        /// <param name="documentId">
+        ///     the integer ID of the current document, needed when
+        ///     indexing each term from the document.
+        /// </param>
         public static void IndexFile(string fileName, NaiveInvertedIndex index, int documentId)
         {
             // TO-DO: finish this method for indexing a particular file.
@@ -26,7 +32,7 @@ namespace SearchEngineProject
 
             while (simpleTokenStream.HasNextToken)
             {
-                string token = simpleTokenStream.NextToken();
+                var token = simpleTokenStream.NextToken();
                 index.AddTerm(PorterStemmer.ProcessToken(token), documentId, position);
                 position++;
             }
@@ -34,7 +40,7 @@ namespace SearchEngineProject
         }
 
         /// <summary>
-        /// Prints the inverted index.
+        ///     Prints the inverted index.
         /// </summary>
         public static void PrintResults(NaiveInvertedIndex index, IList<string> fileNames)
         {
@@ -51,18 +57,18 @@ namespace SearchEngineProject
             // as:      document0 document3 document4 document5
             // engines: document1
             // search:  document2 document4 
-            string[] terms = index.GetDictionary();
-            int maxlength = 0;
-            foreach (string term in terms)
+            var terms = index.GetDictionary();
+            var maxlength = 0;
+            foreach (var term in terms)
             {
                 if (term.Length > maxlength)
                     maxlength = term.Length;
             }
 
-            foreach (string term in terms)
+            foreach (var term in terms)
             {
                 Console.Write("{0,-" + maxlength + "} ", term + ":");
-                foreach (int id in index.GetPostings(term).Keys)
+                foreach (var id in index.GetPostings(term).Keys)
                 {
                     Console.Write(fileNames[id] + " ");
                 }
