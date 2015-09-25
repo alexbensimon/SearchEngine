@@ -50,16 +50,21 @@ namespace SearchEngineProject
                 if (word == "quit")
                     break;
 
-                IList<int> postings = index.GetPostings(PorterStemmer.ProcessToken(word));
+                Dictionary<int, IList<int>> postings = index.GetPostings(PorterStemmer.ProcessToken(word));
 
                 if (postings == null)
                     Console.WriteLine("This word does not exist in the documents.\n");
                 else
                 {
                     Console.Write("The word is contained in:");
-                    foreach (int id in postings)
+                    foreach (int id in postings.Keys)
                     {
-                        Console.Write(" " + fileNames[id]);
+                        Console.Write(" " + fileNames[id] + "( ");
+                        foreach(int position in postings[id])
+                        {
+                            Console.Write(position + " ");
+                        }
+                        Console.Write(")");
                     }
                     Console.Write("\n\n");
                 }

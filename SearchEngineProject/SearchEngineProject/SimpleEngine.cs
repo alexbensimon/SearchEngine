@@ -22,11 +22,13 @@ namespace SearchEngineProject
             // Construct a SimpleTokenStream for the given File.
             // Read each token from the stream and add it to the index.
             SimpleTokenStream simpleTokenStream = new SimpleTokenStream(fileName);
+            int position = 0;
 
             while (simpleTokenStream.HasNextToken)
             {
                 string token = simpleTokenStream.NextToken();
-                index.AddTerm(PorterStemmer.ProcessToken(token), documentId);
+                index.AddTerm(PorterStemmer.ProcessToken(token), documentId, position);
+                position++;
             }
             simpleTokenStream.Close();
         }
@@ -60,7 +62,7 @@ namespace SearchEngineProject
             foreach (string term in terms)
             {
                 Console.Write("{0,-" + maxlength + "} ", term + ":");
-                foreach (int id in index.GetPostings(term))
+                foreach (int id in index.GetPostings(term).Keys)
                 {
                     Console.Write(fileNames[id] + " ");
                 }

@@ -6,12 +6,12 @@ namespace SearchEngineProject
 {
     public class NaiveInvertedIndex
     {
-        private readonly Dictionary<string, IList<int>> _mIndex = new Dictionary<string, IList<int>>();
+        private readonly Dictionary<string, Dictionary<int, IList<int>>> _mIndex = new Dictionary<string, Dictionary<int, IList<int>>>();
 
         /// <summary>
         /// Associates the given term with the given document ID in the index.
         /// </summary>
-        public void AddTerm(string term, int documentId)
+        public void AddTerm(string term, int documentId, int position)
         {
             // TO-DO: add the term to the index Dictionary. If the index does not have
             // an entry for the term, initialize a new List<int>, add the 
@@ -19,16 +19,22 @@ namespace SearchEngineProject
             // to the list that already exists in the Dictionary, but ONLY IF the list does
             // not already contain the docID.
 
+            //If the index contains the term
             if (_mIndex.ContainsKey(term))
             {
-                if (_mIndex[term].Last() < documentId)
-                    _mIndex[term].Add(documentId);
+                //If the index contains the docID
+                if (_mIndex[term].Keys.Last() > documentId)
+                    _mIndex[term][documentId].Add(position);
+                //If not
+                else
+                    _mIndex[term].Add(documentId, new List<int>(position));
+
             }
             else
             {
-                IList<int> liste = new List<int>();
-                liste.Add(documentId);
-                _mIndex.Add(term, liste);
+                Dictionary < int, IList < int >> dict = new Dictionary<int, IList<int>> ();
+                dict.Add(documentId, new List<int>(position));
+                _mIndex.Add(term, dict);
             }
 
         }
@@ -40,8 +46,6 @@ namespace SearchEngineProject
         {
             get
             {
-                // TO-DO: return the number of terms in the index.
-
                 return _mIndex.Count;
             }
         }
@@ -49,7 +53,7 @@ namespace SearchEngineProject
         /// <summary>
         /// Retrieves the postings list for the given term.
         /// </summary>
-        public IList<int> GetPostings(string term)
+        public Dictionary<int, IList<int>> GetPostings(string term)
         {
             // TO-DO: return the postings list for the given term from the index Dictionary.
             try
