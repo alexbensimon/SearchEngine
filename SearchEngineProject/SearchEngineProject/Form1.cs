@@ -30,6 +30,9 @@ namespace SearchEngineProject
             }
             //PrintResults(index, fileNames);
 
+            foreach (var term in _index.GetDictionary())
+                KGramIndex.AddType(term);
+
             InitializeComponent();
         }
 

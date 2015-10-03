@@ -20,7 +20,7 @@ namespace SearchEngineProject
             // not already contain the docID.
 
             //If the index contains the term
-            if (_mIndex.ContainsKey(term))
+           if (_mIndex.ContainsKey(term))
             {
                 //If the index contains the docID
                 if (_mIndex[term].Keys.Last() >= documentId)
@@ -36,7 +36,6 @@ namespace SearchEngineProject
                 var dict = new Dictionary<int, IList<int>> {{documentId, list}};
                 _mIndex.Add(term, dict);
             }
-
         }
 
         /// <summary>

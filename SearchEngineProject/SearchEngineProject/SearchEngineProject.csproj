@@ -51,6 +51,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="ITokenStream.cs" />
+    <Compile Include="KGramIndex.cs" />
     <Compile Include="NaiveInvertedIndex.cs" />
     <Compile Include="PorterStemmer.cs" />
     <Compile Include="Program.cs" />

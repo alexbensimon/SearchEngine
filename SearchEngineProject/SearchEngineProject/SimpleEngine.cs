@@ -36,7 +36,7 @@ namespace SearchEngineProject
                 index.AddTerm(PorterStemmer.ProcessToken(token), documentId, position);
                 position++;
             }
-            simpleTokenStream.Close();
+            simpleTokenStream.Close();    
         }
 
         /// <summary>
