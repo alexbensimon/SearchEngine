@@ -28,10 +28,13 @@ namespace SearchEngineProject
                 // add the file's name to the list of filenames.
                 _fileNames.Add(Path.GetFileName(fileName));
             }
+            _index.ComputeStatistics();
             //PrintResults(index, fileNames);
 
             foreach (var term in _index.GetDictionary())
                 KGramIndex.AddType(term);
+
+            
 
             InitializeComponent();
         }
@@ -66,6 +69,40 @@ namespace SearchEngineProject
                 }
                 richTextBox1.Text = results.ToString();
             }
+        }
+
+        private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var statistics = new StringBuilder();
+            statistics.Append("Number of terms in the index: ");
+            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
+
+            statistics.Append("Average number of documents in the postings list: ");
+            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+
+            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
+            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+            {
+                statistics.Append(pair.Key + ": " + Math.Round(pair.Value,2)*100 + "%; ");
+            }
+            statistics.AppendLine("\n");
+
+            statistics.Append("Approximate memory requirement of the index: ");
+            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
+
+            MessageBox.Show(statistics.ToString(), "Index statistics");
+        }
+
+        private string prettyBytes(long numberOfBytes)
+        {
+            int counter = 0;
+            string[] unit = new string[] {"B", "KB", "MB", "GB"};
+            while (numberOfBytes > 1024)
+            {
+                numberOfBytes /= 1024;
+                counter++;
+            }
+            return numberOfBytes + unit[counter];
         }
     }
 }
