@@ -1,10 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
 {
     public class SimpleEngine
     {
+        public static bool IsQuerySyntaxCorrect(string query)
+        {
+            // Testing patterns.
+            var aParenthese = new Regex(@"\(|\)");
+            var aPlusSign = new Regex(@"\+");
+
+            // Correct patterns.
+            var matchingParentheses = new Regex(@"^.*\(.*\).*$");
+            var noEmptyQi = new Regex(@"^.*\S+.*\+.*\S+.*$");
+
+            // If the query follows a certain pattern, verify the partern is correct.
+            if (aParenthese.IsMatch(query))
+                if (!(matchingParentheses.IsMatch(query)))
+                    return false;
+            if(aPlusSign.IsMatch(query))
+                if (!(noEmptyQi.IsMatch(query)))
+                    return false;
+
+            return true;
+        }
+
+        public static List<string> SplitOrQuery(string query)
+        {
+            return query.Split('+').ToList();
+        }
+
+        public static List<string> SplitPhraseQuery(string query)
+        {
+            return query.Split(null).ToList();
+        }
+
         /// <summary>
         ///     Indexes a file by reading a series of tokens from the file, treating each
         ///     token read as a term, and then adding the given document's ID to the inverted
