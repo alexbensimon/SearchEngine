@@ -42,6 +42,44 @@ namespace SearchEngineProject
             return query.Split(null).ToList();
         }
 
+        public static List<int> ProcessAndQuery(string query, NaiveInvertedIndex index)
+        {
+            var andQueryTerms = SplitWhiteSpace(query);
+            var andQueryItemsResultsDocsIds = new List<List<int>>();
+
+            foreach (string term in andQueryTerms)
+            {
+                andQueryItemsResultsDocsIds.Add(
+                    index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
+            }
+
+            // Merge the AND query results.
+            for (int i = 0; i < andQueryItemsResultsDocsIds.Count - 1; i++)
+            {
+                var andMergedList = new List<int>();
+                int a = 0;
+                int b = 0;
+                while (a < andQueryItemsResultsDocsIds[i].Count && b < andQueryItemsResultsDocsIds[i + 1].Count)
+                {
+                    if (andQueryItemsResultsDocsIds[i][a] == andQueryItemsResultsDocsIds[i + 1][b])
+                    {
+                        andMergedList.Add(andQueryItemsResultsDocsIds[i][a]);
+                        a++;
+                        b++;
+                    }
+                    else
+                    {
+                        if (andQueryItemsResultsDocsIds[i][a] < andQueryItemsResultsDocsIds[i + 1][b])
+                            a++;
+                        else
+                            b++;
+                    }
+                }
+                andQueryItemsResultsDocsIds[i + 1] = andMergedList;
+            }
+            return andQueryItemsResultsDocsIds.Last();
+        } 
+
         public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
         {
 
@@ -58,43 +96,20 @@ namespace SearchEngineProject
             // Process each Q: 
             foreach (string q in qList)
             {
+                // Parentheses.
+                var parentheses = Regex.Matches(q, @"\((.+?)\)")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string expression in parentheses)
+                {
+                    orQueryItemsResultsDocIds.Add((ProcessAndQuery(expression, index)));
+                }
+
                 // AND queries.
                 if (q.Trim().Contains(" "))
                 {
-                    var andQueryTerms = SplitWhiteSpace(q);
-                    var andQueryItemsResultsDocsIds = new List<List<int>>();
-
-                    foreach (string term in andQueryTerms)
-                    {
-                        andQueryItemsResultsDocsIds.Add(
-                            index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
-                    }
-
-                    // Merge the AND query results.
-                    for (int i = 0; i < andQueryItemsResultsDocsIds.Count - 1; i++)
-                    {
-                        var andMergedList = new List<int>();
-                        int a = 0;
-                        int b = 0;
-                        while (a < andQueryItemsResultsDocsIds[i].Count && b < andQueryItemsResultsDocsIds[i + 1].Count)
-                        {
-                            if (andQueryItemsResultsDocsIds[i][a] == andQueryItemsResultsDocsIds[i + 1][b])
-                            {
-                                andMergedList.Add(andQueryItemsResultsDocsIds[i][a]);
-                                a++;
-                                b++;
-                            }
-                            else
-                            {
-                                if (andQueryItemsResultsDocsIds[i][a] < andQueryItemsResultsDocsIds[i + 1][b])
-                                    a++;
-                                else
-                                    b++;
-                            }
-                        }
-                        andQueryItemsResultsDocsIds[i + 1] = andMergedList;
-                    }
-                    orQueryItemsResultsDocIds.Add(andQueryItemsResultsDocsIds.Last());
+                    orQueryItemsResultsDocIds.Add(ProcessAndQuery(q, index));
                 }
 
                 // Wildcard queries.
@@ -195,42 +210,6 @@ namespace SearchEngineProject
                         termsPostings.Add(index.GetPostings(PorterStemmer.ProcessToken(term)));
                     }
                 }
-
-                // Parentheses
-                var parentheses = Regex.Matches(q, @"\((.+?)\)")
-                    .Cast<Match>()
-                    .Select(m => m.Groups[1].Value)
-                    .ToList();
-                foreach (string expression in parentheses)
-                {
-                    var terms = SplitWhiteSpace(expression);
-                    foreach (string term in terms)
-                    {
-                        var termPostings = index.GetPostings(PorterStemmer.ProcessToken(term));
-                    }
-                }
-
-                // White space means "AND"
-                // Simple query
-                // Wildcard query
-
-                // Merge the results in an AND query
-
-            }
-
-
-            // OR the results of all the Qs.
-
-            // Return the results.
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-            
-
-
 
     */
         }
