@@ -34,7 +34,7 @@ namespace SearchEngineProject
             foreach (var term in _index.GetDictionary())
                 KGramIndex.AddType(term);
 
-            
+
 
             InitializeComponent();
         }
@@ -43,28 +43,14 @@ namespace SearchEngineProject
         {
             richTextBox1.Clear();
 
-            var word = textBox1.Text;
+            var query = textBox1.Text;
 
-            var postings = _index.GetPostings(PorterStemmer.ProcessToken(word));
+            string results = SimpleEngine.ProcessQuery(query, _index, _fileNames);
 
-            if (postings == null)
+            if (results == String.Empty)
                 MessageBox.Show(Resources.inexistantWordMessage);
             else
-            {
-                var results = new StringBuilder();
-                foreach (var id in postings.Keys)
-                {
-                    results.Append(_fileNames[id]);
-                    results.AppendLine();
-                    foreach (var position in postings[id])
-                    {
-                        results.Append(position + " ");
-                    }
-                    results.AppendLine();
-                    results.AppendLine();
-                }
-                richTextBox1.Text = results.ToString();
-            }
+                richTextBox1.Text = results;
         }
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -79,7 +65,7 @@ namespace SearchEngineProject
             statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
             foreach (var pair in _index.ProportionDocContaining10MostFrequent)
             {
-                statistics.Append(pair.Key + ": " + Math.Round(pair.Value,2)*100 + "%; ");
+                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
             }
             statistics.AppendLine("\n");
 
@@ -92,7 +78,7 @@ namespace SearchEngineProject
         private string prettyBytes(long numberOfBytes)
         {
             int counter = 0;
-            string[] unit = new string[] {"B", "KB", "MB", "GB"};
+            string[] unit = new string[] { "B", "KB", "MB", "GB" };
             while (numberOfBytes > 1024)
             {
                 numberOfBytes /= 1024;
