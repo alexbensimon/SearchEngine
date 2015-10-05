@@ -178,10 +178,18 @@ namespace SearchEngineProject
             while (simpleTokenStream.HasNextToken)
             {
                 var token = simpleTokenStream.NextToken();
-                index.AddTerm(PorterStemmer.ProcessToken(token), documentId, position);
+                if (token.Replace("-", "") == "") continue;
+                if (token.Contains("-"))
+                {
+                    foreach (var tokenHyphen in token.Split('-'))
+                    {
+                        index.AddTerm(PorterStemmer.ProcessToken(tokenHyphen), documentId, position);
+                    }
+                }
+                index.AddTerm(PorterStemmer.ProcessToken(token.Replace("-", "")), documentId, position);
                 position++;
             }
-            simpleTokenStream.Close();
+            simpleTokenStream.Close();    
         }
 
         /// <summary>
