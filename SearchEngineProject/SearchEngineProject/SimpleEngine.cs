@@ -97,12 +97,15 @@ namespace SearchEngineProject
                     orQueryItemsResultsDocIds.Add(andQueryItemsResultsDocsIds.Last());
                 }
 
-                // Simple queries.
-                else
+                // Wildcard queries.
+                else if (Regex.IsMatch(q, @"(.*\*.*)+"))
                 {
-                    if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
-                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
+                    
                 }
+
+                // Simple queries.
+                else if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
+                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
             }
 
             // Merge all the OR query items results
