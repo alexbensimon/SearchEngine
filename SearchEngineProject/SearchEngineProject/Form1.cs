@@ -38,31 +38,17 @@ namespace SearchEngineProject
         }
 
         private void button1_Click(object sender, EventArgs e)
-        {
+        {            
             richTextBox1.Clear();
 
-            var word = textBox1.Text;
+            var query = textBox1.Text;
 
-            var postings = _index.GetPostings(PorterStemmer.ProcessToken(word));
+            string results = SimpleEngine.ProcessQuery(query, _index, _fileNames);
 
-            if (postings == null)
+            if(results == String.Empty)
                 MessageBox.Show(Resources.inexistantWordMessage);
             else
-            {
-                var results = new StringBuilder();
-                foreach (var id in postings.Keys)
-                {
-                    results.Append(_fileNames[id]);
-                    results.AppendLine();
-                    foreach (var position in postings[id])
-                    {
-                        results.Append(position + " ");
-                    }
-                    results.AppendLine();
-                    results.AppendLine();
-                }
-                richTextBox1.Text = results.ToString();
-            }
+                richTextBox1.Text = results;
         }
     }
 }

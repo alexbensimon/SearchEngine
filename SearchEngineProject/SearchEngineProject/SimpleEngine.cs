@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using SearchEngineProject.Properties;
 
 namespace SearchEngineProject
 {
@@ -28,14 +32,122 @@ namespace SearchEngineProject
             return true;
         }
 
-        public static List<string> SplitOrQuery(string query)
+        public static IList<string> SplitOrQuery(string query)
         {
             return query.Split('+').ToList();
         }
 
-        public static List<string> SplitPhraseQuery(string query)
+        public static IList<string> SplitWhiteSpace(string query)
         {
             return query.Split(null).ToList();
+        }
+
+        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        {
+
+            //////////////////////////////////////////////////////////////////////////////////
+
+
+            // Split by +, it gives us all the Qs. We will process the "OR" later.
+            var qList = SplitOrQuery(query);
+
+            // Process each Q: 
+            var qsPostingsResults = new List<Dictionary<int, IList<int>>>();
+            foreach (string q in qList)
+            {
+                qsPostingsResults.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())));
+            }
+
+            // If there isn't any result.
+            if (qsPostingsResults.Count == 0)
+                return string.Empty;
+            // Build the results.
+            var results = new StringBuilder();
+            foreach (var qPostingResult in qsPostingsResults)
+            {
+                foreach (var id in qPostingResult.Keys)
+                {
+                    results.Append(fileNames[id]);
+                    results.AppendLine();
+                    foreach (var position in qPostingResult[id])
+                    {
+                        results.Append(position + " ");
+                    }
+                    results.AppendLine();
+                    results.AppendLine();
+                }
+            }
+            
+            return results.ToString();
+
+
+
+            //////////////////////////////////////////////////////////////////////////////////
+
+            /*
+            var results = new StringBuilder();
+
+            // Verify the syntax is correct.
+            if (!IsQuerySyntaxCorrect(query))
+                return null;
+
+
+
+            // Process each Q: 
+            foreach (string q in qList)
+            {
+                // Phrase queries with " " 
+                var phraseQueries = Regex.Matches(q, "\"(.+?)\"")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string phraseQuery in phraseQueries)
+                {
+                    var terms = SplitWhiteSpace(phraseQuery);
+                    var termsPostings = new List<Dictionary<int, IList<int>>>();  
+                    foreach (string term in terms)
+                    {
+                        termsPostings.Add(index.GetPostings(PorterStemmer.ProcessToken(term)));
+                    }
+                }
+
+                // Parentheses
+                var parentheses = Regex.Matches(q, @"\((.+?)\)")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string expression in parentheses)
+                {
+                    var terms = SplitWhiteSpace(expression);
+                    foreach (string term in terms)
+                    {
+                        var termPostings = index.GetPostings(PorterStemmer.ProcessToken(term));
+                    }
+                }
+
+                // White space means "AND"
+                // Simple query
+                // Wildcard query
+
+                // Merge the results in an AND query
+
+            }
+
+
+            // OR the results of all the Qs.
+
+            // Return the results.
+
+            //////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            
+
+
+
+    */
         }
 
         /// <summary>
