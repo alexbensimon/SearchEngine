@@ -85,7 +85,7 @@ namespace SearchEngineProject
         }
 
         //Ici je pars du principe que la query est clean, elle ne contient plus aucun espace
-        //TODO faire en sorte que des qu'on tape un mot/ une requete les resultats s'affichent en live
+        //TODO traiter tous les mots comme des wildcard queries, genre quand on recherche hel rechercher plutot *hel* pour que ca affiche les resultats de hello et de hell ou de fuckinggoddamnmotherrouxfromhel
 
         private static List<string> FilterPostings(IList<string> postingList, string query)
         {

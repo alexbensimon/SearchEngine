@@ -68,5 +68,14 @@ namespace SearchEngineProject.Properties {
                 return ResourceManager.GetString("inexistantWordMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Index statistics.
+        /// </summary>
+        internal static string StatMessageBoxTitle {
+            get {
+                return ResourceManager.GetString("StatMessageBoxTitle", resourceCulture);
+            }
+        }
     }
 }

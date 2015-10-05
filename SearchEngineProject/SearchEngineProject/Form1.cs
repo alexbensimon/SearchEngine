@@ -36,16 +36,23 @@ namespace SearchEngineProject
 
         private void button1_Click(object sender, EventArgs e)
         {
+            DisplaySearchResults();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            DisplaySearchResults();
+        }
+
+        private void DisplaySearchResults()
+        {
             richTextBox1.Clear();
 
             var query = textBox1.Text;
 
             string results = SimpleEngine.ProcessQuery(query, _index, _fileNames);
 
-            if (results == String.Empty)
-                MessageBox.Show(Resources.inexistantWordMessage);
-            else
-                richTextBox1.Text = results;
+            richTextBox1.Text = results;
         }
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -67,13 +74,13 @@ namespace SearchEngineProject
             statistics.Append("Approximate memory requirement of the index: ");
             statistics.Append(prettyBytes(_index.IndexSizeInMemory));
 
-            MessageBox.Show(statistics.ToString(), "Index statistics");
+            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
         }
 
         private string prettyBytes(long numberOfBytes)
         {
-            int counter = 0;
-            string[] unit = new string[] { "B", "KB", "MB", "GB" };
+            var counter = 0;
+            var unit = new string[] { "B", "KB", "MB", "GB" };
             while (numberOfBytes > 1024)
             {
                 numberOfBytes /= 1024;

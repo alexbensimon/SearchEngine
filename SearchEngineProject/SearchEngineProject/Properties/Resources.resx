@@ -117,4 +117,7 @@
   <data name="inexistantWordMessage" xml:space="preserve">
     <value>This word does not exist in the documents</value>
   </data>
+  <data name="StatMessageBoxTitle" xml:space="preserve">
+    <value>Index statistics</value>
+  </data>
 </root>
