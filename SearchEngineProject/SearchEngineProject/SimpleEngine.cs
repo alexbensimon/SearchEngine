@@ -266,9 +266,11 @@ namespace SearchEngineProject
                     foreach (var tokenHyphen in token.Split('-'))
                     {
                         index.AddTerm(PorterStemmer.ProcessToken(tokenHyphen), documentId, position);
+                        KGramIndex.AddType(tokenHyphen);
                     }
                 }
                 index.AddTerm(PorterStemmer.ProcessToken(token.Replace("-", "")), documentId, position);
+                KGramIndex.AddType(token.Replace("-", ""));
                 position++;
             }
             simpleTokenStream.Close();    
