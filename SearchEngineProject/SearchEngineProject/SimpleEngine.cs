@@ -51,34 +51,116 @@ namespace SearchEngineProject
             // Split by +, it gives us all the Qs. We will process the "OR" later.
             var qList = SplitOrQuery(query);
 
+            // The list that will contain the final result of the query as docids.
+            var finalResultsDocIds = new List<int>();
+
+            var orQueryItemsResultsDocIds = new List<List<int>>();
             // Process each Q: 
-            var qsPostingsResults = new List<Dictionary<int, IList<int>>>();
             foreach (string q in qList)
             {
-                qsPostingsResults.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())));
-            }
-
-            // If there isn't any result.
-            if (qsPostingsResults.Count == 0)
-                return string.Empty;
-            // Build the results.
-            var results = new StringBuilder();
-            foreach (var qPostingResult in qsPostingsResults)
-            {
-                foreach (var id in qPostingResult.Keys)
+                // AND queries.
+                if (q.Trim().Contains(" "))
                 {
-                    results.Append(fileNames[id]);
-                    results.AppendLine();
-                    foreach (var position in qPostingResult[id])
+                    var andQueryTerms = SplitWhiteSpace(q);
+                    var andQueryItemsResultsDocsIds = new List<List<int>>();
+
+                    foreach (string term in andQueryTerms)
                     {
-                        results.Append(position + " ");
+                        andQueryItemsResultsDocsIds.Add(
+                            index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
                     }
-                    results.AppendLine();
-                    results.AppendLine();
+
+                    // Merge the AND query results.
+                    for (int i = 0; i < andQueryItemsResultsDocsIds.Count - 1; i++)
+                    {
+                        var andMergedList = new List<int>();
+                        int a = 0;
+                        int b = 0;
+                        while (a < andQueryItemsResultsDocsIds[i].Count && b < andQueryItemsResultsDocsIds[i + 1].Count)
+                        {
+                            if (andQueryItemsResultsDocsIds[i][a] == andQueryItemsResultsDocsIds[i + 1][b])
+                            {
+                                andMergedList.Add(andQueryItemsResultsDocsIds[i][a]);
+                                a++;
+                                b++;
+                            }
+                            else
+                            {
+                                if (andQueryItemsResultsDocsIds[i][a] < andQueryItemsResultsDocsIds[i + 1][b])
+                                    a++;
+                                else
+                                    b++;
+                            }
+                        }
+                        andQueryItemsResultsDocsIds[i + 1] = andMergedList;
+                    }
+                    orQueryItemsResultsDocIds.Add(andQueryItemsResultsDocsIds.Last());
+                }
+
+                // Simple queries.
+                else
+                {
+                    if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
+                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
                 }
             }
-            
-            return results.ToString();
+
+            // Merge all the OR query items results
+            for (int i = 0; i < orQueryItemsResultsDocIds.Count - 1; i++)
+            {
+                var orMergedList = new List<int>();
+                int a = 0;
+                int b = 0;
+                while (a < orQueryItemsResultsDocIds[i].Count || b < orQueryItemsResultsDocIds[i + 1].Count)
+                {
+                    if (b >= orQueryItemsResultsDocIds[i + 1].Count)
+                    {
+                        orMergedList.Add(orQueryItemsResultsDocIds[i][a]);
+                        a++;
+                    }
+                    else if (a >= orQueryItemsResultsDocIds[i].Count)
+                    {
+                        orMergedList.Add(orQueryItemsResultsDocIds[i + 1][b]);
+                        b++;
+                    }
+                    else if (orQueryItemsResultsDocIds[i][a] == orQueryItemsResultsDocIds[i + 1][b])
+                    {
+                        orMergedList.Add(orQueryItemsResultsDocIds[i][a]);
+                        a++;
+                        b++;
+                    }
+                    else
+                    {
+                        if (orQueryItemsResultsDocIds[i][a] < orQueryItemsResultsDocIds[i + 1][b])
+                        {
+                            orMergedList.Add(orQueryItemsResultsDocIds[i][a]);
+                            a++;
+                        }
+                        else
+                        {
+                            orMergedList.Add(orQueryItemsResultsDocIds[i + 1][b]);
+                            b++;
+                        }
+                    }
+                }
+                orQueryItemsResultsDocIds[i + 1] = orMergedList;
+            }
+            if(orQueryItemsResultsDocIds.Count > 0)
+                finalResultsDocIds.AddRange(orQueryItemsResultsDocIds.Last());
+
+            // If there isn't any result.
+            if (finalResultsDocIds.Count == 0)
+                return string.Empty;
+            // Build the results.
+            var finalResults = new StringBuilder();
+            foreach (int docId in finalResultsDocIds)
+            {
+                finalResults.Append(fileNames[docId]);
+                finalResults.AppendLine();
+                finalResults.AppendLine();
+            }
+
+            return finalResults.ToString();
 
 
 
