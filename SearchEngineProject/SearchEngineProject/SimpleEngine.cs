@@ -45,85 +45,43 @@ namespace SearchEngineProject
         public static List<int> ProcessAndQuery(string query, NaiveInvertedIndex index)
         {
             var andQueryTerms = SplitWhiteSpace(query);
-                    var andQueryItemsResultsDocsIds = new List<List<int>>();
+            var andQueryItemsResultsDocsIds = new List<List<int>>();
 
-                    foreach (string term in andQueryTerms)
-                    {
-                        andQueryItemsResultsDocsIds.Add(
-                            index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
-                    }
+            foreach (string term in andQueryTerms)
+            {
+                andQueryItemsResultsDocsIds.Add(
+                    index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
+            }
 
-                    // Merge the AND query results.
-                    for (int i = 0; i < andQueryItemsResultsDocsIds.Count - 1; i++)
+            // Merge the AND query results.
+            for (int i = 0; i < andQueryItemsResultsDocsIds.Count - 1; i++)
+            {
+                var andMergedList = new List<int>();
+                int a = 0;
+                int b = 0;
+                while (a < andQueryItemsResultsDocsIds[i].Count && b < andQueryItemsResultsDocsIds[i + 1].Count)
+                {
+                    if (andQueryItemsResultsDocsIds[i][a] == andQueryItemsResultsDocsIds[i + 1][b])
                     {
-                        var andMergedList = new List<int>();
-                        int a = 0;
-                        int b = 0;
-                        while (a < andQueryItemsResultsDocsIds[i].Count && b < andQueryItemsResultsDocsIds[i + 1].Count)
-                        {
-                            if (andQueryItemsResultsDocsIds[i][a] == andQueryItemsResultsDocsIds[i + 1][b])
-                            {
-                                andMergedList.Add(andQueryItemsResultsDocsIds[i][a]);
-                                a++;
-                                b++;
-                            }
-                            else
-                            {
-                                if (andQueryItemsResultsDocsIds[i][a] < andQueryItemsResultsDocsIds[i + 1][b])
-                                    a++;
-                                else
-                                    b++;
-                            }
-                        }
-                        andQueryItemsResultsDocsIds[i + 1] = andMergedList;
+                        andMergedList.Add(andQueryItemsResultsDocsIds[i][a]);
+                        a++;
+                        b++;
                     }
+                    else
+                    {
+                        if (andQueryItemsResultsDocsIds[i][a] < andQueryItemsResultsDocsIds[i + 1][b])
+                            a++;
+                        else
+                            b++;
+                    }
+                }
+                andQueryItemsResultsDocsIds[i + 1] = andMergedList;
+            }
             return andQueryItemsResultsDocsIds.Last();
         } 
 
-        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        public static List<List<int>> MergeOrResults(List<List<int>> orQueryItemsResultsDocIds)
         {
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-
-            // Split by +, it gives us all the Qs. We will process the "OR" later.
-            var qList = SplitOrQuery(query);
-
-            // The list that will contain the final result of the query as docids.
-            var finalResultsDocIds = new List<int>();
-
-            var orQueryItemsResultsDocIds = new List<List<int>>();
-            // Process each Q: 
-            foreach (string q in qList)
-            {
-                // Parentheses.
-                var parentheses = Regex.Matches(q, @"\((.+?)\)")
-                    .Cast<Match>()
-                    .Select(m => m.Groups[1].Value)
-                    .ToList();
-                foreach (string expression in parentheses)
-                {
-                    orQueryItemsResultsDocIds.Add((ProcessAndQuery(expression, index)));
-                }
-
-                // AND queries.
-                if (q.Trim().Contains(" "))
-                {
-                    orQueryItemsResultsDocIds.Add(ProcessAndQuery(q, index));
-                }
-
-                // Wildcard queries.
-                else if (Regex.IsMatch(q, @"(.*\*.*)+"))
-                {
-                    
-                }
-
-                // Simple queries.
-                else if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
-                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
-                }
-
-            // Merge all the OR query items results
             for (int i = 0; i < orQueryItemsResultsDocIds.Count - 1; i++)
             {
                 var orMergedList = new List<int>();
@@ -163,7 +121,75 @@ namespace SearchEngineProject
                 }
                 orQueryItemsResultsDocIds[i + 1] = orMergedList;
             }
-            if (orQueryItemsResultsDocIds.Count > 0)
+            return orQueryItemsResultsDocIds;
+            }
+
+        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        {
+            // Verify the syntax is correct.
+            if (!IsQuerySyntaxCorrect(query))
+                return null;
+
+            // Split by +, it gives us all the Qs. We will process the "OR" later.
+            var qList = SplitOrQuery(query);
+
+            // The list that will contain the final result of the query as docids.
+            var finalResultsDocIds = new List<int>();
+
+            var orQueryItemsResultsDocIds = new List<List<int>>();
+            // Process each Q: 
+            foreach (string q in qList)
+            {
+                // Parentheses.
+                var parentheses = Regex.Matches(q, @"\((.+?)\)")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string expression in parentheses)
+                {
+                    orQueryItemsResultsDocIds.Add(ProcessAndQuery(expression, index));
+                }
+
+                // Phrase queries with " ".
+                var phraseQueries = Regex.Matches(q, "\"(.+?)\"")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string phraseQuery in phraseQueries)
+                {
+                    //TODO: phrase queries
+                    var phraseQueryTerms = SplitWhiteSpace(phraseQuery);
+                    var phraseQueryTermsPostings = new List<Dictionary<int, IList<int>>>();
+                    foreach (string term in phraseQueryTerms)
+                    {
+                        phraseQueryTermsPostings.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())));
+                    }
+                }
+
+                // AND queries.
+                if (q.Trim().Contains(" "))
+                {
+                    orQueryItemsResultsDocIds.Add(ProcessAndQuery(q, index));
+                }
+
+                // Wildcard queries.
+                else if (Regex.IsMatch(q, @"(.*\*.*)+"))
+                {
+                    var termsList = SplitOrQuery(KGramIndex.GenerateNormalQuery(q));
+                    foreach (var term in termsList)
+                    {
+                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
+                    }
+                }
+
+                // Simple queries.
+                else if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
+                        orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
+                    }
+
+            // Merge all the OR query items results
+            orQueryItemsResultsDocIds = MergeOrResults(orQueryItemsResultsDocIds);
+            if(orQueryItemsResultsDocIds.Count > 0)
                 finalResultsDocIds.AddRange(orQueryItemsResultsDocIds.Last());
 
             // If there isn't any result.
@@ -176,42 +202,9 @@ namespace SearchEngineProject
                 finalResults.Append(fileNames[docId]);
                 finalResults.AppendLine();
                 finalResults.AppendLine();
-            }
-
-            return finalResults.ToString();
-
-
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-            /*
-            var results = new StringBuilder();
-
-            // Verify the syntax is correct.
-            if (!IsQuerySyntaxCorrect(query))
-                return null;
-
-
-
-            // Process each Q: 
-            foreach (string q in qList)
-            {
-                // Phrase queries with " " 
-                var phraseQueries = Regex.Matches(q, "\"(.+?)\"")
-                    .Cast<Match>()
-                    .Select(m => m.Groups[1].Value)
-                    .ToList();
-                foreach (string phraseQuery in phraseQueries)
-                {
-                    var terms = SplitWhiteSpace(phraseQuery);
-                    var termsPostings = new List<Dictionary<int, IList<int>>>();  
-                    foreach (string term in terms)
-                    {
-                        termsPostings.Add(index.GetPostings(PorterStemmer.ProcessToken(term)));
-                    }
                 }
 
-    */
+            return finalResults.ToString();
         }
 
         public static Dictionary<int, IList<int>> ProcessPhraseQuery(NaiveInvertedIndex index, List<string> wordsList)
