@@ -25,7 +25,7 @@ namespace SearchEngineProject
             if (aParenthese.IsMatch(query))
                 if (!(matchingParentheses.IsMatch(query)))
                     return false;
-            if(aPlusSign.IsMatch(query))
+            if (aPlusSign.IsMatch(query))
                 if (!(noEmptyQi.IsMatch(query)))
                     return false;
 
@@ -100,7 +100,7 @@ namespace SearchEngineProject
                 // Simple queries.
                 else
                 {
-                    if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
+                    if (index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
                         orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
                 }
             }
@@ -145,7 +145,7 @@ namespace SearchEngineProject
                 }
                 orQueryItemsResultsDocIds[i + 1] = orMergedList;
             }
-            if(orQueryItemsResultsDocIds.Count > 0)
+            if (orQueryItemsResultsDocIds.Count > 0)
                 finalResultsDocIds.AddRange(orQueryItemsResultsDocIds.Last());
 
             // If there isn't any result.
@@ -232,6 +232,67 @@ namespace SearchEngineProject
     */
         }
 
+        public static Dictionary<int, IList<int>> ProcessPhraseQuery(NaiveInvertedIndex index, List<string> wordsList)
+        {
+            Dictionary<int, IList<int>> word1Postings = null;
+            
+            foreach (var word in wordsList)
+            {
+                if (word1Postings == null)
+                    word1Postings = index.GetPostings(word);
+                else
+                {
+                    var word2Postings = index.GetPostings(word);
+                    word1Postings = Process2WordPhraseQuery(word1Postings, word2Postings);
+                }
+            }
+
+            return word1Postings;
+        }
+
+        private static Dictionary<int, IList<int>> Process2WordPhraseQuery(Dictionary<int, IList<int>> word1Postings,
+            Dictionary<int, IList<int>> word2Postings)
+        {
+            var newPostingList = new Dictionary<int, IList<int>>();
+            var docPointer1 = 0;
+            var docPointer2 = 0;
+            while (docPointer1 < word1Postings.Count && docPointer2 < word2Postings.Count)
+            {
+                var word1DocId = word1Postings.ElementAt(docPointer1).Key;
+                var word2DocId = word2Postings.ElementAt(docPointer2).Key;
+                if (word1DocId == word2DocId)
+                {
+                    var posPointer1 = 0;
+                    var posPointer2 = 0;
+                    while (posPointer1 < word1Postings[word1DocId].Count &&
+                            posPointer2 < word2Postings[word2DocId].Count)
+                    {
+                        var word1Pos = word1Postings[word1DocId].ElementAt(posPointer1);
+                        var word2Pos = word2Postings[word2DocId].ElementAt(posPointer2);
+                        if (Math.Abs(word1Pos - word2Pos) == 1)
+                        {
+                            if (newPostingList.ContainsKey(word2DocId))
+                                newPostingList[word2DocId].Add(word2Pos);
+                            else
+                                newPostingList.Add(word2DocId, new List<int>() { word2Pos });
+                        }
+                        else
+                        {
+                            if (word1Pos <= word2Pos)
+                                posPointer1++;
+                            else
+                                posPointer2++;
+                        }
+                    }
+                }
+                else if (word1DocId <= word2DocId)
+                    docPointer1++;
+                else
+                    docPointer2++;
+            }
+            return newPostingList;
+        }
+
         /// <summary>
         ///     Indexes a file by reading a series of tokens from the file, treating each
         ///     token read as a term, and then adding the given document's ID to the inverted
@@ -273,7 +334,7 @@ namespace SearchEngineProject
                 KGramIndex.AddType(token.Replace("-", ""));
                 position++;
             }
-            simpleTokenStream.Close();    
+            simpleTokenStream.Close();
         }
 
         /// <summary>
@@ -281,19 +342,6 @@ namespace SearchEngineProject
         /// </summary>
         public static void PrintResults(NaiveInvertedIndex index, IList<string> fileNames)
         {
-            // TO-DO: print the inverted index.
-            // Retrieve the dictionary of terms from the index. (It will already be sorted.)
-            // For each term in the dictionary, retrieve the postings list for the
-            // term. Use the postings list to print the list of document names that
-            // contain the term. (The document ID in a postings list corresponds to 
-            // an index in the fileNames list.)
-
-            // Print the postings list so they are all left-aligned starting at the
-            // same column, one space after the longest of the term lengths. Example:
-            // 
-            // as:      document0 document3 document4 document5
-            // engines: document1
-            // search:  document2 document4 
             var terms = index.GetDictionary();
             var maxlength = 0;
             foreach (var term in terms)
