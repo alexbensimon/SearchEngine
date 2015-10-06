@@ -42,26 +42,9 @@ namespace SearchEngineProject
             return query.Split(null).ToList();
         }
 
-        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        public static List<int> ProcessAndQuery(string query, NaiveInvertedIndex index)
         {
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-
-            // Split by +, it gives us all the Qs. We will process the "OR" later.
-            var qList = SplitOrQuery(query);
-
-            // The list that will contain the final result of the query as docids.
-            var finalResultsDocIds = new List<int>();
-
-            var orQueryItemsResultsDocIds = new List<List<int>>();
-            // Process each Q: 
-            foreach (string q in qList)
-            {
-                // AND queries.
-                if (q.Trim().Contains(" "))
-                {
-                    var andQueryTerms = SplitWhiteSpace(q);
+            var andQueryTerms = SplitWhiteSpace(query);
                     var andQueryItemsResultsDocsIds = new List<List<int>>();
 
                     foreach (string term in andQueryTerms)
@@ -94,16 +77,51 @@ namespace SearchEngineProject
                         }
                         andQueryItemsResultsDocsIds[i + 1] = andMergedList;
                     }
-                    orQueryItemsResultsDocIds.Add(andQueryItemsResultsDocsIds.Last());
+            return andQueryItemsResultsDocsIds.Last();
+        } 
+
+        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        {
+
+            //////////////////////////////////////////////////////////////////////////////////
+
+
+            // Split by +, it gives us all the Qs. We will process the "OR" later.
+            var qList = SplitOrQuery(query);
+
+            // The list that will contain the final result of the query as docids.
+            var finalResultsDocIds = new List<int>();
+
+            var orQueryItemsResultsDocIds = new List<List<int>>();
+            // Process each Q: 
+            foreach (string q in qList)
+            {
+                // Parentheses.
+                var parentheses = Regex.Matches(q, @"\((.+?)\)")
+                    .Cast<Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (string expression in parentheses)
+                {
+                    orQueryItemsResultsDocIds.Add((ProcessAndQuery(expression, index)));
+                }
+
+                // AND queries.
+                if (q.Trim().Contains(" "))
+                {
+                    orQueryItemsResultsDocIds.Add(ProcessAndQuery(q, index));
+                }
+
+                // Wildcard queries.
+                else if (Regex.IsMatch(q, @"(.*\*.*)+"))
+                {
+                    
                 }
 
                 // Simple queries.
-                else
-                {
-                    if (index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
+                else if(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
                         orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
                 }
-            }
 
             // Merge all the OR query items results
             for (int i = 0; i < orQueryItemsResultsDocIds.Count - 1; i++)
@@ -192,42 +210,6 @@ namespace SearchEngineProject
                         termsPostings.Add(index.GetPostings(PorterStemmer.ProcessToken(term)));
                     }
                 }
-
-                // Parentheses
-                var parentheses = Regex.Matches(q, @"\((.+?)\)")
-                    .Cast<Match>()
-                    .Select(m => m.Groups[1].Value)
-                    .ToList();
-                foreach (string expression in parentheses)
-                {
-                    var terms = SplitWhiteSpace(expression);
-                    foreach (string term in terms)
-                    {
-                        var termPostings = index.GetPostings(PorterStemmer.ProcessToken(term));
-                    }
-                }
-
-                // White space means "AND"
-                // Simple query
-                // Wildcard query
-
-                // Merge the results in an AND query
-
-            }
-
-
-            // OR the results of all the Qs.
-
-            // Return the results.
-
-            //////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-            
-
-
 
     */
         }
@@ -334,7 +316,7 @@ namespace SearchEngineProject
                 KGramIndex.AddType(token.Replace("-", ""));
                 position++;
             }
-            simpleTokenStream.Close();
+            simpleTokenStream.Close();    
         }
 
         /// <summary>
