@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SearchEngineProject
 {
-    public class NaiveInvertedIndex
+    public class PositionalInvertedIndex
     {
         private readonly Dictionary<string, Dictionary<int, IList<int>>> _mIndex = new Dictionary<string, Dictionary<int, IList<int>>>();
         public int IndexSize { get; private set; }

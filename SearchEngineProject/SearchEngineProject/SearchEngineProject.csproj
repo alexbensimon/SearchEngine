@@ -52,7 +52,7 @@
     </Compile>
     <Compile Include="ITokenStream.cs" />
     <Compile Include="KGramIndex.cs" />
-    <Compile Include="NaiveInvertedIndex.cs" />
+    <Compile Include="PositionalInvertedIndex.cs" />
     <Compile Include="PorterStemmer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
