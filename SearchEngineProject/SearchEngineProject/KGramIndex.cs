@@ -110,5 +110,6 @@ namespace SearchEngineProject
             //Remove the last + and return the query
             return newQuery.Substring(0, newQuery.Length-1);
         }
+
     }
 }
