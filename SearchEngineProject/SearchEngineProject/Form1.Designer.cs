@@ -65,6 +65,7 @@
             this.richTextBox1.Size = new System.Drawing.Size(422, 316);
             this.richTextBox1.TabIndex = 2;
             this.richTextBox1.Text = "";
+            this.richTextBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseClick_1);
             // 
             // richTextBox2
             // 
