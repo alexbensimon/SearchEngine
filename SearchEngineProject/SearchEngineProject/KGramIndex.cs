@@ -7,14 +7,14 @@ namespace SearchEngineProject
     internal class KGramIndex
     {
         private static readonly Dictionary<string, IList<string>>[] _kGramIndex = new Dictionary<string, IList<string>>[3] { new Dictionary<string, IList<string>>(), new Dictionary<string, IList<string>>(), new Dictionary<string, IList<string>>() };
-        private static List<string> typeList = new List<string>(); 
+        private static HashSet<string> _typeList = new HashSet<string>(); 
 
         public static void AddType(string type)
         {
-            if (typeList.Contains(type))
+            if (_typeList.Contains(type))
                 return;
             
-            typeList.Add(type);
+            _typeList.Add(type);
 
             type = '$' + type + '$';
 
@@ -85,7 +85,6 @@ namespace SearchEngineProject
         }
 
         //Ici je pars du principe que la query est clean, elle ne contient plus aucun espace
-        //TODO traiter tous les mots comme des wildcard queries, genre quand on recherche hel rechercher plutot *hel* pour que ca affiche les resultats de hello et de hell ou de fuckinggoddamnmotherrouxfromhel
 
         private static List<string> FilterPostings(IList<string> postingList, string query)
         {

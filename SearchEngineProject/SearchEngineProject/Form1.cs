@@ -12,7 +12,7 @@ namespace SearchEngineProject
         // The list of file name strings.
         private readonly IList<string> _fileNames = new List<string>();
         //The inverted index
-        private readonly NaiveInvertedIndex _index = new NaiveInvertedIndex();
+        private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
 
         public Form1()
         {

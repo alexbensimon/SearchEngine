@@ -42,7 +42,7 @@ namespace SearchEngineProject
             return query.Split(null).ToList();
         }
 
-        public static List<int> ProcessAndQuery(string query, NaiveInvertedIndex index)
+        public static List<int> ProcessAndQuery(string query, PositionalInvertedIndex index)
         {
             var andQueryTerms = SplitWhiteSpace(query);
             var andQueryItemsResultsDocsIds = new List<List<int>>();
@@ -124,7 +124,7 @@ namespace SearchEngineProject
             return orQueryItemsResultsDocIds;
             }
 
-        public static string ProcessQuery(string query, NaiveInvertedIndex index, IList<string> fileNames)
+        public static string ProcessQuery(string query, PositionalInvertedIndex index, IList<string> fileNames)
         {
             // Verify the syntax is correct.
             if (!IsQuerySyntaxCorrect(query))
@@ -207,7 +207,7 @@ namespace SearchEngineProject
             return finalResults.ToString();
         }
 
-        public static Dictionary<int, IList<int>> ProcessPhraseQuery(NaiveInvertedIndex index, List<string> wordsList)
+        public static Dictionary<int, IList<int>> ProcessPhraseQuery(PositionalInvertedIndex index, List<string> wordsList)
         {
             Dictionary<int, IList<int>> word1Postings = null;
             
@@ -285,7 +285,7 @@ namespace SearchEngineProject
         ///     the integer ID of the current document, needed when
         ///     indexing each term from the document.
         /// </param>
-        public static void IndexFile(string fileName, NaiveInvertedIndex index, int documentId)
+        public static void IndexFile(string fileName, PositionalInvertedIndex index, int documentId)
         {
             // TO-DO: finish this method for indexing a particular file.
             // Construct a SimpleTokenStream for the given File.
@@ -315,7 +315,7 @@ namespace SearchEngineProject
         /// <summary>
         ///     Prints the inverted index.
         /// </summary>
-        public static void PrintResults(NaiveInvertedIndex index, IList<string> fileNames)
+        public static void PrintResults(PositionalInvertedIndex index, IList<string> fileNames)
         {
             var terms = index.GetDictionary();
             var maxlength = 0;
