@@ -20,7 +20,7 @@ namespace SearchEngineProject
 
             for (var counter = 0; counter < 3; counter++)
             {
-                var kGramList = new List<string>();
+                var kGramList = new HashSet<string>();
                 for (var charIndex = 0; charIndex < type.Length - counter; charIndex++)
                 {
                     var kGram = "";
