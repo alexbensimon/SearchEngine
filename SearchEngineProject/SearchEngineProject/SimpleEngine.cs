@@ -202,7 +202,7 @@ namespace SearchEngineProject
                 finalResults.Append(fileNames[docId]);
                 finalResults.AppendLine();
                 finalResults.AppendLine();
-                }
+            }
 
             return finalResults.ToString();
         }
