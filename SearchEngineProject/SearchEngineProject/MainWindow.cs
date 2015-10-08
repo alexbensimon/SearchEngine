@@ -126,14 +126,10 @@ namespace SearchEngineProject
             //get the word under the cursor
             var word = GetWordUnderCursor(control, e);
             if (word != null)
-            {
                 this.Cursor = Cursors.Hand;
                 richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
                 richTextBox1.SelectionColor = Color.CornflowerBlue;
                 richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
-            }
-            else
-                this.Cursor = Cursors.Arrow;
             }
 
         private void button2_Click(object sender, EventArgs e)

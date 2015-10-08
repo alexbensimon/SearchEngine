@@ -185,7 +185,7 @@ namespace SearchEngineProject
                         // If Wildcard query.
                         if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
                             secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if(postings == null)
+                        else if (postings == null)
                             secondAndQueryItemsResultsDocIds.Add(new List<int>());
                         else
                             secondAndQueryItemsResultsDocIds.Add(postings.Keys.ToList());
@@ -216,20 +216,20 @@ namespace SearchEngineProject
                 // In the Q, it only remains simple words.
                 if (q != string.Empty)
                 {
-                var terms = SplitWhiteSpace(q);
-                foreach (string term in terms)
-                {
+                    var terms = SplitWhiteSpace(q);
+                    foreach (string term in terms)
+                    {
                         var postings = index.GetPostings(PorterStemmer.ProcessToken(term.Trim()));
-                    // If Wildcard query.
-                    if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
-                        andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
+                        // If Wildcard query.
+                        if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
+                            andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
                         else if (postings == null)
-                        andQueryItemsResultsDocIds.Add(new List<int>());
-                    else
+                            andQueryItemsResultsDocIds.Add(new List<int>());
+                        else
                             andQueryItemsResultsDocIds.Add(postings.Keys.ToList());
                     }
                 }
-                
+
                 // Merge all the results in a AND query.
                 if (andQueryItemsResultsDocIds.Count > 0)
                     orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
