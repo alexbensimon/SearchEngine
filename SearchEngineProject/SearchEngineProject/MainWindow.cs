@@ -131,6 +131,7 @@ namespace SearchEngineProject
             return control.Text.Substring(start, end - start + 1);
         }
 
+        
         private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
@@ -158,6 +159,7 @@ namespace SearchEngineProject
                 }
             }
         }
+        
 
         private void button2_Click(object sender, EventArgs e)
         {

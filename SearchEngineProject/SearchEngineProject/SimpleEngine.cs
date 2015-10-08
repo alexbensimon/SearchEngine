@@ -294,7 +294,7 @@ namespace SearchEngineProject
                     {
                         var word1Pos = word1Postings[word1DocId].ElementAt(posPointer1);
                         var word2Pos = word2Postings[word2DocId].ElementAt(posPointer2);
-                        if (Math.Abs(word1Pos - word2Pos) == 1)
+                        if (word2Pos - word1Pos == 1)
                         {
                             if (newPostingList.ContainsKey(word2DocId))
                                 newPostingList[word2DocId].Add(word2Pos);
