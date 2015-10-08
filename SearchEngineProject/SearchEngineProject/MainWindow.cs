@@ -92,7 +92,7 @@ namespace SearchEngineProject
             var control = sender as RichTextBox;
             //get the word under the cursor
             var word = GetWordUnderCursor(control, e);
-            if (word != null)
+            if (word != null &&  word.EndsWith(".txt"))
             {
                 richTextBox2.Text = File.ReadAllText("Corpus/" + word);
             }
@@ -128,6 +128,9 @@ namespace SearchEngineProject
             if (word != null)
             {
                 this.Cursor = Cursors.Hand;
+                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
+                richTextBox1.SelectionColor = Color.CornflowerBlue;
+                richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
             }
             else
                 this.Cursor = Cursors.Arrow;
