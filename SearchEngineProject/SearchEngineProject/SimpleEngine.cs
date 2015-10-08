@@ -181,14 +181,14 @@ namespace SearchEngineProject
 
                     foreach (string term in andQueryTerms)
                     {
+                        var postings = index.GetPostings(PorterStemmer.ProcessToken(term.Trim()));
                         // If Wildcard query.
                         if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
                                 secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
+                        else if(postings == null)
                             secondAndQueryItemsResultsDocIds.Add(new List<int>());
                         else
-                            secondAndQueryItemsResultsDocIds.Add(
-                                index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
+                            secondAndQueryItemsResultsDocIds.Add(postings.Keys.ToList());
                     }
                     if(secondAndQueryItemsResultsDocIds.Count > 0)
                         andQueryItemsResultsDocIds.Add(MergeAndResults(secondAndQueryItemsResultsDocIds).Last());
@@ -204,26 +204,32 @@ namespace SearchEngineProject
                 foreach (string phraseQuery in phraseQueries)
                 {
                     var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
-                    if(ProcessPhraseQuery(index, phraseQueryTerms) == null)
+                    var results = ProcessPhraseQuery(index, phraseQueryTerms);
+                    if (results == null)
                         andQueryItemsResultsDocIds.Add(new List<int>());    
                     else  
-                        andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
+                        andQueryItemsResultsDocIds.Add(results.Keys.ToList());
                 }
                 // Remove phrase queries from the Q.
                 q = Regex.Replace(q, "\"(.+?)\"", "");
 
                 // In the Q, it only remains simple words.
-                var terms = SplitWhiteSpace(q);
-                foreach (string term in terms)
+                if (q != string.Empty)
                 {
-                    // If Wildcard query.
-                    if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
-                        andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                    else if (index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
-                        andQueryItemsResultsDocIds.Add(new List<int>());
-                    else
-                        andQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
+                    var terms = SplitWhiteSpace(q);
+                    foreach (string term in terms)
+                    {
+                        var postings = index.GetPostings(PorterStemmer.ProcessToken(term.Trim()));
+                        // If Wildcard query.
+                        if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
+                            andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
+                        else if (postings == null)
+                            andQueryItemsResultsDocIds.Add(new List<int>());
+                        else
+                            andQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                    }
                 }
+                
                 // Merge all the results in a AND query.
                 if (andQueryItemsResultsDocIds.Count > 0)
                     orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
