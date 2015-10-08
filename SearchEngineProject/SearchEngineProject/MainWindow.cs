@@ -126,12 +126,8 @@ namespace SearchEngineProject
             //get the word under the cursor
             var word = GetWordUnderCursor(control, e);
             if (word != null)
-            {
                 this.Cursor = Cursors.Hand;
-            }
-            else
-                this.Cursor = Cursors.Arrow;
-            }
+        }
 
         private void button2_Click(object sender, EventArgs e)
         {
