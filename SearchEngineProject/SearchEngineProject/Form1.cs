@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -31,7 +32,7 @@ namespace SearchEngineProject
             _index.ComputeStatistics();
             //PrintResults(index, fileNames);
 
-            InitializeComponent();   
+            InitializeComponent();
         }
 
         private void button1_Click(object sender, EventArgs e)

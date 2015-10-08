@@ -145,6 +145,12 @@ namespace SearchEngineProject
 
         public static List<int> ProcessQuery(string query, PositionalInvertedIndex index)
         {
+            // Trim the query.
+            query = query.Trim();
+
+            if (query == string.Empty)
+                return new List<int>();
+
             // Verify the syntax is correct.
             if (!IsQuerySyntaxCorrect(query))
                 return null;
@@ -157,8 +163,10 @@ namespace SearchEngineProject
 
             var orQueryItemsResultsDocIds = new List<List<int>>();
             // Process each Q: 
-            foreach (string q in qList)
+            foreach (string qTemp in qList)
             {
+                string q = qTemp;
+
                 var andQueryItemsResultsDocIds = new List<List<int>>();
 
                 // Parentheses.
@@ -168,14 +176,14 @@ namespace SearchEngineProject
                     .ToList();
                 foreach (string expression in parentheses)
                 {
-                    var andQueryTerms = SplitWhiteSpace(query);
+                    var andQueryTerms = SplitWhiteSpace(expression);
                     var secondAndQueryItemsResultsDocIds = new List<List<int>>();
 
                     foreach (string term in andQueryTerms)
                     {
                         // If Wildcard query.
-                        if (Regex.IsMatch(q, @"(.*\*.*)+"))
-                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                        if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
+                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
                         else if(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) != null)
                             secondAndQueryItemsResultsDocIds.Add(
                                 index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
@@ -184,7 +192,7 @@ namespace SearchEngineProject
                         andQueryItemsResultsDocIds.Add(MergeAndResults(secondAndQueryItemsResultsDocIds).Last());
                 }
                 // Remove parentheses from the Q.
-                Regex.Replace(q, @"\((.+?)\)", "");
+                q = Regex.Replace(q, @"\((.+?)\)", "");
 
                 // Phrase queries with " ".
                 var phraseQueries = Regex.Matches(q, "\"(.+?)\"")
@@ -193,21 +201,22 @@ namespace SearchEngineProject
                     .ToList();
                 foreach (string phraseQuery in phraseQueries)
                 {
-                    var phraseQueryTerms = SplitWhiteSpace(phraseQuery);
-                    andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
+                    var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
+                    if(ProcessPhraseQuery(index, phraseQueryTerms) != null)  
+                        andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
                 }
                 // Remove phrase queries from the Q.
-                Regex.Replace(q, "\"(.+?)\"", "");
+                q = Regex.Replace(q, "\"(.+?)\"", "");
 
                 // In the Q, it only remains simple words.
                 var terms = SplitWhiteSpace(q);
                 foreach (string term in terms)
                 {
                     // If Wildcard query.
-                    if (Regex.IsMatch(q, @"(.*\*.*)+"))
-                        andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
-                    else if (index.GetPostings(PorterStemmer.ProcessToken(q.Trim())) != null)
-                        andQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(q.Trim())).Keys.ToList());
+                    if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
+                        andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
+                    else if (index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) != null)
+                        andQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
                 }
 
                 // Merge all the results in a AND query.
@@ -216,9 +225,11 @@ namespace SearchEngineProject
             }
 
             // Merge all the OR query items results.
-            orQueryItemsResultsDocIds = MergeOrResults(orQueryItemsResultsDocIds);
-            if(orQueryItemsResultsDocIds.Count > 0)
+            if (orQueryItemsResultsDocIds.Count > 0)
+            {
+                orQueryItemsResultsDocIds = MergeOrResults(orQueryItemsResultsDocIds);
                 finalResultsDocIds.AddRange(orQueryItemsResultsDocIds.Last());
+            }
 
             return finalResultsDocIds;
         }
@@ -230,10 +241,10 @@ namespace SearchEngineProject
             foreach (var word in wordsList)
             {
                 if (word1Postings == null)
-                    word1Postings = index.GetPostings(word);
+                    word1Postings = index.GetPostings(word.Trim());
                 else
                 {
-                    var word2Postings = index.GetPostings(word);
+                    var word2Postings = index.GetPostings(word.Trim());
                     word1Postings = Process2WordPhraseQuery(word1Postings, word2Postings);
                 }
             }

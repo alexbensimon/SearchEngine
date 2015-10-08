@@ -1125,6 +1125,7 @@
     <Content Include="Corpus\article3f0c.txt" />
     <Content Include="Corpus\article3f0e.txt" />
     <Content Include="Corpus\article3f1a.txt" />
+    <Content Include="Pictures\SearchIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
