@@ -50,13 +50,27 @@ namespace SearchEngineProject
 
             var query = textBox1.Text;
 
-            string results = SimpleEngine.ProcessQuery(query, _index, _fileNames);
-            if (results == null)
+            var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
+
+            if (resultsDocIds == null)
                 richTextBox1.Text = "Wrong syntax";
-            else if(results == string.Empty)
+            else if (resultsDocIds.Count == 0)
                 richTextBox1.Text = "No results";
             else
-                richTextBox1.Text = results;
+            {
+                // Display the number of returned documents.
+                label1.Text = "Result: " + resultsDocIds.Count + " documents";
+
+                // Build the results.
+                var finalResults = new StringBuilder();
+                foreach (int docId in resultsDocIds)
+                {
+                    finalResults.Append(_fileNames[docId]);
+                    finalResults.AppendLine();
+                    finalResults.AppendLine();
+                }
+                richTextBox1.Text = finalResults.ToString();
+            }
         }
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)

@@ -143,7 +143,7 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         } 
 
-        public static string ProcessQuery(string query, PositionalInvertedIndex index, IList<string> fileNames)
+        public static List<int> ProcessQuery(string query, PositionalInvertedIndex index)
         {
             // Verify the syntax is correct.
             if (!IsQuerySyntaxCorrect(query))
@@ -220,19 +220,7 @@ namespace SearchEngineProject
             if(orQueryItemsResultsDocIds.Count > 0)
                 finalResultsDocIds.AddRange(orQueryItemsResultsDocIds.Last());
 
-            // If there isn't any result.
-            if (finalResultsDocIds.Count == 0)
-                return string.Empty;
-            // Build the results.
-            var finalResults = new StringBuilder();
-            foreach (int docId in finalResultsDocIds)
-            {
-                finalResults.Append(fileNames[docId]);
-                finalResults.AppendLine();
-                finalResults.AppendLine();
-            }
-
-            return finalResults.ToString();
+            return finalResultsDocIds;
         }
 
         public static Dictionary<int, IList<int>> ProcessPhraseQuery(PositionalInvertedIndex index, IList<string> wordsList)
