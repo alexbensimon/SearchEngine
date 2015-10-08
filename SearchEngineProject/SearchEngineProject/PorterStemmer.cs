@@ -5,37 +5,37 @@ namespace SearchEngineProject
 {
     internal class PorterStemmer
     {
-        // a single consonant
+        // A single consonant.
         private const string c = "[^aeiou]";
-        // a single vowel
+        // A single vowel.
         private const string v = "[aeiouy]";
 
-        // a sequence of consonants; the second/third/etc consonant cannot be 'y'
+        // A sequence of consonants; the second/third/etc consonant cannot be 'y'.
         private const string C = c + "[^aeiouy]*";
-        // a sequence of vowels; the second/third/etc cannot be 'y'
+        // A sequence of vowels; the second/third/etc cannot be 'y'.
         private const string V = v + "[aeiou]*";
 
 
-        // this regex tests if the token has measure > 0 [at least one VC].
+        // This regex tests if the token has measure > 0 [at least one VC].
         private static readonly Regex MGr0 = new Regex("^(" + C + ")?" + V + C);
 
 
-        // add more Regex variables for the following patterns:
-        // m equals 1: token has measure == 1
+        // Add more Regex variables for the following patterns.
+        // M equals 1: token has measure == 1.
         private static readonly Regex MEq1 = new Regex("^(" + C + ")?" + V + C + "(" + V + ")?$");
 
-        // m greater than 1: token has measure > 1
+        // M greater than 1: token has measure > 1.
         private static readonly Regex MGr1 = new Regex("^(" + C + ")?" + V + C + V + C);
 
-        // vowel: token has a vowel after the first (optional) C
+        // Vowel: token has a vowel after the first (optional) C.
         private static readonly Regex Vowel = new Regex("^(" + C + ")?" + V);
 
-        // double consonant: token ends in two consonants that are the same, 
+        // Double consonant: token ends in two consonants that are the same, 
         //			unless they are L, S, or Z. (look up "backreferencing" to help 
-        //			with this)
+        //			with this).
         private static readonly Regex Dbcons = new Regex(@"([^aeioulszy])\1$");
 
-        // m equals 1, Cvc: token is in Cvc form, where the last c is not w, x, 
+        // M equals 1, Cvc: token is in Cvc form, where the last c is not w, x, 
         //			or y.
         private static readonly Regex MEq1Cvc = new Regex("^(" + C + ")" + v + "[^aeiouwxy]$");
 
@@ -99,35 +99,35 @@ namespace SearchEngineProject
 
         public static string ProcessToken(string token)
         {
-            if (token.Length < 3) return token; // token must be at least 3 chars
+            // Token must be at least 3 chars.
+            if (token.Length < 3) return token; 
 
-            // step 1a
+            // Step 1a.
             if (token.EndsWith("sses") || token.EndsWith("ies"))
                 token = token.Substring(0, token.Length - 2);
-            // program the other steps in 1a. 
-            // note that Step 1a.3 implies that there is only a single 's' as the 
-            //	suffix; ss does not count. you may need a regex here for 
-            // "not s followed by s".
+            // Program the other steps in 1a. 
+            // Note that Step 1a.3 implies that there is only a single 's' as the 
+            //  suffix; ss does not count. you may need a regex here for 
+            //  "not s followed by s".
             else if (!token.EndsWith("ss") && token.EndsWith("s"))
                 token = token.Substring(0, token.Length - 1);
 
 
-            // step 1b
+            // Step 1b.
             bool doStep1Bb = false;
-            //		step 1b
             if (token.EndsWith("eed"))
             {
-                // 1b.1
-                // token.Substring(0, token.Length - 3) is the stem prior to "eed".
-                // if that has m>0, then remove the "d".
+                // 1b.1.
+                // Token.Substring(0, token.Length - 3) is the stem prior to "eed".
+                // If that has m>0, then remove the "d".
                 string stem = token.Substring(0, token.Length - 3);
                 if (MGr0.IsMatch(stem))
                 {
                     token = stem + "ee";
                 }
             }
-            // program the rest of 1b. set the bool doStep1bb to true if Step 1b* 
-            // should be performed.
+            // Program the rest of 1b. set the bool doStep1bb to true if Step 1b* 
+            //  should be performed.
             else if (token.EndsWith("ed"))
             {
                 string stem = token.Substring(0, token.Length - 2);
@@ -147,7 +147,7 @@ namespace SearchEngineProject
                 }
             }
 
-            // step 1b*, only if the 1b.2 or 1b.3 were performed.
+            // Step 1b*, only if the 1b.2 or 1b.3 were performed.
             if (doStep1Bb)
             {
                 if (token.EndsWith("at") || token.EndsWith("bl") || token.EndsWith("iz"))
@@ -162,12 +162,12 @@ namespace SearchEngineProject
                 {
                     token = token + "e";
                 }
-                // use the regexes you wrote for 1b*.4 and 1b*.5
+                // Use the regexes you wrote for 1b*.4 and 1b*.5.
             }
 
-            // step 1c
-            // program this step. test the suffix of 'y' first, then test the 
-            // condition *v*.
+            // Step 1c.
+            // Program this step. test the suffix of 'y' first, then test the 
+            //  condition *v*.
             if (token.EndsWith("y"))
             {
                 string stem = token.Substring(0, token.Length - 1);
@@ -178,34 +178,34 @@ namespace SearchEngineProject
             }
 
 
-            // step 2
-            // program this step. for each suffix, see if the token ends in the 
-            // suffix. 
+            // Step 2.
+            // Program this step. for each suffix, see if the token ends in the 
+            //  suffix. 
             //		* if it does, extract the stem, and do NOT test any other suffix.
             //    * take the stem and make sure it has m > 0.
             //			* if it does, complete the step. if it does not, do not 
             //				attempt any other suffix.
 
 
-            // you may want to write a helper method for this. a matrix of 
-            // "suffix"/"replacement" pairs might be helpful. It could look like
-            // string[][] step2pairs = {  new string[] {"ational", "ate"}, 
+            // You may want to write a helper method for this. a matrix of 
+            //  "suffix"/"replacement" pairs might be helpful. It could look like
+            //  string[][] step2pairs = {  new string[] {"ational", "ate"}, 
             //										new string[] {"tional", "tion"}, ....
             token = Step23(token, SuffixListS2);
 
-            // step 3
-            // program this step. the rules are identical to step 2 and you can use
-            // the same helper method. you may also want a matrix here.
+            // Step 3.
+            // Program this step. the rules are identical to step 2 and you can use
+            //  the same helper method. you may also want a matrix here.
             token = Step23(token, SuffixListS3);
 
 
-            // step 4
-            // program this step similar to step 2/3, except now the stem must have
-            // measure > 1.
-            // note that ION should only be removed if the suffix is SION or TION, 
-            // which would leave the S or T.
-            // as before, if one suffix matches, do not try any others even if the 
-            // stem does not have measure > 1.
+            // Step 4.
+            // Program this step similar to step 2/3, except now the stem must have
+            //  measure > 1.
+            // Note that ION should only be removed if the suffix is SION or TION, 
+            //  which would leave the S or T.
+            // As before, if one suffix matches, do not try any others even if the 
+            //  stem does not have measure > 1.
             foreach (string suffix in SuffixListS4)
             {
                 if (token.EndsWith(suffix))
@@ -222,10 +222,9 @@ namespace SearchEngineProject
                 }
             }
 
-
-            // step 5
-            // program this step. you have a regex for m=1 and for "Cvc", which
-            // you can use to see if m=1 and NOT Cvc.
+            // Step 5.
+            // Program this step. you have a regex for m=1 and for "Cvc", which
+            //  you can use to see if m=1 and NOT Cvc.
             if (token.EndsWith("e"))
             {
                 string stem = token.Substring(0, token.Length - 1);
@@ -241,8 +240,8 @@ namespace SearchEngineProject
             }
 
 
-            // all your code should change the variable token, which represents
-            // the stemmed term for the token.
+            // All your code should change the variable token, which represents
+            //  the stemmed term for the token.
             return token;
         }
 

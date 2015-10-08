@@ -7,7 +7,7 @@ namespace SearchEngineProject
     internal class KGramIndex
     {
         private static readonly Dictionary<string, List<string>>[] _kGramIndex = new Dictionary<string, List<string>>[3] { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>() };
-        private static HashSet<string> _typeList = new HashSet<string>();
+        private static readonly HashSet<string> _typeList = new HashSet<string>();
 
         public static void AddType(string type)
         {
@@ -45,8 +45,7 @@ namespace SearchEngineProject
         {
             if (_kGramIndex[kGram.Length - 1].ContainsKey(kGram))
                 return _kGramIndex[kGram.Length - 1][kGram];
-            else
-                return null;
+            return null;
         }
 
         private static List<string> GenerateKgrams(string wildcardQuery)
@@ -80,7 +79,7 @@ namespace SearchEngineProject
             List<string> finalPostingList = null;
             foreach (var kgram in GenerateKgrams(query))
             {
-                if (finalPostingList==null)
+                if (finalPostingList == null)
                     finalPostingList = GetTypes(kgram);
                 else
                     finalPostingList = finalPostingList.Intersect(GetTypes(kgram)).ToList();
@@ -88,11 +87,10 @@ namespace SearchEngineProject
 
             if (finalPostingList == null)
                 return null;
-            else
-                return FilterPostings(finalPostingList, query);
+            return FilterPostings(finalPostingList, query);
         }
 
-        //Ici je pars du principe que la query est clean, elle ne contient plus aucun espace
+        // From here, we suppose that the query is clean: it does not contain any more white spaces.
 
         private static List<string> FilterPostings(List<string> postingList, string query)
         {
@@ -117,8 +115,8 @@ namespace SearchEngineProject
                 newQuery += posting + "+";
             }
 
-            //Remove the last + and return the query
-                return newQuery.Substring(0, newQuery.Length - 1);
+            // Remove the last + and return the query.
+            return newQuery.Substring(0, newQuery.Length - 1);
         }
 
     }
