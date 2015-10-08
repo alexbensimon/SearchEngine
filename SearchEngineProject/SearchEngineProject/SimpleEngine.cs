@@ -142,7 +142,7 @@ namespace SearchEngineProject
         public static List<int> ProcessQuery(string query, PositionalInvertedIndex index)
         {
             // Trim the query.
-            query = query.Trim();
+            query = query.Trim().Replace("-", "");
 
             if (query == string.Empty)
                 return new List<int>();

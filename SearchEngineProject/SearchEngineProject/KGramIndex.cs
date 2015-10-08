@@ -107,7 +107,7 @@ namespace SearchEngineProject
         {
             var newQuery = "";
             List<string> postings = MergePostings(initialQuery);
-            if (postings == null)
+            if (postings == null || postings.Count==0)
                 return "";
 
             foreach (var posting in postings)
