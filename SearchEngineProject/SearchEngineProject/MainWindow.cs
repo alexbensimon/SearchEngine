@@ -102,9 +102,7 @@ namespace SearchEngineProject
             //get the word under the cursor
             var word = GetWordUnderCursor(control, e);
             if (word != null && word.EndsWith(".txt"))
-            {
-                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
-                richTextBox1.SelectionColor = Color.Gold;
+            { 
                 richTextBox2.Text = File.ReadAllText("Corpus/" + word);
             }
         }
@@ -138,15 +136,15 @@ namespace SearchEngineProject
         var word = GetWordUnderCursor(control, e);
         if (word != _currentWordUnderCursor)
         {
-            if (word == null && _currentWordUnderCursor != null && richTextBox2.Text == string.Empty)
+            if (_currentWordUnderCursor != null)
             {
                 richTextBox1.Select(richTextBox1.Text.IndexOf(_currentWordUnderCursor), _currentWordUnderCursor.Length);
                 richTextBox1.SelectionColor = Color.Black;
                 richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Regular);
+                _currentWordUnderCursor = null;
             }
-            else if (word != null && word.EndsWith(".txt"))
+            if (word != null && word.EndsWith(".txt"))
             {
-                Cursor.Current = Cursors.Hand;
                 richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
                 richTextBox1.SelectionColor = Color.Gold;
                 richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
