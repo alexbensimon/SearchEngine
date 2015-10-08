@@ -141,7 +141,7 @@ namespace SearchEngineProject
             }
 
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
-        } 
+        }
 
         public static List<int> ProcessQuery(string query, PositionalInvertedIndex index)
         {
@@ -183,14 +183,14 @@ namespace SearchEngineProject
                     {
                         // If Wildcard query.
                         if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
-                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
+                            secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
+                        else if (index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
                             secondAndQueryItemsResultsDocIds.Add(new List<int>());
                         else
                             secondAndQueryItemsResultsDocIds.Add(
                                 index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
                     }
-                    if(secondAndQueryItemsResultsDocIds.Count > 0)
+                    if (secondAndQueryItemsResultsDocIds.Count > 0)
                         andQueryItemsResultsDocIds.Add(MergeAndResults(secondAndQueryItemsResultsDocIds).Last());
                 }
                 // Remove parentheses from the Q.
@@ -204,9 +204,9 @@ namespace SearchEngineProject
                 foreach (string phraseQuery in phraseQueries)
                 {
                     var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
-                    if(ProcessPhraseQuery(index, phraseQueryTerms) == null)
-                        andQueryItemsResultsDocIds.Add(new List<int>());    
-                    else  
+                    if (ProcessPhraseQuery(index, phraseQueryTerms) == null)
+                        andQueryItemsResultsDocIds.Add(new List<int>());
+                    else
                         andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
                 }
                 // Remove phrase queries from the Q.
@@ -242,16 +242,20 @@ namespace SearchEngineProject
         public static Dictionary<int, List<int>> ProcessPhraseQuery(PositionalInvertedIndex index, List<string> wordsList)
         {
             Dictionary<int, List<int>> word1Postings = null;
-            
+
             foreach (var word in wordsList)
             {
                 if (word1Postings == null)
-                    word1Postings = index.GetPostings(word.Trim());
+                    word1Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()));
                 else
                 {
-                    var word2Postings = index.GetPostings(word.Trim());
+                    var word2Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()));
+                    if (word2Postings == null)
+                        return null;
                     word1Postings = Process2WordPhraseQuery(word1Postings, word2Postings);
                 }
+                if (word1Postings == null)
+                    return null;
             }
 
             return word1Postings;
@@ -345,7 +349,7 @@ namespace SearchEngineProject
                 KGramIndex.AddType(token.Replace("-", ""));
                 position++;
             }
-            simpleTokenStream.Close();    
+            simpleTokenStream.Close();
         }
 
         /// <summary>
