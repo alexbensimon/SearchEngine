@@ -80,12 +80,16 @@ namespace SearchEngineProject
             List<string> finalPostingList = null;
             foreach (var kgram in GenerateKgrams(query))
             {
-                if (finalPostingList == null)
+                if (finalPostingList==null)
                     finalPostingList = GetTypes(kgram);
                 else
                     finalPostingList = finalPostingList.Intersect(GetTypes(kgram)).ToList();
             }
-            return FilterPostings(finalPostingList, query);
+
+            if (finalPostingList == null)
+                return null;
+            else
+                return FilterPostings(finalPostingList, query);
         }
 
         //Ici je pars du principe que la query est clean, elle ne contient plus aucun espace
@@ -104,14 +108,17 @@ namespace SearchEngineProject
         public static string GenerateNormalQuery(string initialQuery)
         {
             var newQuery = "";
+            List<string> postings = MergePostings(initialQuery);
+            if (postings == null)
+                return "";
 
-            foreach (var posting in MergePostings(initialQuery))
+            foreach (var posting in postings)
             {
                 newQuery += posting + "+";
             }
 
             //Remove the last + and return the query
-            return newQuery.Substring(0, newQuery.Length - 1);
+                return newQuery.Substring(0, newQuery.Length - 1);
         }
 
     }
