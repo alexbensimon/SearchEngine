@@ -15,24 +15,33 @@ namespace SearchEngineProject
         //The inverted index
         private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
 
+        private string _currentWordUnderCursor;
+        private string _currentWordClicked;
+
         public MainWindow()
         {
             // The ID of the next document to be added.
             var documentId = 0;
 
-            // Iterate through all .txt files in the current directory.
-            foreach (var fileName in Directory.EnumerateFiles(Environment.CurrentDirectory + @"\Corpus", "*.txt"))
+            var fbd = new FolderBrowserDialog();
+            fbd.ShowDialog();
+            string directoryPath = fbd.SelectedPath;
+            if (directoryPath != null)
             {
-                // for each file, open the file and index it.
-                SimpleEngine.IndexFile(fileName, _index, documentId);
-                documentId++;
-                // add the file's name to the list of filenames.
-                _fileNames.Add(Path.GetFileName(fileName));
-            }
-            _index.ComputeStatistics();
-            //PrintResults(index, fileNames);
+                // Iterate through all .txt files in the chosen directory.
+                foreach (var fileName in Directory.EnumerateFiles(directoryPath))
+                {
+                    // for each file, open the file and index it.
+                    SimpleEngine.IndexFile(fileName, _index, documentId);
+                    documentId++;
+                    // add the file's name to the list of filenames.
+                    _fileNames.Add(Path.GetFileName(fileName));
+                }
+                _index.ComputeStatistics();
+                //PrintResults(index, fileNames);
 
-            InitializeComponent();
+                InitializeComponent();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -92,66 +101,80 @@ namespace SearchEngineProject
             var control = sender as RichTextBox;
             //get the word under the cursor
             var word = GetWordUnderCursor(control, e);
-            if (word != null &&  word.EndsWith(".txt"))
+            if (word != null && word.EndsWith(".txt"))
             {
+                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
+                richTextBox1.SelectionColor = Color.Gold;
                 richTextBox2.Text = File.ReadAllText("Corpus/" + word);
             }
         }
 
-        public static string GetWordUnderCursor(RichTextBox control, MouseEventArgs e)
+    public static string GetWordUnderCursor(RichTextBox control, MouseEventArgs e)
+    {
+        //check if there's any text entered
+        if (string.IsNullOrWhiteSpace(control.Text))
+            return null;
+        //get index of nearest character
+        var index = control.GetCharIndexFromPosition(e.Location);
+        //check if mouse is above a word (non-whitespace character)
+        if (char.IsWhiteSpace(control.Text[index]))
+            return null;
+        //find the start index of the word
+        var start = index;
+        while (start > 0 && !char.IsWhiteSpace(control.Text[start - 1]))
+            start--;
+        //find the end index of the word
+        var end = index;
+        while (end < control.Text.Length - 1 && !char.IsWhiteSpace(control.Text[end + 1]))
+            end++;
+        //get and return the whole word
+        return control.Text.Substring(start, end - start + 1);
+    }
+
+    private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
+    {
+        var control = sender as RichTextBox;
+        //get the word under the cursor
+        var word = GetWordUnderCursor(control, e);
+        if (word != _currentWordUnderCursor)
         {
-            //check if there's any text entered
-            if (string.IsNullOrWhiteSpace(control.Text))
-                return null;
-            //get index of nearest character
-            var index = control.GetCharIndexFromPosition(e.Location);
-            //check if mouse is above a word (non-whitespace character)
-            if (char.IsWhiteSpace(control.Text[index]))
-                return null;
-            //find the start index of the word
-            var start = index;
-            while (start > 0 && !char.IsWhiteSpace(control.Text[start - 1]))
-                start--;
-            //find the end index of the word
-            var end = index;
-            while (end < control.Text.Length - 1 && !char.IsWhiteSpace(control.Text[end + 1]))
-                end++;
-            //get and return the whole word
-            return control.Text.Substring(start, end - start + 1);
-        }
-
-        private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            var control = sender as RichTextBox;
-            //get the word under the cursor
-            var word = GetWordUnderCursor(control, e);
-            if (word != null)
-                this.Cursor = Cursors.Hand;
-                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
-                richTextBox1.SelectionColor = Color.CornflowerBlue;
-                richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
-            }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            var statistics = new StringBuilder();
-            statistics.Append("Number of terms in the index: ");
-            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
-
-            statistics.Append("Average number of documents in the postings list: ");
-            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
-
-            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
-            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+            if (word == null && _currentWordUnderCursor != null && richTextBox2.Text == string.Empty)
             {
-                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
+                richTextBox1.Select(richTextBox1.Text.IndexOf(_currentWordUnderCursor), _currentWordUnderCursor.Length);
+                richTextBox1.SelectionColor = Color.Black;
+                richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Regular);
             }
-            statistics.AppendLine("\n");
-
-            statistics.Append("Approximate memory requirement of the index: ");
-            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
-
-            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
+            else if (word != null && word.EndsWith(".txt"))
+            {
+                Cursor.Current = Cursors.Hand;
+                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
+                richTextBox1.SelectionColor = Color.Gold;
+                richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
+                _currentWordUnderCursor = word;
+            }
         }
     }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        var statistics = new StringBuilder();
+        statistics.Append("Number of terms in the index: ");
+        statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
+
+        statistics.Append("Average number of documents in the postings list: ");
+        statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+
+        statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
+        foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+        {
+            statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
+        }
+        statistics.AppendLine("\n");
+
+        statistics.Append("Approximate memory requirement of the index: ");
+        statistics.Append(prettyBytes(_index.IndexSizeInMemory));
+
+        MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
+    }
+}
 }

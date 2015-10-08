@@ -165,7 +165,7 @@ namespace SearchEngineProject
             // Process each Q: 
             foreach (string qTemp in qList)
             {
-                string q = qTemp;
+                string q = qTemp.Trim();
 
                 var andQueryItemsResultsDocIds = new List<List<int>>();
 
@@ -179,16 +179,20 @@ namespace SearchEngineProject
                     var andQueryTerms = SplitWhiteSpace(expression);
                     var secondAndQueryItemsResultsDocIds = new List<List<int>>();
 
-                    foreach (string term in andQueryTerms)
+                    foreach (string termTemp in andQueryTerms)
                     {
-                        var postings = index.GetPostings(PorterStemmer.ProcessToken(term.Trim()));
-                        // If Wildcard query.
-                        if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
-                            secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if (postings == null)
-                            secondAndQueryItemsResultsDocIds.Add(new List<int>());
-                        else
-                            secondAndQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                        string term = termTemp.Trim();
+                        if (term != string.Empty)
+                        {
+                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term));
+                            // If Wildcard query.
+                            if (Regex.IsMatch(term, @"(.*\*.*)+"))
+                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                            else if (postings == null)
+                                secondAndQueryItemsResultsDocIds.Add(new List<int>());
+                            else
+                                secondAndQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                        }
                     }
                     if (secondAndQueryItemsResultsDocIds.Count > 0)
                         andQueryItemsResultsDocIds.Add(MergeAndResults(secondAndQueryItemsResultsDocIds).Last());
@@ -217,16 +221,20 @@ namespace SearchEngineProject
                 if (q != string.Empty)
                 {
                     var terms = SplitWhiteSpace(q);
-                    foreach (string term in terms)
+                    foreach (string termTemp in terms)
                     {
-                        var postings = index.GetPostings(PorterStemmer.ProcessToken(term.Trim()));
-                        // If Wildcard query.
-                        if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
-                            andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if (postings == null)
-                            andQueryItemsResultsDocIds.Add(new List<int>());
-                        else
-                            andQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                        string term = termTemp.Trim();
+                        if (term != string.Empty)
+                        {
+                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term));
+                            // If Wildcard query.
+                            if (Regex.IsMatch(term, @"(.*\*.*)+"))
+                                andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                            else if (postings == null)
+                                andQueryItemsResultsDocIds.Add(new List<int>());
+                            else
+                                andQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                        }
                     }
                 }
 
