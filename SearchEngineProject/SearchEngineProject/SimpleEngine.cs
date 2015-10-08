@@ -184,7 +184,9 @@ namespace SearchEngineProject
                         // If Wildcard query.
                         if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
                                 secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                        else if(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) != null)
+                        else if(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
+                            secondAndQueryItemsResultsDocIds.Add(new List<int>());
+                        else
                             secondAndQueryItemsResultsDocIds.Add(
                                 index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
                     }
@@ -202,7 +204,9 @@ namespace SearchEngineProject
                 foreach (string phraseQuery in phraseQueries)
                 {
                     var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
-                    if(ProcessPhraseQuery(index, phraseQueryTerms) != null)  
+                    if(ProcessPhraseQuery(index, phraseQueryTerms) == null)
+                        andQueryItemsResultsDocIds.Add(new List<int>());    
+                    else  
                         andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
                 }
                 // Remove phrase queries from the Q.
@@ -215,10 +219,11 @@ namespace SearchEngineProject
                     // If Wildcard query.
                     if (Regex.IsMatch(term.Trim(), @"(.*\*.*)+"))
                         andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term.Trim(), index));
-                    else if (index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) != null)
+                    else if (index.GetPostings(PorterStemmer.ProcessToken(term.Trim())) == null)
+                        andQueryItemsResultsDocIds.Add(new List<int>());
+                    else
                         andQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
                 }
-
                 // Merge all the results in a AND query.
                 if (andQueryItemsResultsDocIds.Count > 0)
                     orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
