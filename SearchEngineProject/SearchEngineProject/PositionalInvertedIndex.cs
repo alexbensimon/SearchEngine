@@ -27,13 +27,13 @@ namespace SearchEngineProject
             // to the list that already exists in the Dictionary, but ONLY IF the list does
             // not already contain the docID.
 
-            //If the index contains the term
+            // If the index contains the term.
             if (_mIndex.ContainsKey(term))
             {
-                //If the index contains the docID
+                // If the index contains the docID.
                 if (_mIndex[term].Keys.Last() >= documentId)
                     _mIndex[term][documentId].Add(position);
-                //If not
+                // If not.
                 else
                     _mIndex[term].Add(documentId, new List<int> { position });
 

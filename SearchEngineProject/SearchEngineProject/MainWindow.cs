@@ -12,7 +12,7 @@ namespace SearchEngineProject
     {
         // The list of file name strings.
         private readonly List<string> _fileNames = new List<string>();
-        //The inverted index
+        // The inverted index.
         private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
 
         private string _currentWordUnderCursor;
@@ -33,7 +33,7 @@ namespace SearchEngineProject
                     // for each file, open the file and index it.
                     SimpleEngine.IndexFile(fileName, _index, documentId);
                     documentId++;
-                    // add the file's name to the list of filenames.
+                    // Add the file's name to the list of filenames.
                     _fileNames.Add(Path.GetFileName(fileName));
                 }
                 _index.ComputeStatistics();
@@ -98,7 +98,7 @@ namespace SearchEngineProject
         private void richTextBox1_MouseClick_1(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
-            //get the word under the cursor
+            // Get the word under the cursor.
             var word = GetWordUnderCursor(control, e);
             if (word != null && word.EndsWith(".txt"))
             {
@@ -110,30 +110,30 @@ namespace SearchEngineProject
 
         public static string GetWordUnderCursor(RichTextBox control, MouseEventArgs e)
         {
-            //check if there's any text entered
+            // Check if there is any text entered.
             if (string.IsNullOrWhiteSpace(control.Text))
                 return null;
-            //get index of nearest character
+            // Get index of nearest character.
             var index = control.GetCharIndexFromPosition(e.Location);
-            //check if mouse is above a word (non-whitespace character)
+            // Check if mouse is above a word (non-whitespace character).
             if (char.IsWhiteSpace(control.Text[index]))
                 return null;
-            //find the start index of the word
+            // Find the start index of the word.
             var start = index;
             while (start > 0 && !char.IsWhiteSpace(control.Text[start - 1]))
                 start--;
-            //find the end index of the word
+            // Find the end index of the word.
             var end = index;
             while (end < control.Text.Length - 1 && !char.IsWhiteSpace(control.Text[end + 1]))
                 end++;
-            //get and return the whole word
+            // Get and return the whole word.
             return control.Text.Substring(start, end - start + 1);
         }
 
         private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
-            //get the word under the cursor
+            // Get the word under the cursor.
             var word = GetWordUnderCursor(control, e);
             if (word != null)
                 richTextBox1.Cursor = Cursors.Hand;
