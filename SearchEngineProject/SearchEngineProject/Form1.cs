@@ -10,7 +10,7 @@ namespace SearchEngineProject
     public partial class Form1 : Form
     {
         // The list of file name strings.
-        private readonly IList<string> _fileNames = new List<string>();
+        private readonly List<string> _fileNames = new List<string>();
         //The inverted index
         private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
 

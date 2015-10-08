@@ -6,26 +6,26 @@ namespace SearchEngineProject
 {
     internal class KGramIndex
     {
-        private static readonly Dictionary<string, IList<string>>[] _kGramIndex = new Dictionary<string, IList<string>>[3] { new Dictionary<string, IList<string>>(), new Dictionary<string, IList<string>>(), new Dictionary<string, IList<string>>() };
-        private static HashSet<string> _typeList = new HashSet<string>(); 
+        private static readonly Dictionary<string, List<string>>[] _kGramIndex = new Dictionary<string, List<string>>[3] { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>() };
+        private static HashSet<string> _typeList = new HashSet<string>();
 
         public static void AddType(string type)
         {
             if (_typeList.Contains(type))
                 return;
-            
+
             _typeList.Add(type);
 
-            type = '$' + type + '$';
+            var modifiedType = '$' + type + '$';
 
             for (var counter = 0; counter < 3; counter++)
             {
                 var kGramList = new HashSet<string>();
-                for (var charIndex = 0; charIndex < type.Length - counter; charIndex++)
+                for (var charIndex = 0; charIndex < modifiedType.Length - counter; charIndex++)
                 {
                     var kGram = "";
                     for (var charOffset = 0; charOffset <= counter; charOffset++)
-                        kGram = kGram + type[charIndex + charOffset];
+                        kGram = kGram + modifiedType[charIndex + charOffset];
 
                     if (!kGramList.Contains(kGram))
                         kGramList.Add(kGram);
@@ -35,15 +35,18 @@ namespace SearchEngineProject
                 {
                     if (_kGramIndex[counter].ContainsKey(kGram))
                         _kGramIndex[counter][kGram].Add(type);
-                    else
+                    else if (kGram != "$")
                         _kGramIndex[counter].Add(kGram, new List<string>() { type });
                 }
             }
         }
 
-        private static IList<string> GetTypes(string kGram)
+        private static List<string> GetTypes(string kGram)
         {
-            return _kGramIndex[kGram.Length - 1][kGram];
+            if (_kGramIndex[kGram.Length - 1].ContainsKey(kGram))
+                return _kGramIndex[kGram.Length - 1][kGram];
+            else
+                return null;
         }
 
         private static List<string> GenerateKgrams(string wildcardQuery)
@@ -53,7 +56,7 @@ namespace SearchEngineProject
             var tempKgrams = usableWildcardQuery.Split('*');
             foreach (var kgram in tempKgrams)
             {
-                if (kgram.Length <= 3)
+                if (kgram.Length <= 3 && kgram != "$")
                     finalKgrams.Add(kgram);
                 else
                 {
@@ -64,34 +67,35 @@ namespace SearchEngineProject
                         finalKgrams.Add(tmpKgram.Substring(0, 3));
                         tmpKgram = tmpKgram.Remove(0, 3);
                     }
-                    finalKgrams.Add(tmpKgram);
+                    if (tmpKgram != "$")
+                        finalKgrams.Add(tmpKgram);
                 }
             }
 
             return finalKgrams;
         }
 
-        private static IList<string> MergePostings(string query)
+        private static List<string> MergePostings(string query)
         {
-            IList<string> finalPostingList = null;
+            List<string> finalPostingList = null;
             foreach (var kgram in GenerateKgrams(query))
             {
                 if (finalPostingList == null)
                     finalPostingList = GetTypes(kgram);
                 else
-                    finalPostingList = (IList<string>) finalPostingList.Intersect(GetTypes(kgram));
+                    finalPostingList = finalPostingList.Intersect(GetTypes(kgram)).ToList();
             }
             return FilterPostings(finalPostingList, query);
         }
 
         //Ici je pars du principe que la query est clean, elle ne contient plus aucun espace
 
-        private static List<string> FilterPostings(IList<string> postingList, string query)
+        private static List<string> FilterPostings(List<string> postingList, string query)
         {
             var filteredList = new List<string>();
             foreach (var candidateWord in postingList)
             {
-                if(Regex.IsMatch(candidateWord, "^" + query.Replace("*", "\\w*") + "$"))
+                if (Regex.IsMatch(candidateWord, "^" + query.Replace("*", "\\w*") + "$"))
                     filteredList.Add(candidateWord);
             }
             return filteredList;
@@ -107,7 +111,7 @@ namespace SearchEngineProject
             }
 
             //Remove the last + and return the query
-            return newQuery.Substring(0, newQuery.Length-1);
+            return newQuery.Substring(0, newQuery.Length - 1);
         }
 
     }

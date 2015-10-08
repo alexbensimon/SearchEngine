@@ -6,7 +6,7 @@ namespace SearchEngineProject
 {
     public class PositionalInvertedIndex
     {
-        private readonly Dictionary<string, Dictionary<int, IList<int>>> _mIndex = new Dictionary<string, Dictionary<int, IList<int>>>();
+        private readonly Dictionary<string, Dictionary<int, List<int>>> _mIndex = new Dictionary<string, Dictionary<int, List<int>>>();
         public int IndexSize { get; private set; }
         public int AvgNumberDocsInPostingsList { get; private set; }
 
@@ -41,7 +41,7 @@ namespace SearchEngineProject
             else
             {
                 var list = new List<int> { position };
-                var dict = new Dictionary<int, IList<int>> { { documentId, list } };
+                var dict = new Dictionary<int, List<int>> { { documentId, list } };
                 _mIndex.Add(term, dict);
             }
 
@@ -56,7 +56,7 @@ namespace SearchEngineProject
         /// <summary>
         /// Retrieves the postings list for the given term.
         /// </summary>
-        public Dictionary<int, IList<int>> GetPostings(string term)
+        public Dictionary<int, List<int>> GetPostings(string term)
         {
             // TO-DO: return the postings list for the given term from the index Dictionary.
             try
