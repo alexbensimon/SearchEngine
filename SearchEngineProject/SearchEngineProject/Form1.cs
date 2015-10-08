@@ -47,6 +47,7 @@ namespace SearchEngineProject
         private void DisplaySearchResults()
         {
             richTextBox1.Clear();
+            label1.Text = string.Empty;
 
             var query = textBox1.Text;
 
@@ -59,7 +60,7 @@ namespace SearchEngineProject
             else
             {
                 // Display the number of returned documents.
-                label1.Text = "Result: " + resultsDocIds.Count + " documents";
+                label1.Text = "Results: " + resultsDocIds.Count + " documents";
 
                 // Build the results.
                 var finalResults = new StringBuilder();
