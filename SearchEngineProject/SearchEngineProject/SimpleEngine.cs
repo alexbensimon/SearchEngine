@@ -48,12 +48,12 @@ namespace SearchEngineProject
             return true;
         }
 
-        public static IList<string> SplitOrQuery(string query)
+        public static List<string> SplitOrQuery(string query)
         {
             return query.Split('+').ToList();
         }
 
-        public static IList<string> SplitWhiteSpace(string query)
+        public static List<string> SplitWhiteSpace(string query)
         {
             return query.Split(null).ToList();
         }
@@ -223,9 +223,9 @@ namespace SearchEngineProject
             return finalResultsDocIds;
         }
 
-        public static Dictionary<int, IList<int>> ProcessPhraseQuery(PositionalInvertedIndex index, IList<string> wordsList)
+        public static Dictionary<int, List<int>> ProcessPhraseQuery(PositionalInvertedIndex index, List<string> wordsList)
         {
-            Dictionary<int, IList<int>> word1Postings = null;
+            Dictionary<int, List<int>> word1Postings = null;
             
             foreach (var word in wordsList)
             {
@@ -241,10 +241,10 @@ namespace SearchEngineProject
             return word1Postings;
         }
 
-        private static Dictionary<int, IList<int>> Process2WordPhraseQuery(Dictionary<int, IList<int>> word1Postings,
-            Dictionary<int, IList<int>> word2Postings)
+        private static Dictionary<int, List<int>> Process2WordPhraseQuery(Dictionary<int, List<int>> word1Postings,
+            Dictionary<int, List<int>> word2Postings)
         {
-            var newPostingList = new Dictionary<int, IList<int>>();
+            var newPostingList = new Dictionary<int, List<int>>();
             var docPointer1 = 0;
             var docPointer2 = 0;
             while (docPointer1 < word1Postings.Count && docPointer2 < word2Postings.Count)
@@ -331,7 +331,7 @@ namespace SearchEngineProject
         /// <summary>
         ///     Prints the inverted index.
         /// </summary>
-        public static void PrintResults(PositionalInvertedIndex index, IList<string> fileNames)
+        public static void PrintResults(PositionalInvertedIndex index, List<string> fileNames)
         {
             var terms = index.GetDictionary();
             var maxlength = 0;
