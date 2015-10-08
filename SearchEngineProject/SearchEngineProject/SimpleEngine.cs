@@ -204,10 +204,11 @@ namespace SearchEngineProject
                 foreach (string phraseQuery in phraseQueries)
                 {
                     var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
-                    if (ProcessPhraseQuery(index, phraseQueryTerms) == null)
+                    var postingsPhraseQuery = ProcessPhraseQuery(index, phraseQueryTerms);
+                    if (postingsPhraseQuery == null)
                         andQueryItemsResultsDocIds.Add(new List<int>());
                     else
-                        andQueryItemsResultsDocIds.Add(ProcessPhraseQuery(index, phraseQueryTerms).Keys.ToList());
+                        andQueryItemsResultsDocIds.Add(postingsPhraseQuery.Keys.ToList());
                 }
                 // Remove phrase queries from the Q.
                 q = Regex.Replace(q, "\"(.+?)\"", "");

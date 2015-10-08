@@ -8,14 +8,14 @@ using SearchEngineProject.Properties;
 
 namespace SearchEngineProject
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
         // The list of file name strings.
         private readonly List<string> _fileNames = new List<string>();
         //The inverted index
         private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
 
-        public Form1()
+        public MainWindow()
         {
             // The ID of the next document to be added.
             var documentId = 0;
@@ -49,7 +49,7 @@ namespace SearchEngineProject
         {
             richTextBox1.Clear();
             label1.Text = string.Empty;
-
+            label1.ForeColor = SystemColors.HighlightText;
             var query = textBox1.Text;
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
@@ -73,28 +73,6 @@ namespace SearchEngineProject
                 }
                 richTextBox1.Text = finalResults.ToString();
             }
-        }
-
-        private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var statistics = new StringBuilder();
-            statistics.Append("Number of terms in the index: ");
-            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
-
-            statistics.Append("Average number of documents in the postings list: ");
-            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
-
-            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
-            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
-            {
-                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
-            }
-            statistics.AppendLine("\n");
-
-            statistics.Append("Approximate memory requirement of the index: ");
-            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
-
-            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
         }
 
         private string prettyBytes(long numberOfBytes)
@@ -151,6 +129,30 @@ namespace SearchEngineProject
             {
                 this.Cursor = Cursors.Hand;
             }
+            else
+                this.Cursor = Cursors.Arrow;
+            }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var statistics = new StringBuilder();
+            statistics.Append("Number of terms in the index: ");
+            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
+
+            statistics.Append("Average number of documents in the postings list: ");
+            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+
+            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
+            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+            {
+                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
+            }
+            statistics.AppendLine("\n");
+
+            statistics.Append("Approximate memory requirement of the index: ");
+            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
+
+            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
         }
     }
 }
