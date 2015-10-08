@@ -278,6 +278,8 @@ namespace SearchEngineProject
                                 newPostingList[word2DocId].Add(word2Pos);
                             else
                                 newPostingList.Add(word2DocId, new List<int>() { word2Pos });
+                            posPointer1++;
+                            posPointer2++;
                         }
                         else
                         {
@@ -287,6 +289,8 @@ namespace SearchEngineProject
                                 posPointer2++;
                         }
                     }
+                    docPointer1++;
+                    docPointer2++;
                 }
                 else if (word1DocId <= word2DocId)
                     docPointer1++;
