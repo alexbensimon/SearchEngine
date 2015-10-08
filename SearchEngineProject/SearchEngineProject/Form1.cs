@@ -51,8 +51,12 @@ namespace SearchEngineProject
             var query = textBox1.Text;
 
             string results = SimpleEngine.ProcessQuery(query, _index, _fileNames);
-
-            richTextBox1.Text = results;
+            if (results == null)
+                richTextBox1.Text = "Wrong syntax";
+            else if(results == string.Empty)
+                richTextBox1.Text = "No results";
+            else
+                richTextBox1.Text = results;
         }
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -120,6 +124,17 @@ namespace SearchEngineProject
                 end++;
             //get and return the whole word
             return control.Text.Substring(start, end - start + 1);
+        }
+
+        private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            var control = sender as RichTextBox;
+            //get the word under the cursor
+            var word = GetWordUnderCursor(control, e);
+            if (word != null)
+            {
+                this.Cursor = Cursors.Hand;
+            }
         }
     }
 }
