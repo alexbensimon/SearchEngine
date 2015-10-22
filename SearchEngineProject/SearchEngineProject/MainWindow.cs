@@ -26,6 +26,12 @@ namespace SearchEngineProject
             var fbd = new FolderBrowserDialog();
             fbd.ShowDialog();
             string directoryPath = fbd.SelectedPath;
+
+            //TODO changer ce bout de code qui vient du disk engine
+            IndexWriter writer = new IndexWriter(folder);
+            writer.BuildIndex();
+            //Ca s'arrete la
+
             if (directoryPath != null)
             {
                 // Iterate through all .txt files in the chosen directory.
