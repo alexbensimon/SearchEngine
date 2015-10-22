@@ -27,21 +27,16 @@ namespace SearchEngineProject
             fbd.ShowDialog();
             string directoryPath = fbd.SelectedPath;
 
-            //TODO changer ce bout de code qui vient du disk engine
-            IndexWriter writer = new IndexWriter(folder);
-            writer.BuildIndex();
-            //Ca s'arrete la
-
             if (directoryPath != null)
             {
+                //TODO changer ce bout de code qui vient du disk engine
+                IndexWriter writer = new IndexWriter(directoryPath);
+                writer.BuildIndex();
+
                 // Iterate through all .txt files in the chosen directory.
                 foreach (var fileName in Directory.EnumerateFiles(directoryPath))
                 {
-                    // for each file, open the file and index it.
-                    SimpleEngine.IndexFile(fileName, _index, documentId);
-                    documentId++;
-                    // Add the file's name to the list of filenames.
-                    _fileNames.Add(Path.GetFileName(fileName));
+                    
                 }
                 _index.ComputeStatistics();
                 //PrintResults(index, fileNames);
