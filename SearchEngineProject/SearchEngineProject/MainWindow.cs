@@ -11,38 +11,23 @@ namespace SearchEngineProject
 {
     public partial class MainWindow : Form
     {
-        // The list of file name strings.
-        private readonly List<string> _fileNames = new List<string>();
-        // The inverted index.
-        private readonly PositionalInvertedIndex _index = new PositionalInvertedIndex();
-
         private string _currentWordUnderCursor;
+        private DiskInvertedIndex _index;
 
         public MainWindow()
         {
-            // The ID of the next document to be added.
-            var documentId = 0;
-
             var fbd = new FolderBrowserDialog();
             fbd.ShowDialog();
-            string directoryPath = fbd.SelectedPath;
+            var directoryPath = fbd.SelectedPath;
 
-            if (directoryPath != null)
-            {
-                //TODO changer ce bout de code qui vient du disk engine
-                IndexWriter writer = new IndexWriter(directoryPath);
-                writer.BuildIndex();
+            if (directoryPath == null) return;
 
-                // Iterate through all .txt files in the chosen directory.
-                foreach (var fileName in Directory.EnumerateFiles(directoryPath))
-                {
-                    
-                }
-                _index.ComputeStatistics();
-                //PrintResults(index, fileNames);
+            var writer = new IndexWriter(directoryPath);
+            writer.BuildIndex();
 
-                InitializeComponent();
-            }
+            _index = new DiskInvertedIndex(directoryPath);
+
+            InitializeComponent();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -77,7 +62,7 @@ namespace SearchEngineProject
                 var finalResults = new StringBuilder();
                 foreach (int docId in resultsDocIds)
                 {
-                    finalResults.Append(_fileNames[docId]);
+                    finalResults.Append(_index.FileNames[docId]);
                     finalResults.AppendLine();
                     finalResults.AppendLine();
                 }
@@ -132,7 +117,6 @@ namespace SearchEngineProject
             return control.Text.Substring(start, end - start + 1);
         }
 
-        
         private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
@@ -161,25 +145,24 @@ namespace SearchEngineProject
             }
         }
         
-
         private void button2_Click(object sender, EventArgs e)
         {
             var statistics = new StringBuilder();
             statistics.Append("Number of terms in the index: ");
-            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
+            statistics.AppendLine(IndexWriter.IndexSize.ToString() + " terms\n");
 
             statistics.Append("Average number of documents in the postings list: ");
-            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+            statistics.AppendLine(IndexWriter.AvgNumberDocsInPostingsList.ToString() + " documents\n");
 
             statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
-            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+            foreach (var pair in IndexWriter.ProportionDocContaining10MostFrequent)
             {
                 statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
             }
             statistics.AppendLine("\n");
 
             statistics.Append("Approximate memory requirement of the index: ");
-            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
+            statistics.Append(prettyBytes(IndexWriter.IndexSizeInMemory));
 
             MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
         }

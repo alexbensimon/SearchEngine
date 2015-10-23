@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -6,25 +7,36 @@ namespace SearchEngineProject
 {
     public class IndexWriter
     {
-        private string mPath;
+        private readonly string _mPath;
+        public static int IndexSize { get; private set; }
+        public static int AvgNumberDocsInPostingsList { get; private set; }
+        public static Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
+        public static long IndexSizeInMemory { get; private set; }
 
         public IndexWriter(string path)
         {
-            mPath = path;
+            _mPath = path;
         }
 
         public void BuildIndex()
         {
-            BuildIndexForDirectory(mPath);
+            BuildIndexForDirectory(_mPath);
         }
 
         private static void BuildIndexForDirectory(string folder)
         {
-            PositionalInvertedIndex index = new PositionalInvertedIndex();
+            // The inverted index.
+            var index = new PositionalInvertedIndex();
 
             // Index the directory using a naive index
             IndexFiles(folder, index);
 
+            index.ComputeStatistics();
+            IndexSize = index.IndexSize;
+            AvgNumberDocsInPostingsList = index.AvgNumberDocsInPostingsList;
+            ProportionDocContaining10MostFrequent = index.ProportionDocContaining10MostFrequent;
+            IndexSizeInMemory = index.IndexSizeInMemory;
+                
             // at this point, "index" contains the in-memory inverted index 
             // now we save the index to disk, building three files: the postings index,
             // the vocabulary list, and the vocabulary table.
@@ -71,21 +83,38 @@ namespace SearchEngineProject
                     Array.Reverse(pPositionBytes);
                 vocabTable.Write(pPositionBytes, 0, pPositionBytes.Length);
 
-                // write the postings file for this term. first, the document frequency for the term, then
-                // the document IDs, encoded as gaps.
+                // Number of documents
                 byte[] docFreqBytes = BitConverter.GetBytes(postings.Count);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(docFreqBytes);
                 postingsFile.Write(docFreqBytes, 0, docFreqBytes.Length);
 
+                //Document IDs as gaps
                 int lastDocId = 0;
                 foreach (int docId in postings.Keys)
                 {
-                    byte[] docIdBytes = BitConverter.GetBytes(docId - lastDocId); // encode a gap, not a doc ID
+                    byte[] docIdBytes = BitConverter.GetBytes(docId - lastDocId);
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(docIdBytes);
                     postingsFile.Write(docIdBytes, 0, docIdBytes.Length);
                     lastDocId = docId;
+
+                    //Number of positions
+                    byte[] posFreqBytes = BitConverter.GetBytes(postings[docId].Count);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(posFreqBytes);
+                    postingsFile.Write(posFreqBytes, 0, posFreqBytes.Length);
+
+                    //Positions as gaps
+                    int lastPos = 0;
+                    foreach (var position in postings[docId])
+                    {
+                        byte[] posBytes = BitConverter.GetBytes(position - lastPos);
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(posBytes);
+                        postingsFile.Write(posBytes, 0, posBytes.Length);
+                        lastPos = position;
+                    }
                 }
 
                 vocabI++;
@@ -114,7 +143,7 @@ namespace SearchEngineProject
 
         private static void IndexFiles(string folder, PositionalInvertedIndex index)
         {
-            int documentId = 0;
+            var documentId = 0;
 
             Console.WriteLine("Indexing " + Path.Combine(Environment.CurrentDirectory, folder));
             foreach (string fileName in Directory.EnumerateFiles(

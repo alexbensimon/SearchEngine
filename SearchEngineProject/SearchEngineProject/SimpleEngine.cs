@@ -139,7 +139,7 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
-        public static List<int> ProcessQuery(string query, PositionalInvertedIndex index)
+        public static List<int> ProcessQuery(string query, DiskInvertedIndex index)
         {
             // Trim the query.
             query = query.Trim().Replace("-", "");
