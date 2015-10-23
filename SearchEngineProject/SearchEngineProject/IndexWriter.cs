@@ -30,6 +30,11 @@ namespace SearchEngineProject
 
             // Index the directory using a naive index
             IndexFiles(folder, index);
+            foreach (var subfolder in Directory.EnumerateDirectories(folder))
+            {
+                IndexFiles(subfolder, index);
+            }
+            
 
             index.ComputeStatistics();
             IndexSize = index.IndexSize;
