@@ -12,7 +12,7 @@ namespace SearchEngineProject
     public partial class MainWindow : Form
     {
         private string _currentWordUnderCursor;
-        private DiskInvertedIndex _index;
+        private DiskPositionalIndex _index;
 
         public MainWindow()
         {
@@ -25,7 +25,7 @@ namespace SearchEngineProject
             var writer = new IndexWriter(directoryPath);
             writer.BuildIndex();
 
-            _index = new DiskInvertedIndex(directoryPath);
+            _index = new DiskPositionalIndex(directoryPath);
 
             InitializeComponent();
         }

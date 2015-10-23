@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchEngineProject
 {
-    public class DiskInvertedIndex : IDisposable
+    public class DiskPositionalIndex : IDisposable
     {
         private string mPath;
         private FileStream mVocabList;
@@ -13,14 +13,13 @@ namespace SearchEngineProject
         private long[] mVocabTable;
         private List<string> mFileNames;
 
-        public DiskInvertedIndex(string path)
+        public DiskPositionalIndex(string path)
         {
             // open the vocabulary table and read it into memory. 
             // we will end up with an array of T pairs of longs, where the first value is
             // a position in the vocabularyTable file, and the second is a position in
             // the postings file.
-
-
+            
             mPath = path;
 
             mVocabList = new FileStream(Path.Combine(path, "vocab.bin"), FileMode.Open, FileAccess.Read);
@@ -30,7 +29,7 @@ namespace SearchEngineProject
             mFileNames = ReadFileNames(path);
         }
 
-        private static int[] ReadPostingsFromFile(FileStream postings, long postingsPosition)
+        private static int[][] ReadPostingsFromFile(FileStream postings, long postingsPosition, bool positionsRequested)
         {
             // seek the specified position in the file
             postings.Seek(postingsPosition, SeekOrigin.Begin);
@@ -48,30 +47,72 @@ namespace SearchEngineProject
             int documentFrequency = BitConverter.ToInt32(buffer, 0);
 
             // initialize the array of document IDs to return.
-            int[] docIds = new int[documentFrequency];
+            int[][] postingsArray = new int[documentFrequency][];
 
             int previousDocId = 0;
             for (int i = 0; i < documentFrequency; i++)
             {
+                //Read the document ID
                 buffer = new byte[4];
                 postings.Read(buffer, 0, buffer.Length);
 
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(buffer);
 
-                int gap = BitConverter.ToInt32(buffer, 0);
-                previousDocId += gap;
-                docIds[i] = previousDocId;
+                int docGap = BitConverter.ToInt32(buffer, 0);
+                previousDocId += docGap;
+
+                //Read the term frequency in the document
+                buffer = new byte[4];
+                postings.Read(buffer, 0, buffer.Length);
+
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
+
+                int termFrequency = BitConverter.ToInt32(buffer, 0);
+
+                if (positionsRequested)
+                {
+                    postingsArray[i] = new int[termFrequency+1];
+                    postingsArray[i][0] = previousDocId;
+
+                    int previousPos = 0;
+                    for (int j = 0; j < termFrequency; j++)
+                    {
+                        //Read a position
+                        buffer = new byte[4];
+                        postings.Read(buffer, 0, buffer.Length);
+
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(buffer);
+
+                        int posGap = BitConverter.ToInt32(buffer, 0);
+                        previousPos += posGap;
+                        postingsArray[i][j+1] = previousPos;
+                    }
+                }
+                else
+                {
+                    postingsArray[i] = new int[1];
+                    postingsArray[i][0] = previousDocId;
+
+                    //TODO Ameliorer cett partie, on peut seek plus loin peut etre
+                    buffer = new byte[4*termFrequency];
+                    postings.Read(buffer, 0, buffer.Length);
+
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                } 
             }
 
-            return docIds;
+            return postingsArray;
         }
 
-        public int[] GetPostings(string term)
+        public int[][] GetPostings(string term, bool positionsRequested)
         {
             long postingsPosition = BinarySearchVocabulary(term);
             if (postingsPosition >= 0)
-                return ReadPostingsFromFile(mPostings, postingsPosition);
+                return ReadPostingsFromFile(mPostings, postingsPosition, positionsRequested);
             return null;
         }
 

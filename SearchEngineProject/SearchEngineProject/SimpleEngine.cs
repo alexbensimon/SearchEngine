@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
@@ -126,20 +127,20 @@ namespace SearchEngineProject
             return orQueryItemsResultsDocIds;
         }
 
-        public static List<int> ProcessWildcardQuery(string query, PositionalInvertedIndex index)
+        public static List<int> ProcessWildcardQuery(string query, DiskPositionalIndex index)
         {
             var orQuery = KGramIndex.GenerateNormalQuery(query);
             var terms = SplitOrQuery(orQuery);
             var orQueryItemsResultsDocIds = new List<List<int>>();
             foreach (string term in terms)
             {
-                orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim())).Keys.ToList());
+                orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)[0].ToList());
             }
 
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
-        public static List<int> ProcessQuery(string query, DiskInvertedIndex index)
+        public static List<int> ProcessQuery(string query, DiskPositionalIndex index)
         {
             // Trim the query.
             query = query.Trim().Replace("-", "");
@@ -180,14 +181,14 @@ namespace SearchEngineProject
                         string term = termTemp.Trim();
                         if (term != string.Empty)
                         {
-                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term));
+                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
                             // If Wildcard query.
                             if (Regex.IsMatch(term, @"(.*\*.*)+"))
                                 secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
                             else if (postings == null)
                                 secondAndQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                secondAndQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                                secondAndQueryItemsResultsDocIds.Add(postings[0].ToList());
                         }
                     }
                     if (secondAndQueryItemsResultsDocIds.Count > 0)
@@ -222,14 +223,14 @@ namespace SearchEngineProject
                         string term = termTemp.Trim();
                         if (term != string.Empty)
                         {
-                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term));
+                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
                             // If Wildcard query.
                             if (Regex.IsMatch(term, @"(.*\*.*)+"))
                                 andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
                             else if (postings == null)
                                 andQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                andQueryItemsResultsDocIds.Add(postings.Keys.ToList());
+                                andQueryItemsResultsDocIds.Add(postings[0].ToList());
                         }
                     }
                 }
@@ -249,17 +250,17 @@ namespace SearchEngineProject
             return finalResultsDocIds;
         }
 
-        public static Dictionary<int, List<int>> ProcessPhraseQuery(PositionalInvertedIndex index, List<string> wordsList)
+        public static Dictionary<int, List<int>> ProcessPhraseQuery(DiskPositionalIndex index, List<string> wordsList)
         {
-            Dictionary<int, List<int>> word1Postings = null;
+            int[][] word1Postings = null;
 
             foreach (var word in wordsList)
             {
                 if (word1Postings == null)
-                    word1Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()));
+                    word1Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()), true);
                 else
                 {
-                    var word2Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()));
+                    var word2Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()), true);
                     if (word2Postings == null)
                         return null;
                     word1Postings = Process2WordPhraseQuery(word1Postings, word2Postings);
@@ -268,28 +269,37 @@ namespace SearchEngineProject
                     return null;
             }
 
-            return word1Postings;
+            var resultPostingsList = new Dictionary<int, List<int>>();
+            for (int i = 0; i < word1Postings.Length; i++)
+            {
+                resultPostingsList.Add(word1Postings[i][0], new List<int>());
+                for (int j = 1; j < word1Postings[i].Length; j++)
+                {
+                    resultPostingsList[word1Postings[i][0]].Add(word1Postings[i][j]);
+                }
+            }
+            return resultPostingsList;
         }
 
-        private static Dictionary<int, List<int>> Process2WordPhraseQuery(Dictionary<int, List<int>> word1Postings,
-            Dictionary<int, List<int>> word2Postings)
+        private static int[][] Process2WordPhraseQuery(int[][] word1Postings, int[][] word2Postings)
         {
             var newPostingList = new Dictionary<int, List<int>>();
             var docPointer1 = 0;
             var docPointer2 = 0;
-            while (docPointer1 < word1Postings.Count && docPointer2 < word2Postings.Count)
+
+            while (docPointer1 < word1Postings.Length && docPointer2 < word2Postings.Length)
             {
-                var word1DocId = word1Postings.ElementAt(docPointer1).Key;
-                var word2DocId = word2Postings.ElementAt(docPointer2).Key;
+                var word1DocId = word1Postings[docPointer1][0];
+                var word2DocId = word2Postings[docPointer2][0];
                 if (word1DocId == word2DocId)
                 {
-                    var posPointer1 = 0;
-                    var posPointer2 = 0;
-                    while (posPointer1 < word1Postings[word1DocId].Count &&
-                            posPointer2 < word2Postings[word2DocId].Count)
+                    var posPointer1 = 1;
+                    var posPointer2 = 1;
+                    while (posPointer1 < word1Postings[docPointer1].Length - 1 &&
+                            posPointer2 < word2Postings[docPointer2].Length - 1)
                     {
-                        var word1Pos = word1Postings[word1DocId].ElementAt(posPointer1);
-                        var word2Pos = word2Postings[word2DocId].ElementAt(posPointer2);
+                        var word1Pos = word1Postings[word1DocId][posPointer1];
+                        var word2Pos = word2Postings[word2DocId][posPointer2];
                         if (word2Pos - word1Pos == 1)
                         {
                             if (newPostingList.ContainsKey(word2DocId))
@@ -315,7 +325,24 @@ namespace SearchEngineProject
                 else
                     docPointer2++;
             }
-            return newPostingList;
+
+            //Convert the Dictionnary to an array
+            var newPostingArray = new int[newPostingList.Count][];
+            int i = 0;
+            foreach (var docId in newPostingList.Keys)
+            {
+                newPostingArray[i] = new int[newPostingList[docId].Count];
+                newPostingArray[i][0] = docId;
+                int j = 1;
+                foreach (var position in newPostingList[docId])
+                {
+                    newPostingArray[i][j] = position;
+                    j++;
+                }
+                i++;
+            }
+
+            return newPostingArray;
         }
 
     }
