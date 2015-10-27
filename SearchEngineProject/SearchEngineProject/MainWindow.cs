@@ -19,6 +19,7 @@ namespace SearchEngineProject
         public MainWindow()
         {
             InitializeComponent();
+            label2.Parent = progressBar1;
         }
 
         private void button1_Click(object sender, EventArgs e)

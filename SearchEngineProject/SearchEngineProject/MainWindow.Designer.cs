@@ -158,11 +158,11 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.progressBar1.BackColor = System.Drawing.Color.White;
             this.progressBar1.ForeColor = System.Drawing.Color.Gold;
-            this.progressBar1.Location = new System.Drawing.Point(7, 31);
+            this.progressBar1.Location = new System.Drawing.Point(9, 33);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(282, 34);
+            this.progressBar1.Size = new System.Drawing.Size(279, 30);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 10;
             this.progressBar1.UseWaitCursor = true;
@@ -173,13 +173,12 @@
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Segoe Print", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.label2.Location = new System.Drawing.Point(9, 38);
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label2.Location = new System.Drawing.Point(28, 38);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(278, 21);
+            this.label2.Size = new System.Drawing.Size(239, 21);
             this.label2.TabIndex = 11;
-            this.label2.Text = "We have just finished the indexation for you";
-            this.label2.Visible = false;
+            this.label2.Text = "We are indexing the directory for you";
             // 
             // checkBox1
             // 
@@ -245,6 +244,7 @@
             this.MinimumSize = new System.Drawing.Size(932, 426);
             this.Name = "MainWindow";
             this.Text = "Cal State LB Search Engine";
+            this.TransparencyKey = System.Drawing.Color.Maroon;
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
