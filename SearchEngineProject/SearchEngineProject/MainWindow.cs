@@ -16,17 +16,6 @@ namespace SearchEngineProject
 
         public MainWindow()
         {
-            var fbd = new FolderBrowserDialog();
-            fbd.ShowDialog();
-            var directoryPath = fbd.SelectedPath;
-
-            if (directoryPath == null) return;
-
-            var writer = new IndexWriter(directoryPath);
-            writer.BuildIndex();
-
-            _index = new DiskPositionalIndex(directoryPath);
-
             InitializeComponent();
         }
 
@@ -144,8 +133,8 @@ namespace SearchEngineProject
                 }
             }
         }
-        
-        private void button2_Click(object sender, EventArgs e)
+
+        private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var statistics = new StringBuilder();
             statistics.Append("Number of terms in the index: ");
@@ -165,6 +154,20 @@ namespace SearchEngineProject
             statistics.Append(prettyBytes(IndexWriter.IndexSizeInMemory));
 
             MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
+        }
+
+        private void indexADirectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fbd = new FolderBrowserDialog();
+            fbd.ShowDialog();
+            var directoryPath = fbd.SelectedPath;
+
+            if (directoryPath == null) return;
+
+            var writer = new IndexWriter(directoryPath);
+            writer.BuildIndex();
+
+            _index = new DiskPositionalIndex(directoryPath);
         }
     }
 }
