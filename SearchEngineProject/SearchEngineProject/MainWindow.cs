@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using SearchEngineProject.Properties;
 
@@ -165,15 +167,76 @@ namespace SearchEngineProject
             if (directoryPath == null) return;
 
             var writer = new IndexWriter(directoryPath);
-            writer.BuildIndex();
+            writer.BuildIndex(this);
 
             _index = new DiskPositionalIndex(directoryPath);
         }
 
-        private void MainWindow_Load(object sender, EventArgs e)
+        public void InitiateprogressBar(string directory)
         {
-            // Start the BackgroundWorker.
-            backgroundWorker1.RunWorkerAsync();
+            int counter = Directory.EnumerateFiles(directory).Count();
+            foreach (var subDirectory in Directory.EnumerateDirectories(directory))
+            {
+                counter += Directory.EnumerateFiles(subDirectory).Count();
+            }
+
+            //Initiate the progress bar
+            // Display the ProgressBar control.
+            progressBar1.Visible = true;
+            // Set Minimum to 1 to represent the first file being copied.
+            progressBar1.Minimum = 1;
+            // Set Maximum to the total number of files to copy.
+            progressBar1.Maximum = counter;
+            // Set the initial value of the ProgressBar.
+            progressBar1.Value = 1;
+            // Set the Step property to a value of 1 to represent each file being copied.
+            progressBar1.Step = 1;
+        }
+
+        public void IncrementProgressBar()
+        {
+            progressBar1.PerformStep();
+        }
+
+        public void HideProgressBar()
+        {
+            var t = new System.Windows.Forms.Timer { Interval = 3000 };
+            label2.Show();
+            
+            t.Tick += (s, e) =>
+            {
+                label2.Hide();
+                t.Stop();
+            };
+            t.Start();
+            label2.Hide();
+            progressBar1.Hide();
+        }
+
+        private void checkBox1_Click(object sender, EventArgs e)
+        {
+            checkBox1.CheckState=CheckState.Checked;
+            checkBox1.ForeColor = Color.Black;
+            checkBox1.FlatAppearance.MouseOverBackColor = Color.Gold;
+            checkBox1.FlatAppearance.MouseDownBackColor = Color.Gold;
+
+            checkBox2.CheckState = CheckState.Unchecked;
+            checkBox2.ForeColor = Color.Gold;
+            checkBox2.FlatAppearance.MouseOverBackColor = Color.FromArgb(64,64,64);
+            checkBox2.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+        }
+
+        private void checkBox2_Click(object sender, EventArgs e)
+        {
+            checkBox2.CheckState = CheckState.Checked;
+            checkBox2.ForeColor = Color.Black;
+            checkBox2.FlatAppearance.MouseOverBackColor = Color.Gold;
+            checkBox2.FlatAppearance.MouseDownBackColor = Color.Gold;
+
+            checkBox1.CheckState = CheckState.Unchecked;
+            checkBox1.ForeColor = Color.Gold;
+            checkBox1.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            checkBox1.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
         }
     }
 }

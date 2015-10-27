@@ -18,23 +18,28 @@ namespace SearchEngineProject
             _mPath = path;
         }
 
-        public void BuildIndex()
+        public void BuildIndex(MainWindow mainWindow)
         {
-            BuildIndexForDirectory(_mPath);
+            BuildIndexForDirectory(_mPath, mainWindow);
         }
 
-        private static void BuildIndexForDirectory(string folder)
+        private static void BuildIndexForDirectory(string folder, MainWindow window)
         {
             // The inverted index.
             var index = new PositionalInvertedIndex();
 
+            //Initiate the progress Bar
+            window.InitiateprogressBar(folder);
+
             // Index the directory using a naive index
-            IndexFiles(folder, index);
+            IndexFiles(folder, index, window);
             foreach (var subfolder in Directory.EnumerateDirectories(folder))
             {
-                IndexFiles(subfolder, index);
+                IndexFiles(subfolder, index, window);
             }
             
+            //Hide the progress bar to allow the user to start searching for terms
+            window.HideProgressBar();
 
             index.ComputeStatistics();
             IndexSize = index.IndexSize;
@@ -146,7 +151,7 @@ namespace SearchEngineProject
             vocabList.Close();
         }
 
-        private static void IndexFiles(string folder, PositionalInvertedIndex index)
+        private static void IndexFiles(string folder, PositionalInvertedIndex index, MainWindow window)
         {
             var documentId = 0;
 
@@ -159,6 +164,7 @@ namespace SearchEngineProject
                     IndexFile(fileName, index, documentId);
                     documentId++;
                 }
+                window.IncrementProgressBar();
             }
         }
 
