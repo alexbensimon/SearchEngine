@@ -169,5 +169,11 @@ namespace SearchEngineProject
 
             _index = new DiskPositionalIndex(directoryPath);
         }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+            // Start the BackgroundWorker.
+            backgroundWorker1.RunWorkerAsync();
+        }
     }
 }
