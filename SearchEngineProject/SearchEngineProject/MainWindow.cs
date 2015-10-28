@@ -171,14 +171,22 @@ namespace SearchEngineProject
 
             if (string.IsNullOrEmpty(directoryPath)) return;
 
-            indexingLabel.Show();
-            Update();
-            var writer = new IndexWriter(directoryPath);
-            writer.BuildIndex(this);
+            var filenames = Directory.GetFiles(directoryPath, "*.bin")
+                                     .Select(Path.GetFileNameWithoutExtension)
+                                     .ToArray();
 
-            //Write the KGram Index to the disk
-            KGramIndex.ToDisk(directoryPath);
-            
+            if (!filenames.Contains("kGramIndex") || !filenames.Contains("kGramVocab") || !filenames.Contains("kGram") ||
+                !filenames.Contains("vocab") || !filenames.Contains("vocabTable") || !filenames.Contains("posting"))
+            {
+                indexingLabel.Show();
+                Update();
+                var writer = new IndexWriter(directoryPath);
+                writer.BuildIndex(this);
+
+                //Write the KGram Index to the disk
+                KGramIndex.ToDisk(directoryPath);
+            }
+
             _index = new DiskPositionalIndex(directoryPath);
 
             //Load the KGram index in memory
@@ -222,7 +230,7 @@ namespace SearchEngineProject
         {
             var t = new System.Windows.Forms.Timer { Interval = 3000 };
             indexingLabel.Show();
-            
+
             t.Tick += (s, e) =>
             {
                 indexingLabel.Hide();
@@ -235,14 +243,14 @@ namespace SearchEngineProject
 
         private void checkBox1_Click(object sender, EventArgs e)
         {
-            boolCBox.CheckState=CheckState.Checked;
+            boolCBox.CheckState = CheckState.Checked;
             boolCBox.ForeColor = Color.Black;
             boolCBox.FlatAppearance.MouseOverBackColor = Color.Gold;
             boolCBox.FlatAppearance.MouseDownBackColor = Color.Gold;
 
             rankCbox.CheckState = CheckState.Unchecked;
             rankCbox.ForeColor = Color.Gold;
-            rankCbox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64,64,64);
+            rankCbox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             rankCbox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
         }
 
