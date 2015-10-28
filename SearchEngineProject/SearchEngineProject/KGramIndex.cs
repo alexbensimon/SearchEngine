@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
@@ -107,7 +108,7 @@ namespace SearchEngineProject
         {
             var newQuery = "";
             List<string> postings = MergePostings(initialQuery);
-            if (postings == null || postings.Count==0)
+            if (postings == null || postings.Count == 0)
                 return "";
 
             foreach (var posting in postings)
@@ -123,6 +124,10 @@ namespace SearchEngineProject
         {
             //Create the kgramIndex file
             FileStream kGramIndexFile = new FileStream(Path.Combine(folder, "kGramIndex.bin"), FileMode.Create);
+            //Create the kGramVocabList
+            StreamWriter kGramVocabList = new StreamWriter(Path.Combine(folder, "kGramVocab.bin"), false, Encoding.ASCII);
+            //Create the kGramList
+            StreamWriter kGramList = new StreamWriter(Path.Combine(folder, "kGram.bin"), false, Encoding.ASCII);
 
             //Write the array to the file
             foreach (var kGramIndex in _kGramIndexes)
@@ -136,6 +141,9 @@ namespace SearchEngineProject
                 //Write the dictionnary to the file
                 foreach (var kGram in kGramIndex.Keys)
                 {
+                    //Write the kgram
+                    kGramList.Write(kGram);
+
                     //Wtite the number of words associated to the kGram
                     byte[] wordNumbBytes = BitConverter.GetBytes(kGramIndex[kGram].Count);
                     if (BitConverter.IsLittleEndian)
@@ -145,15 +153,77 @@ namespace SearchEngineProject
                     //Write the words to the file
                     foreach (var word in kGramIndex[kGram])
                     {
-                        byte[] wordBytes = BitConverter.GetBytes(word.Length);
+                        //Write the length of the word
+                        byte[] wordPosBytes = BitConverter.GetBytes(word.Length);
                         if (BitConverter.IsLittleEndian)
-                            Array.Reverse(wordBytes);
-                        kGramIndexFile.Write(wordBytes, 0, wordBytes.Length);
+                            Array.Reverse(wordPosBytes);
+                        kGramIndexFile.Write(wordPosBytes, 0, wordPosBytes.Length);
+
+                        //Write the word
+                        kGramVocabList.Write(word);
                     }
                 }
             }
 
             kGramIndexFile.Close();
+        }
+
+        public static void ToMemory(string path)
+        {
+            var kGramIndexFile = new FileStream(Path.Combine(path, "kGramIndex.bin"), FileMode.Open, FileAccess.Read);
+            var kGramVocabList = new FileStream(Path.Combine(path, "kGramVocab.bin"), FileMode.Open, FileAccess.Read);
+            var kGramList = new FileStream(Path.Combine(path, "kGram.bin"), FileMode.Open, FileAccess.Read);
+
+            //Rank of the GramIndex
+            int k = 1;
+
+            foreach (var kGramIndex in _kGramIndexes)
+            {
+                kGramIndex.Clear();
+
+                //Read size of the the kGramIndex
+                var buffer = new byte[4];
+                kGramIndexFile.Read(buffer, 0, buffer.Length);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
+                int kGramIndexSize = BitConverter.ToInt32(buffer, 0);
+
+                //Read the kgram
+                for (int i = 0; i < kGramIndexSize; i++)
+                {
+                    buffer = new byte[k];
+                    kGramList.Read(buffer, 0, k);
+                    string kGram = Encoding.ASCII.GetString(buffer);
+                    _kGramIndexes[k].Add(kGram, new List<string>());
+
+                    //Read the number of words associated to the kgram
+                    buffer = new byte[4];
+                    kGramIndexFile.Read(buffer, 0, buffer.Length);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                    int wordsNumber = BitConverter.ToInt32(buffer, 0);
+
+                    for (int j = 0; j < wordsNumber; j++)
+                    {
+                        //Read the length of the word
+                        buffer = new byte[4];
+                        kGramIndexFile.Read(buffer, 0, buffer.Length);
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(buffer);
+                        int wordLength = BitConverter.ToInt32(buffer, 0);
+
+                        //Read the word
+                        buffer = new byte[wordLength];
+                        kGramVocabList.Read(buffer, 0, wordLength);
+                        string word = Encoding.ASCII.GetString(buffer);
+
+                        //Add the word to index list
+                        _kGramIndexes[k][kGram].Add(word);
+                    }
+                }
+
+                k++;
+            }
         }
     }
 }

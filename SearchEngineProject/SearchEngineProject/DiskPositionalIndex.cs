@@ -19,7 +19,7 @@ namespace SearchEngineProject
             // we will end up with an array of T pairs of longs, where the first value is
             // a position in the vocabularyTable file, and the second is a position in
             // the postings file.
-            
+
             mPath = path;
 
             mVocabList = new FileStream(Path.Combine(path, "vocab.bin"), FileMode.Open, FileAccess.Read);
@@ -73,7 +73,7 @@ namespace SearchEngineProject
 
                 if (positionsRequested)
                 {
-                    postingsArray[i] = new int[termFrequency+1];
+                    postingsArray[i] = new int[termFrequency + 1];
                     postingsArray[i][0] = previousDocId;
 
                     int previousPos = 0;
@@ -88,7 +88,7 @@ namespace SearchEngineProject
 
                         int posGap = BitConverter.ToInt32(buffer, 0);
                         previousPos += posGap;
-                        postingsArray[i][j+1] = previousPos;
+                        postingsArray[i][j + 1] = previousPos;
                     }
                 }
                 else
@@ -97,12 +97,12 @@ namespace SearchEngineProject
                     postingsArray[i][0] = previousDocId;
 
                     //TODO Ameliorer cett partie, on peut seek plus loin peut etre
-                    buffer = new byte[4*termFrequency];
+                    buffer = new byte[4 * termFrequency];
                     postings.Read(buffer, 0, buffer.Length);
 
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(buffer);
-                } 
+                }
             }
 
             return postingsArray;

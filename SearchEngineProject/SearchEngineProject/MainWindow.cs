@@ -181,6 +181,9 @@ namespace SearchEngineProject
             
             _index = new DiskPositionalIndex(directoryPath);
 
+            //Load the KGram index in memory
+            KGramIndex.ToMemory(directoryPath);
+
             indexingLabel.Hide();
             searchTextBox.Enabled = true;
             searchTextBox.Select();
