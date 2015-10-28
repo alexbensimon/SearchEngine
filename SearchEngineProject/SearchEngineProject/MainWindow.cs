@@ -176,8 +176,10 @@ namespace SearchEngineProject
             var writer = new IndexWriter(directoryPath);
             writer.BuildIndex(this);
 
+            //Write the KGram Index to the disk
+            KGramIndex.ToDisk(directoryPath);
+            
             _index = new DiskPositionalIndex(directoryPath);
-
 
             indexingLabel.Hide();
             searchTextBox.Enabled = true;

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -6,7 +8,7 @@ namespace SearchEngineProject
 {
     internal class KGramIndex
     {
-        private static readonly Dictionary<string, List<string>>[] _kGramIndex = new Dictionary<string, List<string>>[3] { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>() };
+        private static readonly Dictionary<string, List<string>>[] _kGramIndexes = new Dictionary<string, List<string>>[3] { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>() };
         private static readonly HashSet<string> _typeList = new HashSet<string>();
 
         public static void AddType(string type)
@@ -33,18 +35,18 @@ namespace SearchEngineProject
 
                 foreach (var kGram in kGramList)
                 {
-                    if (_kGramIndex[counter].ContainsKey(kGram))
-                        _kGramIndex[counter][kGram].Add(type);
+                    if (_kGramIndexes[counter].ContainsKey(kGram))
+                        _kGramIndexes[counter][kGram].Add(type);
                     else if (kGram != "$")
-                        _kGramIndex[counter].Add(kGram, new List<string>() { type });
+                        _kGramIndexes[counter].Add(kGram, new List<string>() { type });
                 }
             }
         }
 
         private static List<string> GetTypes(string kGram)
         {
-            if (_kGramIndex[kGram.Length - 1].ContainsKey(kGram))
-                return _kGramIndex[kGram.Length - 1][kGram];
+            if (_kGramIndexes[kGram.Length - 1].ContainsKey(kGram))
+                return _kGramIndexes[kGram.Length - 1][kGram];
             return null;
         }
 
@@ -117,5 +119,41 @@ namespace SearchEngineProject
             return newQuery.Substring(0, newQuery.Length - 1);
         }
 
+        public static void ToDisk(string folder)
+        {
+            //Create the kgramIndex file
+            FileStream kGramIndexFile = new FileStream(Path.Combine(folder, "kGramIndex.bin"), FileMode.Create);
+
+            //Write the array to the file
+            foreach (var kGramIndex in _kGramIndexes)
+            {
+                //Write number of kgrams
+                byte[] kGramNumbBytes = BitConverter.GetBytes(kGramIndex.Count);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(kGramNumbBytes);
+                kGramIndexFile.Write(kGramNumbBytes, 0, kGramNumbBytes.Length);
+
+                //Write the dictionnary to the file
+                foreach (var kGram in kGramIndex.Keys)
+                {
+                    //Wtite the number of words associated to the kGram
+                    byte[] wordNumbBytes = BitConverter.GetBytes(kGramIndex[kGram].Count);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(wordNumbBytes);
+                    kGramIndexFile.Write(wordNumbBytes, 0, wordNumbBytes.Length);
+
+                    //Write the words to the file
+                    foreach (var word in kGramIndex[kGram])
+                    {
+                        byte[] wordBytes = BitConverter.GetBytes(word.Length);
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(wordBytes);
+                        kGramIndexFile.Write(wordBytes, 0, wordBytes.Length);
+                    }
+                }
+            }
+
+            kGramIndexFile.Close();
+        }
     }
 }
