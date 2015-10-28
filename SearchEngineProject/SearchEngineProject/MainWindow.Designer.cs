@@ -223,6 +223,7 @@
             this.rankCbox.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.rankCbox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rankCbox.Font = new System.Drawing.Font("Segoe Print", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rankCbox.ForeColor = System.Drawing.Color.Gold;
             this.rankCbox.Location = new System.Drawing.Point(378, 31);
             this.rankCbox.Name = "rankCbox";
             this.rankCbox.Size = new System.Drawing.Size(51, 34);

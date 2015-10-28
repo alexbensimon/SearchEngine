@@ -175,9 +175,15 @@ namespace SearchEngineProject
                                      .Select(Path.GetFileNameWithoutExtension)
                                      .ToArray();
 
-            if (!filenames.Contains("kGramIndex") || !filenames.Contains("kGramVocab") || !filenames.Contains("kGram") ||
-                !filenames.Contains("vocab") || !filenames.Contains("vocabTable") || !filenames.Contains("posting"))
+            DialogResult result = DialogResult.Cancel;
+            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings"))
+                result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.OKCancel);
+
+            if (result == DialogResult.Cancel)
             {
+                if(_index!=null)
+                    _index.Dispose();
+                numberResultsLabel.Hide();
                 indexingLabel.Show();
                 Update();
                 var writer = new IndexWriter(directoryPath);
