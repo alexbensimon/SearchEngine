@@ -166,6 +166,8 @@ namespace SearchEngineProject
             }
 
             kGramIndexFile.Close();
+            kGramVocabList.Close();
+            kGramList.Close();
         }
 
         public static void ToMemory(string path)
@@ -194,7 +196,7 @@ namespace SearchEngineProject
                     buffer = new byte[k];
                     kGramList.Read(buffer, 0, k);
                     string kGram = Encoding.ASCII.GetString(buffer);
-                    _kGramIndexes[k].Add(kGram, new List<string>());
+                    _kGramIndexes[k-1].Add(kGram, new List<string>());
 
                     //Read the number of words associated to the kgram
                     buffer = new byte[4];
@@ -218,12 +220,16 @@ namespace SearchEngineProject
                         string word = Encoding.ASCII.GetString(buffer);
 
                         //Add the word to index list
-                        _kGramIndexes[k][kGram].Add(word);
+                        _kGramIndexes[k-1][kGram].Add(word);
                     }
                 }
 
                 k++;
             }
+
+            kGramIndexFile.Close();
+            kGramVocabList.Close();
+            kGramList.Close();
         }
     }
 }
