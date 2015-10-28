@@ -19,7 +19,7 @@ namespace SearchEngineProject
         public MainWindow()
         {
             InitializeComponent();
-            label2.Parent = progressBar1;
+            indexingLabel.Hide();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -34,21 +34,21 @@ namespace SearchEngineProject
 
         private void DisplaySearchResults()
         {
-            richTextBox1.Clear();
-            label1.Text = string.Empty;
-            label1.ForeColor = SystemColors.HighlightText;
-            var query = textBox1.Text;
+            resultsTextBox.Clear();
+            numberResultsLabel.Text = string.Empty;
+            numberResultsLabel.ForeColor = SystemColors.HighlightText;
+            var query = searchTextBox.Text;
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
             if (resultsDocIds == null)
-                richTextBox1.Text = "Wrong syntax";
+                resultsTextBox.Text = "Wrong syntax";
             else if (resultsDocIds.Count == 0)
-                richTextBox1.Text = "No results";
+                resultsTextBox.Text = "No results";
             else
             {
                 // Display the number of returned documents.
-                label1.Text = "Results: " + resultsDocIds.Count + " documents";
+                numberResultsLabel.Text = "Results: " + resultsDocIds.Count + " documents";
 
                 // Build the results.
                 var finalResults = new StringBuilder();
@@ -58,7 +58,7 @@ namespace SearchEngineProject
                     finalResults.AppendLine();
                     finalResults.AppendLine();
                 }
-                richTextBox1.Text = finalResults.ToString();
+                resultsTextBox.Text = finalResults.ToString();
             }
         }
 
@@ -81,9 +81,9 @@ namespace SearchEngineProject
             var word = GetWordUnderCursor(control, e);
             if (word != null && word.EndsWith(".txt"))
             {
-                richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
-                richTextBox1.SelectionColor = Color.Gold;
-                richTextBox2.Text = File.ReadAllText("Corpus/" + word);
+                resultsTextBox.Select(resultsTextBox.Text.IndexOf(word), word.Length);
+                resultsTextBox.SelectionColor = Color.Gold;
+                articleTextBox.Text = File.ReadAllText("Corpus/" + word);
             }
         }
 
@@ -115,23 +115,23 @@ namespace SearchEngineProject
             // Get the word under the cursor.
             var word = GetWordUnderCursor(control, e);
             if (word != null)
-                richTextBox1.Cursor = Cursors.Hand;
+                resultsTextBox.Cursor = Cursors.Hand;
             else
-                richTextBox1.Cursor = Cursors.Default;
+                resultsTextBox.Cursor = Cursors.Default;
             if (word != _currentWordUnderCursor)
             {
                 if (_currentWordUnderCursor != null)
                 {
-                    richTextBox1.Select(richTextBox1.Text.IndexOf(_currentWordUnderCursor), _currentWordUnderCursor.Length);
-                    richTextBox1.SelectionColor = Color.Black;
-                    richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Regular);
+                    resultsTextBox.Select(resultsTextBox.Text.IndexOf(_currentWordUnderCursor), _currentWordUnderCursor.Length);
+                    resultsTextBox.SelectionColor = Color.Black;
+                    resultsTextBox.SelectionFont = new Font(resultsTextBox.SelectionFont, FontStyle.Regular);
                     _currentWordUnderCursor = null;
                 }
                 if (word != null && word.EndsWith(".txt"))
                 {
-                    richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
-                    richTextBox1.SelectionColor = Color.Gold;
-                    richTextBox1.SelectionFont = new Font(richTextBox1.SelectionFont, FontStyle.Underline);
+                    resultsTextBox.Select(resultsTextBox.Text.IndexOf(word), word.Length);
+                    resultsTextBox.SelectionColor = Color.Gold;
+                    resultsTextBox.SelectionFont = new Font(resultsTextBox.SelectionFont, FontStyle.Underline);
                     _currentWordUnderCursor = word;
                 }
             }
@@ -161,16 +161,28 @@ namespace SearchEngineProject
 
         private void indexADirectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var fbd = new FolderBrowserDialog();
+            var fbd = new FolderBrowserDialog
+            {
+                ShowNewFolderButton = false,
+                Description = "Choose the directory you want to index"
+            };
             fbd.ShowDialog();
             var directoryPath = fbd.SelectedPath;
 
-            if (directoryPath == null) return;
+            if (string.IsNullOrEmpty(directoryPath)) return;
 
+            indexingLabel.Show();
+            this.Update();
             var writer = new IndexWriter(directoryPath);
             writer.BuildIndex(this);
 
             _index = new DiskPositionalIndex(directoryPath);
+            indexingLabel.Hide();
+            searchTextBox.Enabled = true;
+            searchTextBox.Select();
+            searchTextBox.Text = "Search for whatever you want ^^";
+            searchTextBox.SelectionStart = 0;
+            searchTextBox.SelectionLength = searchTextBox.Text.Length;
         }
 
         public void InitiateprogressBar(string directory)
@@ -183,61 +195,62 @@ namespace SearchEngineProject
 
             //Initiate the progress bar
             // Display the ProgressBar control.
-            progressBar1.Visible = true;
+            progressBar.Visible = true;
             // Set Minimum to 1 to represent the first file being copied.
-            progressBar1.Minimum = 1;
+            progressBar.Minimum = 1;
             // Set Maximum to the total number of files to copy.
-            progressBar1.Maximum = counter;
+            progressBar.Maximum = counter;
             // Set the initial value of the ProgressBar.
-            progressBar1.Value = 1;
+            progressBar.Value = 1;
             // Set the Step property to a value of 1 to represent each file being copied.
-            progressBar1.Step = 1;
+            progressBar.Step = 1;
         }
 
         public void IncrementProgressBar()
         {
-            progressBar1.PerformStep();
+            progressBar.PerformStep();
         }
 
         public void HideProgressBar()
         {
             var t = new System.Windows.Forms.Timer { Interval = 3000 };
-            label2.Show();
+            indexingLabel.Show();
             
             t.Tick += (s, e) =>
             {
-                label2.Hide();
+                indexingLabel.Hide();
                 t.Stop();
             };
             t.Start();
-            label2.Hide();
-            progressBar1.Hide();
+            indexingLabel.Hide();
+            progressBar.Hide();
         }
 
         private void checkBox1_Click(object sender, EventArgs e)
         {
-            checkBox1.CheckState=CheckState.Checked;
-            checkBox1.ForeColor = Color.Black;
-            checkBox1.FlatAppearance.MouseOverBackColor = Color.Gold;
-            checkBox1.FlatAppearance.MouseDownBackColor = Color.Gold;
+            boolCBox.CheckState=CheckState.Checked;
+            boolCBox.ForeColor = Color.Black;
+            boolCBox.FlatAppearance.MouseOverBackColor = Color.Gold;
+            boolCBox.FlatAppearance.MouseDownBackColor = Color.Gold;
 
-            checkBox2.CheckState = CheckState.Unchecked;
-            checkBox2.ForeColor = Color.Gold;
-            checkBox2.FlatAppearance.MouseOverBackColor = Color.FromArgb(64,64,64);
-            checkBox2.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+            rankCbox.CheckState = CheckState.Unchecked;
+            rankCbox.ForeColor = Color.Gold;
+            rankCbox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64,64,64);
+            rankCbox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
         }
 
         private void checkBox2_Click(object sender, EventArgs e)
         {
-            checkBox2.CheckState = CheckState.Checked;
-            checkBox2.ForeColor = Color.Black;
-            checkBox2.FlatAppearance.MouseOverBackColor = Color.Gold;
-            checkBox2.FlatAppearance.MouseDownBackColor = Color.Gold;
+            rankCbox.CheckState = CheckState.Checked;
+            rankCbox.ForeColor = Color.Black;
+            rankCbox.FlatAppearance.MouseOverBackColor = Color.Gold;
+            rankCbox.FlatAppearance.MouseDownBackColor = Color.Gold;
 
-            checkBox1.CheckState = CheckState.Unchecked;
-            checkBox1.ForeColor = Color.Gold;
-            checkBox1.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
-            checkBox1.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+            boolCBox.CheckState = CheckState.Unchecked;
+            boolCBox.ForeColor = Color.Gold;
+            boolCBox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            boolCBox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
         }
+
     }
 }
