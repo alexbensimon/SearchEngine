@@ -90,8 +90,6 @@ namespace SearchEngineProject
             return FilterPostings(finalPostingList, query);
         }
 
-        // From here, we suppose that the query is clean: it does not contain any more white spaces.
-
         private static List<string> FilterPostings(List<string> postingList, string query)
         {
             var filteredList = new List<string>();

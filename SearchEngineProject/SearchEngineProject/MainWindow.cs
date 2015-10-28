@@ -37,7 +37,7 @@ namespace SearchEngineProject
             resultsTextBox.Clear();
             numberResultsLabel.Text = string.Empty;
             numberResultsLabel.ForeColor = SystemColors.HighlightText;
-            var query = searchTextBox.Text;
+            var query = searchTextBox.Text.ToLower();
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
@@ -172,11 +172,13 @@ namespace SearchEngineProject
             if (string.IsNullOrEmpty(directoryPath)) return;
 
             indexingLabel.Show();
-            this.Update();
+            Update();
             var writer = new IndexWriter(directoryPath);
             writer.BuildIndex(this);
 
             _index = new DiskPositionalIndex(directoryPath);
+
+
             indexingLabel.Hide();
             searchTextBox.Enabled = true;
             searchTextBox.Select();
