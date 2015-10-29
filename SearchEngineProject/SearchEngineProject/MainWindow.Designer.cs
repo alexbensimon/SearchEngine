@@ -49,12 +49,13 @@
             // 
             // searchTextBox
             // 
-            this.searchTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.searchTextBox.BackColor = System.Drawing.Color.White;
+            this.searchTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.searchTextBox.Enabled = false;
-            this.searchTextBox.Font = new System.Drawing.Font("Segoe Print", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.searchTextBox.Location = new System.Drawing.Point(7, 31);
+            this.searchTextBox.Font = new System.Drawing.Font("Segoe Print", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.searchTextBox.Location = new System.Drawing.Point(8, 31);
             this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(282, 34);
+            this.searchTextBox.Size = new System.Drawing.Size(281, 34);
             this.searchTextBox.TabIndex = 0;
             this.searchTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -66,9 +67,9 @@
             this.searchButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.searchButton.FlatAppearance.BorderSize = 0;
             this.searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.searchButton.Location = new System.Drawing.Point(288, 32);
+            this.searchButton.Location = new System.Drawing.Point(288, 31);
             this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(30, 32);
+            this.searchButton.Size = new System.Drawing.Size(30, 34);
             this.searchButton.TabIndex = 1;
             this.searchButton.Text = "\r\n";
             this.searchButton.UseVisualStyleBackColor = false;
@@ -81,7 +82,7 @@
             this.resultsTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.resultsTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.resultsTextBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.resultsTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.resultsTextBox.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.resultsTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.resultsTextBox.Location = new System.Drawing.Point(7, 84);
             this.resultsTextBox.Margin = new System.Windows.Forms.Padding(7);
@@ -112,18 +113,21 @@
             // numberResultsLabel
             // 
             this.numberResultsLabel.AutoSize = true;
-            this.numberResultsLabel.Location = new System.Drawing.Point(8, 70);
+            this.numberResultsLabel.ForeColor = System.Drawing.Color.Gold;
+            this.numberResultsLabel.Location = new System.Drawing.Point(5, 70);
             this.numberResultsLabel.Name = "numberResultsLabel";
             this.numberResultsLabel.Size = new System.Drawing.Size(0, 13);
             this.numberResultsLabel.TabIndex = 5;
             // 
             // menu
             // 
+            this.menu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.menu.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.indexToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(916, 24);
+            this.menu.Size = new System.Drawing.Size(916, 25);
             this.menu.TabIndex = 7;
             this.menu.Text = "menuStrip1";
             // 
@@ -134,42 +138,43 @@
             this.statisticsToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
+            this.indexToolStripMenuItem.ForeColor = System.Drawing.Color.Gold;
             this.indexToolStripMenuItem.Name = "indexToolStripMenuItem";
-            this.indexToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+            this.indexToolStripMenuItem.Size = new System.Drawing.Size(51, 21);
             this.indexToolStripMenuItem.Text = "Index";
             // 
             // indexADirectoryToolStripMenuItem
             // 
             this.indexADirectoryToolStripMenuItem.Name = "indexADirectoryToolStripMenuItem";
-            this.indexADirectoryToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.indexADirectoryToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.indexADirectoryToolStripMenuItem.Text = "Choose a directory";
             this.indexADirectoryToolStripMenuItem.Click += new System.EventHandler(this.indexADirectoryToolStripMenuItem_Click);
             // 
             // statisticsToolStripMenuItem
             // 
             this.statisticsToolStripMenuItem.Name = "statisticsToolStripMenuItem";
-            this.statisticsToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.statisticsToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.statisticsToolStripMenuItem.Text = "Statistics";
             this.statisticsToolStripMenuItem.Click += new System.EventHandler(this.statisticsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(184, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             // 
             // progressBar
             // 
             this.progressBar.BackColor = System.Drawing.Color.White;
             this.progressBar.ForeColor = System.Drawing.Color.Gold;
-            this.progressBar.Location = new System.Drawing.Point(7, 31);
+            this.progressBar.Location = new System.Drawing.Point(8, 31);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(282, 33);
+            this.progressBar.Size = new System.Drawing.Size(279, 34);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 10;
             this.progressBar.UseWaitCursor = true;
@@ -205,7 +210,7 @@
             this.boolCBox.Font = new System.Drawing.Font("Segoe Print", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.boolCBox.Location = new System.Drawing.Point(330, 31);
             this.boolCBox.Name = "boolCBox";
-            this.boolCBox.Size = new System.Drawing.Size(51, 34);
+            this.boolCBox.Size = new System.Drawing.Size(51, 35);
             this.boolCBox.TabIndex = 12;
             this.boolCBox.Text = "Bool";
             this.boolCBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -226,7 +231,7 @@
             this.rankCbox.ForeColor = System.Drawing.Color.Gold;
             this.rankCbox.Location = new System.Drawing.Point(378, 31);
             this.rankCbox.Name = "rankCbox";
-            this.rankCbox.Size = new System.Drawing.Size(51, 34);
+            this.rankCbox.Size = new System.Drawing.Size(51, 35);
             this.rankCbox.TabIndex = 13;
             this.rankCbox.Text = "Rank";
             this.rankCbox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -238,7 +243,7 @@
             this.AcceptButton = this.searchButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.DarkSlateGray;
+            this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(916, 387);
             this.Controls.Add(this.rankCbox);
             this.Controls.Add(this.boolCBox);

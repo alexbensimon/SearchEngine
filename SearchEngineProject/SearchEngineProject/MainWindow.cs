@@ -201,7 +201,7 @@ namespace SearchEngineProject
             indexingLabel.Hide();
             searchTextBox.Enabled = true;
             searchTextBox.Select();
-            searchTextBox.Text = "Search for whatever you want ^^";
+            searchTextBox.Text = " Indexing done ^^";
             searchTextBox.SelectionStart = 0;
             searchTextBox.SelectionLength = searchTextBox.Text.Length;
         }
