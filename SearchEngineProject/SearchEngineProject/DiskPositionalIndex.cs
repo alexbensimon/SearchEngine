@@ -259,21 +259,21 @@ namespace SearchEngineProject
                 string word = Encoding.ASCII.GetString(buffer);
 
                 //Read the frequency
-                buffer = new byte[4];
+                buffer = new byte[8];
                 statFile.Read(buffer, 0, buffer.Length);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(buffer);
-                int frequency = BitConverter.ToInt32(buffer, 0);
+                double frequency = BitConverter.ToDouble(buffer, 0);
 
                 //Add to the dictionnary
                 ProportionDocContaining10MostFrequent.Add(word, frequency);
             }
 
-            buffer = new byte[4];
+            buffer = new byte[8];
             statFile.Read(buffer, 0, buffer.Length);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(buffer);
-            IndexSizeInMemory = BitConverter.ToInt32(buffer, 0);
+            IndexSizeInMemory = BitConverter.ToInt64(buffer, 0);
 
         }
     }

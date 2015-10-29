@@ -169,7 +169,7 @@ namespace SearchEngineProject
                 statsFile.Write(percentageBytes, 0, percentageBytes.Length);
             }
 
-            //Write the percentage of the 10 most frequent words
+            //Write the size of the index in memory
             byte[] indexSizeInMemoryBytes = BitConverter.GetBytes(_indexSizeInMemory);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(indexSizeInMemoryBytes);
