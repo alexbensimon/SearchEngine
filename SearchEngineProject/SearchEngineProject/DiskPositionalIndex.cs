@@ -12,6 +12,10 @@ namespace SearchEngineProject
         private FileStream mPostings;
         private long[] mVocabTable;
         private List<string> mFileNames;
+        public int IndexSize { get; private set; }
+        public int AvgNumberDocsInPostingsList { get; private set; }
+        public Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
+        public long IndexSizeInMemory { get; private set; }
 
         public DiskPositionalIndex(string path)
         {
@@ -27,6 +31,9 @@ namespace SearchEngineProject
 
             mVocabTable = ReadVocabTable(path);
             mFileNames = ReadFileNames(path);
+
+            //Read index statistics
+            readStats(path);
         }
 
         private static int[][] ReadPostingsFromFile(FileStream postings, long postingsPosition, bool positionsRequested)
@@ -215,6 +222,59 @@ namespace SearchEngineProject
                 mVocabList.Close();
             if (mPostings != null)
                 mPostings.Close();
+        }
+
+        private void readStats(string path)
+        {
+            var statFile = new FileStream(Path.Combine(path, "statistics.bin"), FileMode.Open, FileAccess.Read);
+            var mostFreqFile = new FileStream(Path.Combine(path, "mostFreqWord.bin"), FileMode.Open, FileAccess.Read);
+            ProportionDocContaining10MostFrequent=new Dictionary<string, double>();
+
+            //Read the index size
+            var buffer = new byte[4];
+            statFile.Read(buffer, 0, buffer.Length);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
+            IndexSize = BitConverter.ToInt32(buffer, 0);
+
+            //Average number of docs in postings list
+            buffer = new byte[4];
+            statFile.Read(buffer, 0, buffer.Length);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
+            AvgNumberDocsInPostingsList = BitConverter.ToInt32(buffer, 0);
+
+            for (int i = 0; i < 10; i++)
+            {
+                //Read the length of the word
+                buffer = new byte[4];
+                statFile.Read(buffer, 0, buffer.Length);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
+                int wordLength = BitConverter.ToInt32(buffer, 0);
+
+                //Read the word
+                buffer = new byte[wordLength];
+                mostFreqFile.Read(buffer, 0, wordLength);
+                string word = Encoding.ASCII.GetString(buffer);
+
+                //Read the frequency
+                buffer = new byte[4];
+                statFile.Read(buffer, 0, buffer.Length);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(buffer);
+                int frequency = BitConverter.ToInt32(buffer, 0);
+
+                //Add to the dictionnary
+                ProportionDocContaining10MostFrequent.Add(word, frequency);
+            }
+
+            buffer = new byte[4];
+            statFile.Read(buffer, 0, buffer.Length);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(buffer);
+            IndexSizeInMemory = BitConverter.ToInt32(buffer, 0);
+
         }
     }
 }

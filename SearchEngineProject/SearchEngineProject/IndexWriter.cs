@@ -38,7 +38,7 @@ namespace SearchEngineProject
             window.HideProgressBar();
 
             index.ComputeStatistics();
-            index.statisticsToDisk();
+            index.StatToDisk(folder);
                 
             // at this point, "index" contains the in-memory inverted index 
             // now we save the index to disk, building three files: the postings index,

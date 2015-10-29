@@ -139,24 +139,22 @@ namespace SearchEngineProject
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //Read statistics from Disk if not already read
-
             var statistics = new StringBuilder();
             statistics.Append("Number of terms in the index: ");
-            statistics.AppendLine(IndexWriter.IndexSize.ToString() + " terms\n");
+            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
 
             statistics.Append("Average number of documents in the postings list: ");
-            statistics.AppendLine(IndexWriter.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
 
             statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
-            foreach (var pair in IndexWriter.ProportionDocContaining10MostFrequent)
+            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
             {
                 statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
             }
             statistics.AppendLine("\n");
 
             statistics.Append("Approximate memory requirement of the index: ");
-            statistics.Append(prettyBytes(IndexWriter.IndexSizeInMemory));
+            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
 
             MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
         }
@@ -178,7 +176,7 @@ namespace SearchEngineProject
                                      .ToArray();
 
             DialogResult result = DialogResult.Cancel;
-            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings"))
+            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWords"))
                 result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.OKCancel);
 
             if (result == DialogResult.Cancel)
@@ -190,15 +188,19 @@ namespace SearchEngineProject
                 Update();
                 var writer = new IndexWriter(directoryPath);
                 writer.BuildIndex(this);
-
+                
                 //Write the KGram Index to the disk
                 KGramIndex.ToDisk(directoryPath);
             }
 
+            //Load the Disk positional index into memory
             _index = new DiskPositionalIndex(directoryPath);
 
             //Load the KGram index in memory
             KGramIndex.ToMemory(directoryPath);
+
+            //Load statistics in memory
+
 
             indexingLabel.Hide();
             searchTextBox.Enabled = true;

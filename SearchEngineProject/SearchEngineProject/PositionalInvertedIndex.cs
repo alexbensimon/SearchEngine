@@ -131,7 +131,7 @@ namespace SearchEngineProject
             }
         }
 
-        public void statToDisk(string folder)
+        public void StatToDisk(string folder)
         {
             //Create the stats file
             FileStream statsFile = new FileStream(Path.Combine(folder, "statistics.bin"), FileMode.Create);
