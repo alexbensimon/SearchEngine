@@ -139,6 +139,8 @@ namespace SearchEngineProject
 
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Read statistics from Disk if not already read
+
             var statistics = new StringBuilder();
             statistics.Append("Number of terms in the index: ");
             statistics.AppendLine(IndexWriter.IndexSize.ToString() + " terms\n");

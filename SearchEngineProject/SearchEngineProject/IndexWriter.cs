@@ -8,10 +8,6 @@ namespace SearchEngineProject
     public class IndexWriter
     {
         private readonly string _mPath;
-        public static int IndexSize { get; private set; }
-        public static int AvgNumberDocsInPostingsList { get; private set; }
-        public static Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
-        public static long IndexSizeInMemory { get; private set; }
 
         public IndexWriter(string path)
         {
@@ -42,10 +38,7 @@ namespace SearchEngineProject
             window.HideProgressBar();
 
             index.ComputeStatistics();
-            IndexSize = index.IndexSize;
-            AvgNumberDocsInPostingsList = index.AvgNumberDocsInPostingsList;
-            ProportionDocContaining10MostFrequent = index.ProportionDocContaining10MostFrequent;
-            IndexSizeInMemory = index.IndexSizeInMemory;
+            index.statisticsToDisk();
                 
             // at this point, "index" contains the in-memory inverted index 
             // now we save the index to disk, building three files: the postings index,

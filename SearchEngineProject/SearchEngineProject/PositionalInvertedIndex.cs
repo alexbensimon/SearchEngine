@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace SearchEngineProject
 {
     public class PositionalInvertedIndex
     {
         private readonly Dictionary<string, Dictionary<int, List<int>>> _mIndex = new Dictionary<string, Dictionary<int, List<int>>>();
-        public int IndexSize { get; private set; }
-        public int AvgNumberDocsInPostingsList { get; private set; }
-
-        public Dictionary<string, double> ProportionDocContaining10MostFrequent { get; } =
+        private int _indexSize;
+        private int _avgNumberDocsInPostingsList;
+        private Dictionary<string, double> _proportionDocContaining10MostFrequent =
             new Dictionary<string, double>();
-
-        public long IndexSizeInMemory { get; private set; }
+        private long _indexSizeInMemory;
         private int _corpusSize;
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace SearchEngineProject
 
         public void ComputeStatistics()
         {
-            IndexSize = _mIndex.Count;
-            IndexSizeInMemory = 24 + 36 * IndexSize;
+            _indexSize = _mIndex.Count;
+            _indexSizeInMemory = 24 + 36 * _indexSize;
 
             int totalPostings = 0;
             Dictionary<string, int> mostFrequentTermPostingNumber = new Dictionary<string, int>();
@@ -101,7 +101,7 @@ namespace SearchEngineProject
                 foreach (var positionList in _mIndex[term].Values)
                 {
                     termPositionsNumber += positionList.Count;
-                    IndexSizeInMemory += 48 + 4 * positionList.Count;
+                    _indexSizeInMemory += 48 + 4 * positionList.Count;
                 }
 
                 if (mostFrequentTermPositionNumber.Count < 10)
@@ -121,14 +121,62 @@ namespace SearchEngineProject
                     termSmallestPosition = ordered.First().Key;
                 }
 
-                IndexSizeInMemory += 40 + 2 * term.Length;
-                IndexSizeInMemory += 24 + 8 * termPostingsNumber;
+                _indexSizeInMemory += 40 + 2 * term.Length;
+                _indexSizeInMemory += 24 + 8 * termPostingsNumber;
             }
-            AvgNumberDocsInPostingsList = totalPostings / IndexSize;
+            _avgNumberDocsInPostingsList = totalPostings / _indexSize;
             foreach (var term in mostFrequentTermPositionNumber.OrderByDescending(i => i.Value))
             {
-                ProportionDocContaining10MostFrequent.Add(term.Key, (double)mostFrequentTermPostingNumber[term.Key] / _corpusSize);
+                _proportionDocContaining10MostFrequent.Add(term.Key, (double)mostFrequentTermPostingNumber[term.Key] / _corpusSize);
             }
+        }
+
+        public void statToDisk(string folder)
+        {
+            //Create the stats file
+            FileStream statsFile = new FileStream(Path.Combine(folder, "statistics.bin"), FileMode.Create);
+            //Create the top 10 most frequent word file
+            StreamWriter mostFreqWordFile = new StreamWriter(Path.Combine(folder, "mostFreqWord.bin"), false,
+                Encoding.ASCII);
+
+            //Write the index size
+            byte[] indexSizeBytes = BitConverter.GetBytes(_indexSize);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(indexSizeBytes);
+            statsFile.Write(indexSizeBytes, 0, indexSizeBytes.Length);
+
+            //Write the average number of docs in postings list
+            byte[] avgNumberBytes = BitConverter.GetBytes(_avgNumberDocsInPostingsList);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(avgNumberBytes);
+            statsFile.Write(avgNumberBytes, 0, avgNumberBytes.Length);
+
+            foreach (var word in _proportionDocContaining10MostFrequent.Keys)
+            {
+                //Write the length of the word to the binary file
+                byte[] lengthBytes = BitConverter.GetBytes(word.Length);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(lengthBytes);
+                statsFile.Write(lengthBytes, 0, lengthBytes.Length);
+
+                //Write the word to the other file
+                mostFreqWordFile.Write(word);
+
+                //Write the percentage of the 10 most frequent words
+                byte[] percentageBytes = BitConverter.GetBytes(_proportionDocContaining10MostFrequent[word]);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(percentageBytes);
+                statsFile.Write(percentageBytes, 0, percentageBytes.Length);
+            }
+
+            //Write the percentage of the 10 most frequent words
+            byte[] indexSizeInMemoryBytes = BitConverter.GetBytes(_indexSizeInMemory);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(indexSizeInMemoryBytes);
+            statsFile.Write(indexSizeInMemoryBytes, 0, indexSizeInMemoryBytes.Length);
+
+            statsFile.Close();
+            mostFreqWordFile.Close();
         }
     }
 }
