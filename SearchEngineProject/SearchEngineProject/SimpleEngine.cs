@@ -134,7 +134,7 @@ namespace SearchEngineProject
             var orQueryItemsResultsDocIds = new List<List<int>>();
             foreach (string term in terms)
             {
-                orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)[0].ToList());
+                orQueryItemsResultsDocIds.Add(GetDocIds(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)));
             }
 
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
@@ -188,7 +188,7 @@ namespace SearchEngineProject
                             else if (postings == null)
                                 secondAndQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                secondAndQueryItemsResultsDocIds.Add(postings[0].ToList());
+                                secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
                         }
                     }
                     if (secondAndQueryItemsResultsDocIds.Count > 0)
@@ -230,7 +230,7 @@ namespace SearchEngineProject
                             else if (postings == null)
                                 andQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                andQueryItemsResultsDocIds.Add(postings[0].ToList());
+                                andQueryItemsResultsDocIds.Add(GetDocIds(postings));
                         }
                     }
                 }
@@ -344,6 +344,16 @@ namespace SearchEngineProject
 
             return newPostingArray;
         }
+
+        private static List<int> GetDocIds(int[][] postings)
+        {
+            var idsList = new List<int>();
+            for (int i = 0; i < postings.Count(); i++)
+            {
+                idsList.Add(postings[i][0]);
+            }
+            return idsList;
+        } 
 
     }
 }
