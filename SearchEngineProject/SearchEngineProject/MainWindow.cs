@@ -199,9 +199,7 @@ namespace SearchEngineProject
             //Load the KGram index in memory
             KGramIndex.ToMemory(directoryPath);
 
-            //Load statistics in memory
-
-
+            statisticsToolStripMenuItem.Enabled = true;
             indexingLabel.Hide();
             searchTextBox.Enabled = true;
             searchTextBox.Select();
@@ -277,5 +275,10 @@ namespace SearchEngineProject
             boolCBox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
         }
 
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Dispose();
+            Close();
+        }
     }
 }

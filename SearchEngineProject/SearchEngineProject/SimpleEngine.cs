@@ -291,15 +291,16 @@ namespace SearchEngineProject
             {
                 var word1DocId = word1Postings[docPointer1][0];
                 var word2DocId = word2Postings[docPointer2][0];
+
                 if (word1DocId == word2DocId)
                 {
                     var posPointer1 = 1;
                     var posPointer2 = 1;
-                    while (posPointer1 < word1Postings[docPointer1].Length - 1 &&
-                            posPointer2 < word2Postings[docPointer2].Length - 1)
+                    while (posPointer1 <= word1Postings[docPointer1].Length - 1 &&
+                            posPointer2 <= word2Postings[docPointer2].Length - 1)
                     {
-                        var word1Pos = word1Postings[word1DocId][posPointer1];
-                        var word2Pos = word2Postings[word2DocId][posPointer2];
+                        var word1Pos = word1Postings[docPointer1][posPointer1];
+                        var word2Pos = word2Postings[docPointer2][posPointer2];
                         if (word2Pos - word1Pos == 1)
                         {
                             if (newPostingList.ContainsKey(word2DocId))
@@ -331,7 +332,7 @@ namespace SearchEngineProject
             int i = 0;
             foreach (var docId in newPostingList.Keys)
             {
-                newPostingArray[i] = new int[newPostingList[docId].Count];
+                newPostingArray[i] = new int[newPostingList[docId].Count + 1];
                 newPostingArray[i][0] = docId;
                 int j = 1;
                 foreach (var position in newPostingList[docId])
@@ -353,7 +354,7 @@ namespace SearchEngineProject
                 idsList.Add(postings[i][0]);
             }
             return idsList;
-        } 
+        }
 
     }
 }

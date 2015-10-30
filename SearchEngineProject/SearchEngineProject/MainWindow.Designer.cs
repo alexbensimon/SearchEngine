@@ -152,6 +152,7 @@
             // 
             // statisticsToolStripMenuItem
             // 
+            this.statisticsToolStripMenuItem.Enabled = false;
             this.statisticsToolStripMenuItem.Name = "statisticsToolStripMenuItem";
             this.statisticsToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.statisticsToolStripMenuItem.Text = "Statistics";
@@ -167,6 +168,7 @@
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             this.quitToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.quitToolStripMenuItem.Text = "Quit";
+            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
             // progressBar
             // 
