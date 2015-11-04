@@ -179,11 +179,11 @@ namespace SearchEngineProject
                         foreach (var tokenHyphen in token.Split('-'))
                         {
                             index.AddTerm(PorterStemmer.ProcessToken(tokenHyphen), documentId, position);
-                            KGramIndex.AddType(tokenHyphen);
+                            KGramIndex.GenerateKgrams(tokenHyphen, true, 0);
                         }
                     }
                     index.AddTerm(PorterStemmer.ProcessToken(token.Replace("-", "")), documentId, position);
-                    KGramIndex.AddType(token.Replace("-", ""));
+                    KGramIndex.GenerateKgrams(token.Replace("-", ""), true, 0);
                     position++;
                 }
                 stream.Close();

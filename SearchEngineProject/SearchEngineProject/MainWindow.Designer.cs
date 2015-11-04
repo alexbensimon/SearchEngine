@@ -41,10 +41,15 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.indexingLabel = new System.Windows.Forms.Label();
             this.boolCBox = new System.Windows.Forms.CheckBox();
             this.rankCbox = new System.Windows.Forms.CheckBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.correctedWordLabel = new System.Windows.Forms.Label();
+            this.indexingLabel = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
             this.menu.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // searchTextBox
@@ -53,9 +58,9 @@
             this.searchTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.searchTextBox.Enabled = false;
             this.searchTextBox.Font = new System.Drawing.Font("Segoe Print", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.searchTextBox.Location = new System.Drawing.Point(8, 31);
+            this.searchTextBox.Location = new System.Drawing.Point(18, 31);
             this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(281, 34);
+            this.searchTextBox.Size = new System.Drawing.Size(271, 34);
             this.searchTextBox.TabIndex = 0;
             this.searchTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -84,11 +89,11 @@
             this.resultsTextBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.resultsTextBox.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.resultsTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.resultsTextBox.Location = new System.Drawing.Point(7, 84);
+            this.resultsTextBox.Location = new System.Drawing.Point(18, 103);
             this.resultsTextBox.Margin = new System.Windows.Forms.Padding(7);
             this.resultsTextBox.Name = "resultsTextBox";
             this.resultsTextBox.ReadOnly = true;
-            this.resultsTextBox.Size = new System.Drawing.Size(422, 296);
+            this.resultsTextBox.Size = new System.Drawing.Size(411, 268);
             this.resultsTextBox.TabIndex = 2;
             this.resultsTextBox.Text = "";
             this.resultsTextBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseClick_1);
@@ -103,21 +108,23 @@
             this.articleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.articleTextBox.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.articleTextBox.ForeColor = System.Drawing.Color.DimGray;
-            this.articleTextBox.Location = new System.Drawing.Point(444, 31);
+            this.articleTextBox.Location = new System.Drawing.Point(457, 47);
             this.articleTextBox.Name = "articleTextBox";
             this.articleTextBox.ReadOnly = true;
-            this.articleTextBox.Size = new System.Drawing.Size(464, 349);
+            this.articleTextBox.Size = new System.Drawing.Size(447, 324);
             this.articleTextBox.TabIndex = 3;
             this.articleTextBox.Text = "";
             // 
             // numberResultsLabel
             // 
-            this.numberResultsLabel.AutoSize = true;
-            this.numberResultsLabel.ForeColor = System.Drawing.Color.Gold;
-            this.numberResultsLabel.Location = new System.Drawing.Point(5, 70);
+            this.numberResultsLabel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.numberResultsLabel.Font = new System.Drawing.Font("Calibri Light", 14.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numberResultsLabel.ForeColor = System.Drawing.Color.Gray;
+            this.numberResultsLabel.Location = new System.Drawing.Point(294, 2);
             this.numberResultsLabel.Name = "numberResultsLabel";
-            this.numberResultsLabel.Size = new System.Drawing.Size(0, 13);
+            this.numberResultsLabel.Size = new System.Drawing.Size(127, 24);
             this.numberResultsLabel.TabIndex = 5;
+            this.numberResultsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // menu
             // 
@@ -182,21 +189,6 @@
             this.progressBar.UseWaitCursor = true;
             this.progressBar.Visible = false;
             // 
-            // indexingLabel
-            // 
-            this.indexingLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.indexingLabel.BackColor = System.Drawing.Color.Transparent;
-            this.indexingLabel.Font = new System.Drawing.Font("Segoe Print", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.indexingLabel.ForeColor = System.Drawing.Color.Gold;
-            this.indexingLabel.Location = new System.Drawing.Point(7, 31);
-            this.indexingLabel.Name = "indexingLabel";
-            this.indexingLabel.Size = new System.Drawing.Size(901, 349);
-            this.indexingLabel.TabIndex = 11;
-            this.indexingLabel.Text = "We are indexing the directory for you :)";
-            this.indexingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // boolCBox
             // 
             this.boolCBox.Appearance = System.Windows.Forms.Appearance.Button;
@@ -240,6 +232,59 @@
             this.rankCbox.UseVisualStyleBackColor = false;
             this.rankCbox.Click += new System.EventHandler(this.checkBox2_Click);
             // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.correctedWordLabel);
+            this.panel1.Controls.Add(this.numberResultsLabel);
+            this.panel1.Location = new System.Drawing.Point(8, 72);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(421, 308);
+            this.panel1.TabIndex = 14;
+            // 
+            // correctedWordLabel
+            // 
+            this.correctedWordLabel.AutoSize = true;
+            this.correctedWordLabel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.correctedWordLabel.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.correctedWordLabel.ForeColor = System.Drawing.Color.Firebrick;
+            this.correctedWordLabel.Location = new System.Drawing.Point(7, 3);
+            this.correctedWordLabel.Name = "correctedWordLabel";
+            this.correctedWordLabel.Size = new System.Drawing.Size(0, 23);
+            this.correctedWordLabel.TabIndex = 0;
+            this.correctedWordLabel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.correctedWordLabel_MouseClick);
+            // 
+            // indexingLabel
+            // 
+            this.indexingLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.indexingLabel.BackColor = System.Drawing.Color.Transparent;
+            this.indexingLabel.Font = new System.Drawing.Font("Segoe Print", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.indexingLabel.ForeColor = System.Drawing.Color.Gold;
+            this.indexingLabel.Location = new System.Drawing.Point(7, 31);
+            this.indexingLabel.Name = "indexingLabel";
+            this.indexingLabel.Size = new System.Drawing.Size(901, 349);
+            this.indexingLabel.TabIndex = 11;
+            this.indexingLabel.Text = "We are indexing the directory for you :)";
+            this.indexingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel2.Location = new System.Drawing.Point(439, 31);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(469, 349);
+            this.panel2.TabIndex = 15;
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.White;
+            this.panel3.Location = new System.Drawing.Point(8, 31);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(310, 35);
+            this.panel3.TabIndex = 15;
+            // 
             // MainWindow
             // 
             this.AcceptButton = this.searchButton;
@@ -250,13 +295,15 @@
             this.Controls.Add(this.rankCbox);
             this.Controls.Add(this.boolCBox);
             this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.numberResultsLabel);
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.searchTextBox);
             this.Controls.Add(this.menu);
-            this.Controls.Add(this.indexingLabel);
             this.Controls.Add(this.resultsTextBox);
             this.Controls.Add(this.articleTextBox);
+            this.Controls.Add(this.indexingLabel);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel3);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menu;
             this.MinimumSize = new System.Drawing.Size(932, 426);
@@ -265,6 +312,8 @@
             this.TransparencyKey = System.Drawing.Color.Maroon;
             this.menu.ResumeLayout(false);
             this.menu.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -281,12 +330,16 @@
         private System.Windows.Forms.ToolStripMenuItem indexToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem statisticsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
-        private System.Windows.Forms.Label indexingLabel;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.CheckBox boolCBox;
         private System.Windows.Forms.CheckBox rankCbox;
         private System.Windows.Forms.ToolStripMenuItem indexADirectoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label indexingLabel;
+        private System.Windows.Forms.Label correctedWordLabel;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel3;
     }
 }
 

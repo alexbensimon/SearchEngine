@@ -36,7 +36,6 @@ namespace SearchEngineProject
         {
             resultsTextBox.Clear();
             numberResultsLabel.Text = string.Empty;
-            numberResultsLabel.ForeColor = SystemColors.HighlightText;
             var query = searchTextBox.Text.ToLower();
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
@@ -48,7 +47,7 @@ namespace SearchEngineProject
             else
             {
                 // Display the number of returned documents.
-                numberResultsLabel.Text = "Results: " + resultsDocIds.Count + " documents";
+                numberResultsLabel.Text = resultsDocIds.Count + " results";
 
                 // Build the results.
                 var finalResults = new StringBuilder();
@@ -59,6 +58,49 @@ namespace SearchEngineProject
                     finalResults.AppendLine();
                 }
                 resultsTextBox.Text = finalResults.ToString();
+            }
+
+            //Display potential correction of search terms if needed
+            if (SimpleEngine.PotentialMisspelledWords.Any())
+            {
+                string correctedQuery = searchTextBox.Text;
+                bool correctionFound = false;
+
+                foreach (var potentialMisspelledWord in SimpleEngine.PotentialMisspelledWords)
+                {
+                    var correctedWords = KGramIndex.getCorrectedWord(potentialMisspelledWord);
+
+                    if (correctedWords.Count > 1)
+                    {
+                        int maxDocumentFreq = 0;
+                        string correctedWord = null;
+                        foreach (var word in correctedWords)
+                        {
+                            var termDocFreq = _index.GetPostings(PorterStemmer.ProcessToken(word), false).Count();
+                            if (termDocFreq > maxDocumentFreq)
+                            {
+                                maxDocumentFreq = termDocFreq;
+                                correctedWord = word;
+                            }
+                        }
+                        correctedQuery = correctedQuery.Replace(potentialMisspelledWord, correctedWord);
+                        correctionFound = true;
+                    }
+                    else if (correctedWords.Count == 1)
+                    {
+                        correctedQuery = correctedQuery.Replace(potentialMisspelledWord, correctedWords.First());
+                        correctionFound = true;
+                    }
+                }
+
+                if (!correctionFound) return;
+
+                correctedWordLabel.Show();
+                correctedWordLabel.Text = "Did you mean: " + correctedQuery + "?";
+            }
+            else
+            {
+                correctedWordLabel.Hide();
             }
         }
 
@@ -181,14 +223,14 @@ namespace SearchEngineProject
 
             if (result == DialogResult.Cancel)
             {
-                if(_index!=null)
+                if (_index != null)
                     _index.Dispose();
                 numberResultsLabel.Hide();
                 indexingLabel.Show();
                 Update();
                 var writer = new IndexWriter(directoryPath);
                 writer.BuildIndex(this);
-                
+
                 //Write the KGram Index to the disk
                 KGramIndex.ToDisk(directoryPath);
             }
@@ -203,7 +245,7 @@ namespace SearchEngineProject
             indexingLabel.Hide();
             searchTextBox.Enabled = true;
             searchTextBox.Select();
-            searchTextBox.Text = " Indexing done ^^";
+            searchTextBox.Text = "Indexing done ^^";
             searchTextBox.SelectionStart = 0;
             searchTextBox.SelectionLength = searchTextBox.Text.Length;
         }
@@ -279,6 +321,11 @@ namespace SearchEngineProject
         {
             Dispose();
             Close();
+        }
+
+        private void correctedWordLabel_MouseClick(object sender, MouseEventArgs e)
+        {
+            searchTextBox.Text = correctedWordLabel.Text.Replace("Did you mean: ", "").Replace("?", "");
         }
     }
 }
