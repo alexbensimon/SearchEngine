@@ -327,5 +327,25 @@ namespace SearchEngineProject
         {
             searchTextBox.Text = correctedWordLabel.Text.Replace("Did you mean: ", "").Replace("?", "");
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Class: CECS 529\n" + 
+                "Project: Milestone 2\n" +
+                "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" + 
+                "Category A options: Wildcard queries and spelling correction\n" + 
+                "Category B options: Syntax checking, GUI, Statistics, K-gram index on disk\n" +
+                "Category C options: NOT queries", "About");
+        }
+
+        private void correctedWordLabel_MouseEnter(object sender, EventArgs e)
+        {
+            correctedWordLabel.Font=new Font(correctedWordLabel.Font, FontStyle.Underline);
+        }
+
+        private void correctedWordLabel_MouseLeave(object sender, EventArgs e)
+        {
+            correctedWordLabel.Font = new Font(correctedWordLabel.Font, FontStyle.Regular);
+        }
     }
 }
