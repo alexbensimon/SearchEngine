@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.searchTextBox = new System.Windows.Forms.TextBox();
             this.searchButton = new System.Windows.Forms.Button();
-            this.resultsTextBox = new System.Windows.Forms.RichTextBox();
             this.articleTextBox = new System.Windows.Forms.RichTextBox();
             this.numberResultsLabel = new System.Windows.Forms.Label();
             this.menu = new System.Windows.Forms.MenuStrip();
@@ -46,6 +45,7 @@
             this.boolCBox = new System.Windows.Forms.CheckBox();
             this.rankCbox = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.correctedWordLabel = new System.Windows.Forms.Label();
             this.indexingLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -85,25 +85,6 @@
             this.searchButton.TabIndex = 1;
             this.searchButton.Text = "\r\n";
             this.searchButton.UseVisualStyleBackColor = false;
-            // 
-            // resultsTextBox
-            // 
-            this.resultsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.resultsTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.resultsTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.resultsTextBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.resultsTextBox.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.resultsTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.resultsTextBox.Location = new System.Drawing.Point(18, 151);
-            this.resultsTextBox.Margin = new System.Windows.Forms.Padding(7);
-            this.resultsTextBox.Name = "resultsTextBox";
-            this.resultsTextBox.ReadOnly = true;
-            this.resultsTextBox.Size = new System.Drawing.Size(411, 220);
-            this.resultsTextBox.TabIndex = 2;
-            this.resultsTextBox.Text = "";
-            this.resultsTextBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseClick_1);
-            this.resultsTextBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseMove);
             // 
             // articleTextBox
             // 
@@ -256,12 +237,20 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.flowLayoutPanel1);
             this.panel1.Controls.Add(this.correctedWordLabel);
             this.panel1.Controls.Add(this.numberResultsLabel);
             this.panel1.Location = new System.Drawing.Point(8, 151);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(421, 229);
             this.panel1.TabIndex = 14;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(10, 31);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(411, 268);
+            this.flowLayoutPanel1.TabIndex = 0;
             // 
             // correctedWordLabel
             // 
@@ -326,7 +315,6 @@
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.menu);
             this.Controls.Add(this.panel3);
-            this.Controls.Add(this.resultsTextBox);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.indexingLabel);
@@ -352,7 +340,6 @@
 
         private System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.Button searchButton;
-        private System.Windows.Forms.RichTextBox resultsTextBox;
         private System.Windows.Forms.RichTextBox articleTextBox;
         private System.Windows.Forms.Label numberResultsLabel;
         private System.Windows.Forms.MenuStrip menu;
@@ -369,6 +356,7 @@
         private System.Windows.Forms.Label correctedWordLabel;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }

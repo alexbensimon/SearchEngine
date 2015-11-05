@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -29,16 +30,16 @@ namespace SearchEngineProject
 
         private void DisplaySearchResults()
         {
-            resultsTextBox.Clear();
+            flowLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
             var query = searchTextBox.Text.ToLower();
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
             if (resultsDocIds == null)
-                resultsTextBox.Text = "Wrong syntax";
+                flowLayoutPanel1.Controls.Add(new Label { Text = "Wrong syntax" });
             else if (resultsDocIds.Count == 0)
-                resultsTextBox.Text = "No results";
+                flowLayoutPanel1.Controls.Add(new Label { Text = "No results" });
             else
             {
                 // Display the number of returned documents.
@@ -48,11 +49,13 @@ namespace SearchEngineProject
                 var finalResults = new StringBuilder();
                 foreach (int docId in resultsDocIds)
                 {
-                    finalResults.Append(_index.FileNames[docId]);
-                    finalResults.AppendLine();
-                    finalResults.AppendLine();
+                    var fileNameLabel = new Label { Text = _index.FileNames[docId], AutoSize = true,
+                        Font = new Font("Segoe Print", (float)14.25)};
+                    fileNameLabel.Click += FileNameLabel_Click;
+                    fileNameLabel.MouseEnter += FileNameLabel_MouseEnter;
+                    fileNameLabel.MouseLeave += FileNameLabel_MouseLeave;
+                    flowLayoutPanel1.Controls.Add(fileNameLabel);
                 }
-                resultsTextBox.Text = finalResults.ToString();
             }
 
             //Display potential correction of search terms if needed
@@ -99,6 +102,42 @@ namespace SearchEngineProject
             }
         }
 
+        private void FileNameLabel_Click(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                foreach (Label tempLabel in flowLayoutPanel1.Controls)
+                {
+                    tempLabel.ForeColor = Color.Black;
+                }
+                label.ForeColor = Color.Gold;
+            }
+        }
+
+        private void FileNameLabel_MouseEnter(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                label.Cursor = Cursors.Hand;
+                label.Font = new Font(label.Font.Name, label.Font.SizeInPoints, FontStyle.Underline);
+            }
+        }
+
+        private void FileNameLabel_MouseLeave(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                label.Cursor = Cursors.Default;
+                label.Font = new Font(label.Font.Name, label.Font.SizeInPoints, FontStyle.Regular);
+            }
+        }
+
         private string prettyBytes(long numberOfBytes)
         {
             var counter = 0;
@@ -110,7 +149,7 @@ namespace SearchEngineProject
             }
             return numberOfBytes + unit[counter];
         }
-
+        /*
         private void richTextBox1_MouseClick_1(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
@@ -123,7 +162,7 @@ namespace SearchEngineProject
                 articleTextBox.Text = File.ReadAllText("Corpus/" + word);
             }
         }
-
+        */
         public static string GetWordUnderCursor(RichTextBox control, MouseEventArgs e)
         {
             // Check if there is any text entered.
@@ -145,7 +184,7 @@ namespace SearchEngineProject
             // Get and return the whole word.
             return control.Text.Substring(start, end - start + 1);
         }
-
+        /*
         private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
         {
             var control = sender as RichTextBox;
@@ -173,7 +212,7 @@ namespace SearchEngineProject
                 }
             }
         }
-
+        */
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var statistics = new StringBuilder();
