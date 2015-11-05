@@ -8,6 +8,8 @@ namespace SearchEngineProject
 {
     public class SimpleEngine
     {
+        public static HashSet<string> PotentialMisspelledWords = new HashSet<string>();
+
         public static bool IsQuerySyntaxCorrect(string query)
         {
             // Testing patterns.
@@ -134,7 +136,7 @@ namespace SearchEngineProject
             var orQueryItemsResultsDocIds = new List<List<int>>();
             foreach (string term in terms)
             {
-                orQueryItemsResultsDocIds.Add(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)[0].ToList());
+                orQueryItemsResultsDocIds.Add(GetDocIds(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)));
             }
 
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
@@ -142,6 +144,9 @@ namespace SearchEngineProject
 
         public static List<int> ProcessQuery(string query, DiskPositionalIndex index)
         {
+            //Empty the potential misspelled words
+            PotentialMisspelledWords.Clear();
+
             // Trim the query.
             query = query.Trim().Replace("-", "");
 
@@ -181,14 +186,25 @@ namespace SearchEngineProject
                         string term = termTemp.Trim();
                         if (term != string.Empty)
                         {
-                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
                             // If Wildcard query.
                             if (Regex.IsMatch(term, @"(.*\*.*)+"))
                                 secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
-                            else if (postings == null)
-                                secondAndQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                secondAndQueryItemsResultsDocIds.Add(postings[0].ToList());
+                            {
+                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                                if (postings == null)
+                                {
+                                    secondAndQueryItemsResultsDocIds.Add(new List<int>());
+                                    if (!PotentialMisspelledWords.Contains(term))
+                                        PotentialMisspelledWords.Add(term);
+                                }
+                                else
+                                {
+                                    secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
+                                    if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
+                                        PotentialMisspelledWords.Add(term);
+                                }
+                            }
                         }
                     }
                     if (secondAndQueryItemsResultsDocIds.Count > 0)
@@ -223,14 +239,25 @@ namespace SearchEngineProject
                         string term = termTemp.Trim();
                         if (term != string.Empty)
                         {
-                            var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
                             // If Wildcard query.
                             if (Regex.IsMatch(term, @"(.*\*.*)+"))
                                 andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
-                            else if (postings == null)
-                                andQueryItemsResultsDocIds.Add(new List<int>());
                             else
-                                andQueryItemsResultsDocIds.Add(postings[0].ToList());
+                            {
+                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                                if (postings == null)
+                                {
+                                    andQueryItemsResultsDocIds.Add(new List<int>());
+                                    if (!PotentialMisspelledWords.Contains(term))
+                                        PotentialMisspelledWords.Add(term);
+                                }
+                                else
+                                {
+                                    andQueryItemsResultsDocIds.Add(GetDocIds(postings));
+                                    if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
+                                        PotentialMisspelledWords.Add(term);
+                                }
+                            }
                         }
                     }
                 }
@@ -257,12 +284,32 @@ namespace SearchEngineProject
             foreach (var word in wordsList)
             {
                 if (word1Postings == null)
+                {
                     word1Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()), true);
+
+                    //Check if the word could be mispelled
+                    if (word1Postings != null)
+                    {
+                        if (word1Postings.Count() < 5 && !PotentialMisspelledWords.Contains(word))
+                            PotentialMisspelledWords.Add(word);
+                    }
+                    else if (!PotentialMisspelledWords.Contains(word))
+                        PotentialMisspelledWords.Add(word);
+                }
+
                 else
                 {
                     var word2Postings = index.GetPostings(PorterStemmer.ProcessToken(word.Trim()), true);
                     if (word2Postings == null)
+                    {
+                        if (!PotentialMisspelledWords.Contains(word))
+                            PotentialMisspelledWords.Add(word);
                         return null;
+                    }
+
+                    if (word1Postings.Count() < 5 && !PotentialMisspelledWords.Contains(word))
+                        PotentialMisspelledWords.Add(word);
+
                     word1Postings = Process2WordPhraseQuery(word1Postings, word2Postings);
                 }
                 if (word1Postings == null)
@@ -291,15 +338,16 @@ namespace SearchEngineProject
             {
                 var word1DocId = word1Postings[docPointer1][0];
                 var word2DocId = word2Postings[docPointer2][0];
+
                 if (word1DocId == word2DocId)
                 {
                     var posPointer1 = 1;
                     var posPointer2 = 1;
-                    while (posPointer1 < word1Postings[docPointer1].Length - 1 &&
-                            posPointer2 < word2Postings[docPointer2].Length - 1)
+                    while (posPointer1 <= word1Postings[docPointer1].Length - 1 &&
+                            posPointer2 <= word2Postings[docPointer2].Length - 1)
                     {
-                        var word1Pos = word1Postings[word1DocId][posPointer1];
-                        var word2Pos = word2Postings[word2DocId][posPointer2];
+                        var word1Pos = word1Postings[docPointer1][posPointer1];
+                        var word2Pos = word2Postings[docPointer2][posPointer2];
                         if (word2Pos - word1Pos == 1)
                         {
                             if (newPostingList.ContainsKey(word2DocId))
@@ -331,7 +379,7 @@ namespace SearchEngineProject
             int i = 0;
             foreach (var docId in newPostingList.Keys)
             {
-                newPostingArray[i] = new int[newPostingList[docId].Count];
+                newPostingArray[i] = new int[newPostingList[docId].Count + 1];
                 newPostingArray[i][0] = docId;
                 int j = 1;
                 foreach (var position in newPostingList[docId])
@@ -343,6 +391,16 @@ namespace SearchEngineProject
             }
 
             return newPostingArray;
+        }
+
+        private static List<int> GetDocIds(int[][] postings)
+        {
+            var idsList = new List<int>();
+            for (int i = 0; i < postings.Count(); i++)
+            {
+                idsList.Add(postings[i][0]);
+            }
+            return idsList;
         }
 
     }

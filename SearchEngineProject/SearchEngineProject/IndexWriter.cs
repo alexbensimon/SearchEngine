@@ -8,39 +8,37 @@ namespace SearchEngineProject
     public class IndexWriter
     {
         private readonly string _mPath;
-        public static int IndexSize { get; private set; }
-        public static int AvgNumberDocsInPostingsList { get; private set; }
-        public static Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
-        public static long IndexSizeInMemory { get; private set; }
 
         public IndexWriter(string path)
         {
             _mPath = path;
         }
 
-        public void BuildIndex()
+        public void BuildIndex(MainWindow mainWindow)
         {
-            BuildIndexForDirectory(_mPath);
+            BuildIndexForDirectory(_mPath, mainWindow);
         }
 
-        private static void BuildIndexForDirectory(string folder)
+        private static void BuildIndexForDirectory(string folder, MainWindow window)
         {
             // The inverted index.
             var index = new PositionalInvertedIndex();
 
+            //Initiate the progress Bar
+            window.InitiateprogressBar(folder);
+
             // Index the directory using a naive index
-            IndexFiles(folder, index);
+            IndexFiles(folder, index, window);
             foreach (var subfolder in Directory.EnumerateDirectories(folder))
             {
-                IndexFiles(subfolder, index);
+                IndexFiles(subfolder, index, window);
             }
             
+            //Hide the progress bar to allow the user to start searching for terms
+            window.HideProgressBar();
 
             index.ComputeStatistics();
-            IndexSize = index.IndexSize;
-            AvgNumberDocsInPostingsList = index.AvgNumberDocsInPostingsList;
-            ProportionDocContaining10MostFrequent = index.ProportionDocContaining10MostFrequent;
-            IndexSizeInMemory = index.IndexSizeInMemory;
+            index.StatToDisk(folder);
                 
             // at this point, "index" contains the in-memory inverted index 
             // now we save the index to disk, building three files: the postings index,
@@ -146,7 +144,7 @@ namespace SearchEngineProject
             vocabList.Close();
         }
 
-        private static void IndexFiles(string folder, PositionalInvertedIndex index)
+        private static void IndexFiles(string folder, PositionalInvertedIndex index, MainWindow window)
         {
             var documentId = 0;
 
@@ -159,6 +157,7 @@ namespace SearchEngineProject
                     IndexFile(fileName, index, documentId);
                     documentId++;
                 }
+                window.IncrementProgressBar();
             }
         }
 
@@ -180,11 +179,11 @@ namespace SearchEngineProject
                         foreach (var tokenHyphen in token.Split('-'))
                         {
                             index.AddTerm(PorterStemmer.ProcessToken(tokenHyphen), documentId, position);
-                            KGramIndex.AddType(tokenHyphen);
+                            KGramIndex.GenerateKgrams(tokenHyphen, true, 0);
                         }
                     }
                     index.AddTerm(PorterStemmer.ProcessToken(token.Replace("-", "")), documentId, position);
-                    KGramIndex.AddType(token.Replace("-", ""));
+                    KGramIndex.GenerateKgrams(token.Replace("-", ""), true, 0);
                     position++;
                 }
                 stream.Close();
