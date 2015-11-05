@@ -64,7 +64,7 @@
             this.searchTextBox.Enabled = false;
             this.searchTextBox.Font = new System.Drawing.Font("Segoe Print", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.searchTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.searchTextBox.Location = new System.Drawing.Point(5, 5);
+            this.searchTextBox.Location = new System.Drawing.Point(5, 0);
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(263, 34);
             this.searchTextBox.TabIndex = 0;
@@ -79,9 +79,9 @@
             this.searchButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.searchButton.FlatAppearance.BorderSize = 0;
             this.searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.searchButton.Location = new System.Drawing.Point(276, 31);
+            this.searchButton.Location = new System.Drawing.Point(276, 34);
             this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(36, 43);
+            this.searchButton.Size = new System.Drawing.Size(31, 33);
             this.searchButton.TabIndex = 1;
             this.searchButton.Text = "\r\n";
             this.searchButton.UseVisualStyleBackColor = false;
@@ -183,9 +183,9 @@
             // 
             this.progressBar.BackColor = System.Drawing.Color.White;
             this.progressBar.ForeColor = System.Drawing.Color.Gold;
-            this.progressBar.Location = new System.Drawing.Point(8, 31);
+            this.progressBar.Location = new System.Drawing.Point(8, 34);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(268, 43);
+            this.progressBar.Size = new System.Drawing.Size(268, 33);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 10;
             this.progressBar.UseWaitCursor = true;
@@ -206,7 +206,7 @@
             this.boolCBox.Font = new System.Drawing.Font("Segoe Print", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.boolCBox.Location = new System.Drawing.Point(328, 31);
             this.boolCBox.Name = "boolCBox";
-            this.boolCBox.Size = new System.Drawing.Size(51, 43);
+            this.boolCBox.Size = new System.Drawing.Size(51, 37);
             this.boolCBox.TabIndex = 12;
             this.boolCBox.Text = "Bool";
             this.boolCBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -227,7 +227,7 @@
             this.rankCbox.ForeColor = System.Drawing.Color.Gold;
             this.rankCbox.Location = new System.Drawing.Point(378, 31);
             this.rankCbox.Name = "rankCbox";
-            this.rankCbox.Size = new System.Drawing.Size(51, 43);
+            this.rankCbox.Size = new System.Drawing.Size(51, 37);
             this.rankCbox.TabIndex = 13;
             this.rankCbox.Text = "Rank";
             this.rankCbox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -240,16 +240,17 @@
             this.panel1.Controls.Add(this.flowLayoutPanel1);
             this.panel1.Controls.Add(this.correctedWordLabel);
             this.panel1.Controls.Add(this.numberResultsLabel);
-            this.panel1.Location = new System.Drawing.Point(8, 151);
+            this.panel1.Location = new System.Drawing.Point(8, 80);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(421, 229);
             this.panel1.TabIndex = 14;
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(10, 31);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(411, 268);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(421, 229);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // correctedWordLabel
@@ -296,10 +297,10 @@
             // 
             this.panel3.BackColor = System.Drawing.Color.White;
             this.panel3.Controls.Add(this.searchTextBox);
-            this.panel3.Location = new System.Drawing.Point(8, 31);
+            this.panel3.Location = new System.Drawing.Point(8, 34);
             this.panel3.Name = "panel3";
-            this.panel3.Padding = new System.Windows.Forms.Padding(5, 5, 0, 5);
-            this.panel3.Size = new System.Drawing.Size(268, 43);
+            this.panel3.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.panel3.Size = new System.Drawing.Size(268, 33);
             this.panel3.TabIndex = 15;
             // 
             // MainWindow
@@ -309,8 +310,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(916, 387);
-            this.Controls.Add(this.rankCbox);
             this.Controls.Add(this.progressBar);
+            this.Controls.Add(this.rankCbox);
             this.Controls.Add(this.boolCBox);
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.menu);
