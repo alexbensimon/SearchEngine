@@ -183,7 +183,7 @@
             this.progressBar.ForeColor = System.Drawing.Color.Gold;
             this.progressBar.Location = new System.Drawing.Point(8, 31);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(279, 34);
+            this.progressBar.Size = new System.Drawing.Size(279, 35);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 10;
             this.progressBar.UseWaitCursor = true;
@@ -298,12 +298,12 @@
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.searchTextBox);
             this.Controls.Add(this.menu);
-            this.Controls.Add(this.resultsTextBox);
-            this.Controls.Add(this.articleTextBox);
+            this.Controls.Add(this.panel3);
             this.Controls.Add(this.indexingLabel);
+            this.Controls.Add(this.resultsTextBox);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.articleTextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menu;
             this.MinimumSize = new System.Drawing.Size(932, 426);
