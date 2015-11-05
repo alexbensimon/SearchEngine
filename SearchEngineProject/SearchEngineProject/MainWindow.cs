@@ -347,5 +347,11 @@ namespace SearchEngineProject
         {
             correctedWordLabel.Font = new Font(correctedWordLabel.Font, FontStyle.Regular);
         }
+
+        private void searchTextBox_Click(object sender, EventArgs e)
+        {
+            if(searchTextBox.Text=="Indexing done ^^")
+                searchTextBox.Clear();
+        }
     }
 }

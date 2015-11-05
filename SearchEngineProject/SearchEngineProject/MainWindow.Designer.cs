@@ -65,6 +65,7 @@
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(271, 34);
             this.searchTextBox.TabIndex = 0;
+            this.searchTextBox.Click += new System.EventHandler(this.searchTextBox_Click);
             this.searchTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // searchButton
