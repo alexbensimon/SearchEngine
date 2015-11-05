@@ -39,6 +39,8 @@
             this.statisticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.boolCBox = new System.Windows.Forms.CheckBox();
             this.rankCbox = new System.Windows.Forms.CheckBox();
@@ -50,6 +52,7 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.menu.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // searchTextBox
@@ -62,6 +65,7 @@
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(271, 34);
             this.searchTextBox.TabIndex = 0;
+            this.searchTextBox.Click += new System.EventHandler(this.searchTextBox_Click);
             this.searchTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // searchButton
@@ -82,17 +86,15 @@
             // 
             // articleTextBox
             // 
-            this.articleTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.articleTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.articleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.articleTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.articleTextBox.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.articleTextBox.ForeColor = System.Drawing.Color.DimGray;
-            this.articleTextBox.Location = new System.Drawing.Point(457, 47);
+            this.articleTextBox.Location = new System.Drawing.Point(13, 5);
             this.articleTextBox.Name = "articleTextBox";
             this.articleTextBox.ReadOnly = true;
-            this.articleTextBox.Size = new System.Drawing.Size(447, 324);
+            this.articleTextBox.Size = new System.Drawing.Size(456, 339);
             this.articleTextBox.TabIndex = 3;
             this.articleTextBox.Text = "";
             // 
@@ -112,7 +114,8 @@
             this.menu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.menu.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.indexToolStripMenuItem});
+            this.indexToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
             this.menu.Size = new System.Drawing.Size(916, 25);
@@ -157,6 +160,22 @@
             this.quitToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.ForeColor = System.Drawing.Color.Gold;
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(47, 21);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // progressBar
             // 
@@ -235,12 +254,11 @@
             this.correctedWordLabel.Size = new System.Drawing.Size(0, 23);
             this.correctedWordLabel.TabIndex = 0;
             this.correctedWordLabel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.correctedWordLabel_MouseClick);
+            this.correctedWordLabel.MouseEnter += new System.EventHandler(this.correctedWordLabel_MouseEnter);
+            this.correctedWordLabel.MouseLeave += new System.EventHandler(this.correctedWordLabel_MouseLeave);
             // 
             // indexingLabel
             // 
-            this.indexingLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.indexingLabel.BackColor = System.Drawing.Color.Transparent;
             this.indexingLabel.Font = new System.Drawing.Font("Segoe Print", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.indexingLabel.ForeColor = System.Drawing.Color.Gold;
@@ -253,9 +271,14 @@
             // 
             // panel2
             // 
+            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel2.Controls.Add(this.articleTextBox);
             this.panel2.Location = new System.Drawing.Point(439, 31);
             this.panel2.Name = "panel2";
+            this.panel2.Padding = new System.Windows.Forms.Padding(13, 5, 0, 5);
             this.panel2.Size = new System.Drawing.Size(469, 349);
             this.panel2.TabIndex = 15;
             // 
@@ -290,7 +313,6 @@
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.articleTextBox);
             this.Controls.Add(this.indexingLabel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menu;
@@ -302,6 +324,7 @@
             this.menu.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -328,6 +351,8 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
 
