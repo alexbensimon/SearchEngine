@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using SearchEngineProject.Properties;
@@ -12,7 +10,7 @@ namespace SearchEngineProject
     public partial class MainWindow : Form
     {
         private string _currentWordUnderCursor;
-        private DiskPositionalIndex _index;
+        private readonly DiskPositionalIndex _index;
 
         public MainWindow()
         {
@@ -73,7 +71,7 @@ namespace SearchEngineProject
         private string prettyBytes(long numberOfBytes)
         {
             var counter = 0;
-            var unit = new string[] { "B", "KB", "MB", "GB" };
+            var unit = new[] { "B", "KB", "MB", "GB" };
             while (numberOfBytes > 1024)
             {
                 numberOfBytes /= 1024;
