@@ -45,8 +45,8 @@
             this.boolCBox = new System.Windows.Forms.CheckBox();
             this.rankCbox = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.pageLabel = new System.Windows.Forms.Label();
             this.previousButton = new System.Windows.Forms.Button();
+            this.pageLabel = new System.Windows.Forms.Label();
             this.nextButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.correctedWordLabel = new System.Windows.Forms.Label();
@@ -81,10 +81,12 @@
             this.searchButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.searchButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.searchButton.FlatAppearance.BorderSize = 0;
+            this.searchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.White;
+            this.searchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.White;
             this.searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.searchButton.Location = new System.Drawing.Point(276, 34);
             this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(31, 33);
+            this.searchButton.Size = new System.Drawing.Size(33, 33);
             this.searchButton.TabIndex = 1;
             this.searchButton.Text = "\r\n";
             this.searchButton.UseVisualStyleBackColor = false;
@@ -239,35 +241,39 @@
             // 
             // panel1
             // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.panel1.Controls.Add(this.pageLabel);
             this.panel1.Controls.Add(this.previousButton);
+            this.panel1.Controls.Add(this.pageLabel);
             this.panel1.Controls.Add(this.nextButton);
             this.panel1.Controls.Add(this.tableLayoutPanel1);
             this.panel1.Controls.Add(this.correctedWordLabel);
             this.panel1.Controls.Add(this.numberResultsLabel);
             this.panel1.Location = new System.Drawing.Point(8, 80);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(421, 229);
+            this.panel1.Padding = new System.Windows.Forms.Padding(10, 25, 10, 30);
+            this.panel1.Size = new System.Drawing.Size(421, 300);
             this.panel1.TabIndex = 14;
-            // 
-            // pageLabel
-            // 
-            this.pageLabel.AutoSize = true;
-            this.pageLabel.Location = new System.Drawing.Point(192, 279);
-            this.pageLabel.Name = "pageLabel";
-            this.pageLabel.Size = new System.Drawing.Size(0, 13);
-            this.pageLabel.TabIndex = 8;
             // 
             // previousButton
             // 
-            this.previousButton.Location = new System.Drawing.Point(11, 274);
+            this.previousButton.Location = new System.Drawing.Point(3, 274);
             this.previousButton.Name = "previousButton";
             this.previousButton.Size = new System.Drawing.Size(75, 23);
             this.previousButton.TabIndex = 7;
             this.previousButton.Text = "Previous";
             this.previousButton.UseVisualStyleBackColor = true;
             this.previousButton.Click += new System.EventHandler(this.previousButton_Click);
+            // 
+            // pageLabel
+            // 
+            this.pageLabel.AutoSize = true;
+            this.pageLabel.Location = new System.Drawing.Point(203, 280);
+            this.pageLabel.Name = "pageLabel";
+            this.pageLabel.Size = new System.Drawing.Size(0, 13);
+            this.pageLabel.TabIndex = 8;
             // 
             // nextButton
             // 
@@ -285,12 +291,13 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.53659F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.46341F));
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(11, 29);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(10, 25);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(410, 239);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(401, 245);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
             // correctedWordLabel
@@ -299,7 +306,7 @@
             this.correctedWordLabel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.correctedWordLabel.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.correctedWordLabel.ForeColor = System.Drawing.Color.Firebrick;
-            this.correctedWordLabel.Location = new System.Drawing.Point(7, 3);
+            this.correctedWordLabel.Location = new System.Drawing.Point(4, 4);
             this.correctedWordLabel.Name = "correctedWordLabel";
             this.correctedWordLabel.Size = new System.Drawing.Size(0, 23);
             this.correctedWordLabel.TabIndex = 0;

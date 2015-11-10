@@ -61,6 +61,16 @@ namespace SearchEngineProject.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap google_web_search_xxl {
+            get {
+                object obj = ResourceManager.GetObject("google-web-search-xxl", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This word does not exist in the documents.
         /// </summary>
         internal static string inexistantWordMessage {
