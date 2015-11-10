@@ -14,8 +14,8 @@ namespace SearchEngineProject
 {
     public partial class MainWindow : Form
     {
-        private string _currentWordUnderCursor;
         private DiskPositionalIndex _index;
+        private List<string> _finalResults;
 
         public MainWindow()
         {
@@ -35,32 +35,39 @@ namespace SearchEngineProject
 
         private void DisplaySearchResults()
         {
-            flowLayoutPanel1.Controls.Clear();
+            tableLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
             var query = searchTextBox.Text.ToLower();
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
             if (resultsDocIds == null)
-                flowLayoutPanel1.Controls.Add(new Label { Text = "Wrong syntax" });
+                tableLayoutPanel1.Controls.Add(new Label
+                {
+                    Text = "Wrong syntax",
+                    AutoSize = true,
+                    Font = new Font("Segoe Print", (float)14.25)
+                });
             else if (resultsDocIds.Count == 0)
-                flowLayoutPanel1.Controls.Add(new Label { Text = "No results" });
+                tableLayoutPanel1.Controls.Add(new Label
+                {
+                    Text = "No results",
+                    AutoSize = true,
+                    Font = new Font("Segoe Print", (float)14.25)
+                });
             else
             {
                 // Display the number of returned documents.
                 numberResultsLabel.Text = resultsDocIds.Count + " results";
 
                 // Build the results.
-                var finalResults = new StringBuilder();
+                _finalResults = new List<string>();
                 foreach (int docId in resultsDocIds)
                 {
-                    var fileNameLabel = new Label { Text = _index.FileNames[docId], AutoSize = true,
-                        Font = new Font("Segoe Print", (float)14.25)};
-                    fileNameLabel.Click += FileNameLabel_Click;
-                    fileNameLabel.MouseEnter += FileNameLabel_MouseEnter;
-                    fileNameLabel.MouseLeave += FileNameLabel_MouseLeave;
-                    flowLayoutPanel1.Controls.Add(fileNameLabel);
+                    _finalResults.Add(_index.FileNames[docId]);
                 }
+                pageLabel.Text = "1";
+                UpdateDisplayResults(1);
             }
 
             //Display potential correction of search terms if needed
@@ -107,18 +114,46 @@ namespace SearchEngineProject
             }
         }
 
+        private void AddNewLabel(string text)
+        {
+            var fileNameLabel = new Label
+            {
+                Text = text,
+                AutoSize = true,
+                Font = new Font("Segoe Print", (float)14.25)
+            };
+            fileNameLabel.Click += FileNameLabel_Click;
+            fileNameLabel.MouseEnter += FileNameLabel_MouseEnter;
+            fileNameLabel.MouseLeave += FileNameLabel_MouseLeave;
+            tableLayoutPanel1.Controls.Add(fileNameLabel);
+        }
+
+        private void UpdateDisplayResults(int pageToDisplay)
+        {
+            tableLayoutPanel1.Controls.Clear();
+
+            for (int i = (pageToDisplay * 10) - 10; i < pageToDisplay * 10; i++)
+            {
+                if (_finalResults.Count <= i) break;
+                AddNewLabel(_finalResults.ElementAt(i));
+            }
+        }
+
         private void FileNameLabel_Click(object sender, EventArgs e)
         {
             var label = sender as Label;
 
             if (label != null)
             {
-                foreach (Label tempLabel in flowLayoutPanel1.Controls)
+                foreach (Label tempLabel in tableLayoutPanel1.Controls)
                 {
                     tempLabel.ForeColor = Color.Black;
                 }
                 label.ForeColor = Color.Gold;
+
+                articleTextBox.Text = File.ReadAllText("Corpus/" + label.Text);
             }
+            
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -154,70 +189,7 @@ namespace SearchEngineProject
             }
             return numberOfBytes + unit[counter];
         }
-        /*
-        private void richTextBox1_MouseClick_1(object sender, MouseEventArgs e)
-        {
-            var control = sender as RichTextBox;
-            // Get the word under the cursor.
-            var word = GetWordUnderCursor(control, e);
-            if (word != null && word.EndsWith(".txt"))
-            {
-                resultsTextBox.Select(resultsTextBox.Text.IndexOf(word), word.Length);
-                resultsTextBox.SelectionColor = Color.Gold;
-                articleTextBox.Text = File.ReadAllText("Corpus/" + word);
-            }
-        }
-        */
-        public static string GetWordUnderCursor(RichTextBox control, MouseEventArgs e)
-        {
-            // Check if there is any text entered.
-            if (string.IsNullOrWhiteSpace(control.Text))
-                return null;
-            // Get index of nearest character.
-            var index = control.GetCharIndexFromPosition(e.Location);
-            // Check if mouse is above a word (non-whitespace character).
-            if (char.IsWhiteSpace(control.Text[index]))
-                return null;
-            // Find the start index of the word.
-            var start = index;
-            while (start > 0 && !char.IsWhiteSpace(control.Text[start - 1]))
-                start--;
-            // Find the end index of the word.
-            var end = index;
-            while (end < control.Text.Length - 1 && !char.IsWhiteSpace(control.Text[end + 1]))
-                end++;
-            // Get and return the whole word.
-            return control.Text.Substring(start, end - start + 1);
-        }
-        /*
-        private void richTextBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            var control = sender as RichTextBox;
-            // Get the word under the cursor.
-            var word = GetWordUnderCursor(control, e);
-            if (word != null)
-                resultsTextBox.Cursor = Cursors.Hand;
-            else
-                resultsTextBox.Cursor = Cursors.Default;
-            if (word != _currentWordUnderCursor)
-            {
-                if (_currentWordUnderCursor != null)
-                {
-                    resultsTextBox.Select(resultsTextBox.Text.IndexOf(_currentWordUnderCursor), _currentWordUnderCursor.Length);
-                    resultsTextBox.SelectionColor = Color.Black;
-                    resultsTextBox.SelectionFont = new Font(resultsTextBox.SelectionFont, FontStyle.Regular);
-                    _currentWordUnderCursor = null;
-                }
-                if (word != null && word.EndsWith(".txt"))
-                {
-                    resultsTextBox.Select(resultsTextBox.Text.IndexOf(word), word.Length);
-                    resultsTextBox.SelectionColor = Color.Gold;
-                    resultsTextBox.SelectionFont = new Font(resultsTextBox.SelectionFont, FontStyle.Underline);
-                    _currentWordUnderCursor = word;
-                }
-            }
-        }
-        */
+
         private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var statistics = new StringBuilder();
@@ -369,17 +341,17 @@ namespace SearchEngineProject
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Class: CECS 529\n" + 
+            MessageBox.Show("Class: CECS 529\n" +
                 "Project: Milestone 2\n" +
-                "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" + 
-                "Category A options: Wildcard queries and spelling correction\n" + 
+                "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" +
+                "Category A options: Wildcard queries and spelling correction\n" +
                 "Category B options: Syntax checking, GUI, Statistics, K-gram index on disk\n" +
                 "Category C options: NOT queries", "About");
         }
 
         private void correctedWordLabel_MouseEnter(object sender, EventArgs e)
         {
-            correctedWordLabel.Font=new Font(correctedWordLabel.Font, FontStyle.Underline);
+            correctedWordLabel.Font = new Font(correctedWordLabel.Font, FontStyle.Underline);
         }
 
         private void correctedWordLabel_MouseLeave(object sender, EventArgs e)
@@ -389,8 +361,20 @@ namespace SearchEngineProject
 
         private void searchTextBox_Click(object sender, EventArgs e)
         {
-            if(searchTextBox.Text=="Indexing done ^^")
+            if (searchTextBox.Text == "Indexing done ^^")
                 searchTextBox.Clear();
+        }
+
+        private void nextButton_Click(object sender, EventArgs e)
+        {
+            pageLabel.Text = (int.Parse(pageLabel.Text) + 1).ToString();
+            UpdateDisplayResults((int.Parse(pageLabel.Text)));
+        }
+
+        private void previousButton_Click(object sender, EventArgs e)
+        {
+            pageLabel.Text = (int.Parse(pageLabel.Text) - 1).ToString();
+            UpdateDisplayResults((int.Parse(pageLabel.Text)));
         }
     }
 }
