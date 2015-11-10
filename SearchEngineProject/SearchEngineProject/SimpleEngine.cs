@@ -85,6 +85,11 @@ namespace SearchEngineProject
             return andQueryItemsResultsDocIds;
         }
 
+        public static List<List<int>> MergeAndNotResults(List<List<int>> andNotQueryItemsResultsDocIds)
+        {
+            return andNotQueryItemsResultsDocIds;
+        }
+
         public static List<List<int>> MergeOrResults(List<List<int>> orQueryItemsResultsDocIds)
         {
             for (int i = 0; i < orQueryItemsResultsDocIds.Count - 1; i++)
@@ -148,7 +153,7 @@ namespace SearchEngineProject
             PotentialMisspelledWords.Clear();
 
             // Trim the query.
-            query = query.Trim().Replace("-", "");
+            query = query.Trim();
 
             if (query == string.Empty)
                 return new List<int>();
@@ -170,6 +175,8 @@ namespace SearchEngineProject
                 string q = qTemp.Trim();
 
                 var andQueryItemsResultsDocIds = new List<List<int>>();
+                var andNotQueryItemsResultsDocIds = new List<List<int>>();
+                var notQueriesTempList = new List<List<int>>();
 
                 // Parentheses.
                 var parentheses = Regex.Matches(q, @"\((.+?)\)")
@@ -242,6 +249,17 @@ namespace SearchEngineProject
                             // If Wildcard query.
                             if (Regex.IsMatch(term, @"(.*\*.*)+"))
                                 andQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+
+                            // Not query.
+                            else if (Regex.IsMatch(term, @"-\S+"))
+                            {
+                                term = term.Replace("-", "");
+                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                                if(postings != null)
+                                    notQueriesTempList.Add(GetDocIds(postings));
+                            }
+
+                            // Simple word.  
                             else
                             {
                                 var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
@@ -262,9 +280,21 @@ namespace SearchEngineProject
                     }
                 }
 
-                // Merge all the results in a AND query.
-                if (andQueryItemsResultsDocIds.Count > 0)
-                    orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
+                // If there are NOT queries.
+                if (notQueriesTempList.Count > 0)
+                {
+                    if (andQueryItemsResultsDocIds.Count > 0)
+                        andNotQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
+
+                    andNotQueryItemsResultsDocIds.AddRange(notQueriesTempList);
+
+                    orQueryItemsResultsDocIds.Add(MergeAndNotResults(andNotQueryItemsResultsDocIds).Last());
+                }
+
+                else
+                    // Merge all the results in a AND query.
+                    if (andQueryItemsResultsDocIds.Count > 0)
+                        orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
             }
 
             // Merge all the OR query items results.
