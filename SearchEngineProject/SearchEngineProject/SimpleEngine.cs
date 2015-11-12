@@ -9,6 +9,7 @@ namespace SearchEngineProject
     public class SimpleEngine
     {
         public static HashSet<string> PotentialMisspelledWords = new HashSet<string>();
+        public static HashSet<string> FoundTerms = new HashSet<string>(); 
 
         public static bool IsQuerySyntaxCorrect(string query)
         {
@@ -167,11 +168,16 @@ namespace SearchEngineProject
         public static List<int> ProcessWildcardQuery(string query, DiskPositionalIndex index)
         {
             var orQuery = KGramIndex.GenerateNormalQuery(query);
-            var terms = SplitOrQuery(orQuery);
+            var words = SplitOrQuery(orQuery);
             var orQueryItemsResultsDocIds = new List<List<int>>();
-            foreach (string term in terms)
+            foreach (string word in words)
             {
-                orQueryItemsResultsDocIds.Add(GetDocIds(index.GetPostings(PorterStemmer.ProcessToken(term.Trim()), true)));
+                var term = PorterStemmer.ProcessToken(word.Trim());
+                orQueryItemsResultsDocIds.Add(GetDocIds(index.GetPostings(term, false)));
+
+                //Add the term to to  liste of the found term
+                if (!FoundTerms.Contains(term))
+                    FoundTerms.Add(term);
             }
 
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
@@ -187,11 +193,15 @@ namespace SearchEngineProject
                 var postings = index.GetPostings(term, false);
                 var dft = postings.Count();
                 double wqt = Math.Log(1 + numberOfDocuments / dft);
-
                 double ad = 0;
+
+                //Add the term to to  liste of the found term
+                if (!FoundTerms.Contains(term))
+                    FoundTerms.Add(term);
+
                 foreach (var documentId in GetDocIds(postings))
                 {
-                    int tftd = index.GetPostings(term, false)[documentId].Count();
+                    int tftd = postings[documentId].Count();
                     double wdt = 1 + Math.Log(tftd);
                     ad += wqt*wdt;
                 }
@@ -242,26 +252,30 @@ namespace SearchEngineProject
                     foreach (string termTemp in andQueryTerms)
                     {
                         string term = termTemp.Trim();
-                        if (term != string.Empty)
+                        if (term == string.Empty) continue;
+
+                        // If Wildcard query.
+                        if (Regex.IsMatch(term, @"(.*\*.*)+"))
+                            secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                        else
                         {
-                            // If Wildcard query.
-                            if (Regex.IsMatch(term, @"(.*\*.*)+"))
-                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                            var processedTerm = PorterStemmer.ProcessToken(term);
+                            var postings = index.GetPostings(processedTerm, false);
+
+                            //Add the term to to  liste of the found term
+                            if (!FoundTerms.Contains(processedTerm))
+                                FoundTerms.Add(processedTerm);
+                            if (postings == null)
+                            {
+                                secondAndQueryItemsResultsDocIds.Add(new List<int>());
+                                if (!PotentialMisspelledWords.Contains(term))
+                                    PotentialMisspelledWords.Add(term);
+                            }
                             else
                             {
-                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
-                                if (postings == null)
-                                {
-                                    secondAndQueryItemsResultsDocIds.Add(new List<int>());
-                                    if (!PotentialMisspelledWords.Contains(term))
-                                        PotentialMisspelledWords.Add(term);
-                                }
-                                else
-                                {
-                                    secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
-                                    if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
-                                        PotentialMisspelledWords.Add(term);
-                                }
+                                secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
+                                if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
+                                    PotentialMisspelledWords.Add(term);
                             }
                         }
                     }
@@ -305,15 +319,23 @@ namespace SearchEngineProject
                             else if (Regex.IsMatch(term, @"-\S+"))
                             {
                                 term = term.Replace("-", "");
-                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                                var processedTerm = PorterStemmer.ProcessToken(term);
+                                var postings = index.GetPostings(processedTerm, false);
                                 if (postings != null)
+                                {
+                                    //Add the term to to  liste of the found term
+                                    if (!FoundTerms.Contains(processedTerm))
+                                        FoundTerms.Add(processedTerm);
+
                                     notQueriesTempList.Add(GetDocIds(postings));
+                                }
                             }
 
                             // Simple word.  
                             else
                             {
-                                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                                var processedTerm = PorterStemmer.ProcessToken(term);
+                                var postings = index.GetPostings(processedTerm, false);
                                 if (postings == null)
                                 {
                                     andQueryItemsResultsDocIds.Add(new List<int>());
@@ -323,6 +345,9 @@ namespace SearchEngineProject
                                 else
                                 {
                                     andQueryItemsResultsDocIds.Add(GetDocIds(postings));
+                                    //Add the term to to  liste of the found term
+                                    if (!FoundTerms.Contains(processedTerm))
+                                        FoundTerms.Add(processedTerm);
                                     if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
                                         PotentialMisspelledWords.Add(term);
                                 }
@@ -396,6 +421,14 @@ namespace SearchEngineProject
                 if (word1Postings == null)
                     return null;
             }
+
+            //Add phrase query to found words as a group
+            string tmp = "";
+            foreach (var word in wordsList)
+            {
+                tmp += word + " ";
+            }
+            FoundTerms.Add(tmp.Trim());
 
             var resultPostingsList = new Dictionary<int, List<int>>();
             for (int i = 0; i < word1Postings.Length; i++)

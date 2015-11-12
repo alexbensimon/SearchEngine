@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Channels;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using SearchEngineProject.Properties;
@@ -20,7 +21,8 @@ namespace SearchEngineProject
         private int _numberOfResultsByPage = 14;
         private int _currentPage = 1;
         private int _numberOfPages;
-        private FormWindowState formerWindowsState = FormWindowState.Normal;
+        private FormWindowState _formerWindowsState = FormWindowState.Normal;
+        private string _directoryPath;
 
         public MainWindow()
         {
@@ -44,6 +46,7 @@ namespace SearchEngineProject
         private void DisplayBooleanSearchResults()
         {
             tableLayoutPanel1.Controls.Clear();
+            SimpleEngine.FoundTerms.Clear();
             numberResultsLabel.Text = string.Empty;
             var query = searchTextBox.Text.ToLower();
 
@@ -160,7 +163,7 @@ namespace SearchEngineProject
 
             UpdatePageNumber();
 
-            previousButton.Enabled = _currentPage != 1;           
+            previousButton.Enabled = _currentPage != 1;
 
             nextButton.Enabled = _currentPage != _numberOfPages;
         }
@@ -177,9 +180,34 @@ namespace SearchEngineProject
                 }
                 label.ForeColor = Color.Gold;
 
-                articleTextBox.Text = File.ReadAllText("Corpus/" + label.Text);
+                articleTextBox.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
+
+                //Highlight the search terms
+                HighlightText();
             }
 
+        }
+
+        public void HighlightText()
+        {
+
+            int sStart = articleTextBox.SelectionStart, startIndex = 0;
+
+            foreach (var articleWord in articleTextBox.Text.Split(new char[]{' ', '-'}))
+            {
+                var cleanWord = Regex.Replace(articleWord, @"[^-\w\s]*", "").ToLower();
+                if (SimpleEngine.FoundTerms.Contains(PorterStemmer.ProcessToken(cleanWord)))
+                {
+                    var index = articleTextBox.Text.IndexOf(articleWord, startIndex, StringComparison.Ordinal);
+                    articleTextBox.Select(index, articleWord.Length);
+                    articleTextBox.SelectionColor=Color.Gold;
+                    articleTextBox.SelectionBackColor=Color.Black;
+                }
+                startIndex += articleWord.Length+1;
+            }
+
+            articleTextBox.SelectionStart = sStart;
+            articleTextBox.SelectionLength = 0;
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -246,37 +274,37 @@ namespace SearchEngineProject
                 Description = "Choose the directory you want to index"
             };
             fbd.ShowDialog();
-            var directoryPath = fbd.SelectedPath;
+            _directoryPath = fbd.SelectedPath;
 
-            if (string.IsNullOrEmpty(directoryPath)) return;
+            if (string.IsNullOrEmpty(_directoryPath)) return;
 
-            var filenames = Directory.GetFiles(directoryPath, "*.bin")
+            var filenames = Directory.GetFiles(_directoryPath, "*.bin")
                                      .Select(Path.GetFileNameWithoutExtension)
                                      .ToArray();
 
-            DialogResult result = DialogResult.Cancel;
+            DialogResult result = DialogResult.No;
             if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWord"))
-                result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.OKCancel);
+                result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.YesNo);
 
-            if (result == DialogResult.Cancel)
+            if (result == DialogResult.No)
             {
                 if (_index != null)
                     _index.Dispose();
                 numberResultsLabel.Hide();
                 indexingLabel.Show();
                 Update();
-                var writer = new IndexWriter(directoryPath);
+                var writer = new IndexWriter(_directoryPath);
                 writer.BuildIndex(this);
 
                 //Write the KGram Index to the disk
-                KGramIndex.ToDisk(directoryPath);
+                KGramIndex.ToDisk(_directoryPath);
             }
 
             //Load the Disk positional index into memory
-            _index = new DiskPositionalIndex(directoryPath);
+            _index = new DiskPositionalIndex(_directoryPath);
 
             //Load the KGram index in memory
-            KGramIndex.ToMemory(directoryPath);
+            KGramIndex.ToMemory(_directoryPath);
 
             statisticsToolStripMenuItem.Enabled = true;
             indexingLabel.Hide();
@@ -409,7 +437,7 @@ namespace SearchEngineProject
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
         {
-            if(previousButton.Visible)
+            if (previousButton.Visible)
                 UpdateNumberOfResultsDisplayed();
         }
 
@@ -431,9 +459,9 @@ namespace SearchEngineProject
 
         private void MainWindow_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowState != formerWindowsState && previousButton.Visible)
+            if (WindowState != _formerWindowsState && previousButton.Visible)
             {
-                formerWindowsState = WindowState;
+                _formerWindowsState = WindowState;
                 UpdateNumberOfResultsDisplayed();
             }
         }
