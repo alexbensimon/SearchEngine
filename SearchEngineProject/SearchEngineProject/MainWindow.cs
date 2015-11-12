@@ -17,9 +17,7 @@ namespace SearchEngineProject
     {
         private DiskPositionalIndex _index;
         private List<string> _finalResults;
-        private int _numberOfResultsByPage = 14;
-        private int _currentPage = 1;
-        private int _numberOfPages;
+        private int numberOfResultsByPage = 14;
         private FormWindowState formerWindowsState = FormWindowState.Normal;
 
         public MainWindow()
@@ -30,18 +28,10 @@ namespace SearchEngineProject
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (boolCBox.Checked)
-                DisplayBooleanSearchResults();
-            else if (rankCbox.Checked)
-                DisplayRankSearchResults();
+            DisplaySearchResults();
         }
 
-        private void DisplayRankSearchResults()
-        {
-
-        }
-
-        private void DisplayBooleanSearchResults()
+        private void DisplaySearchResults()
         {
             tableLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
@@ -74,10 +64,8 @@ namespace SearchEngineProject
                 {
                     _finalResults.Add(_index.FileNames[docId]);
                 }
-
-                UpdateDisplayResults(_currentPage);
-                previousButton.Visible = true;
-                nextButton.Visible = true;
+                pageLabel.Text = "1";
+                UpdateDisplayResults(1);
             }
 
             //Display potential correction of search terms if needed
@@ -124,16 +112,6 @@ namespace SearchEngineProject
             }
         }
 
-        private void UpdatePageNumber()
-        {
-            int numberOfResults = int.Parse(numberResultsLabel.Text.Remove(numberResultsLabel.Text.Length - 8));
-            _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
-
-            while (_currentPage > _numberOfPages) _currentPage--;
-
-            pageLabel.Text = _currentPage + "/" + _numberOfPages;
-        }
-
         private void AddNewLabel(string text)
         {
             var fileNameLabel = new Label
@@ -151,18 +129,12 @@ namespace SearchEngineProject
         private void UpdateDisplayResults(int pageToDisplay)
         {
             tableLayoutPanel1.Controls.Clear();
-
-            for (int i = (pageToDisplay * _numberOfResultsByPage) - _numberOfResultsByPage; i < pageToDisplay * _numberOfResultsByPage; i++)
+            
+            for (int i = (pageToDisplay * numberOfResultsByPage) - numberOfResultsByPage; i < pageToDisplay * numberOfResultsByPage; i++)
             {
                 if (_finalResults.Count <= i) break;
                 AddNewLabel(_finalResults.ElementAt(i));
             }
-
-            UpdatePageNumber();
-
-            previousButton.Enabled = _currentPage != 1;           
-
-            nextButton.Enabled = _currentPage != _numberOfPages;
         }
 
         private void FileNameLabel_Click(object sender, EventArgs e)
@@ -179,7 +151,7 @@ namespace SearchEngineProject
 
                 articleTextBox.Text = File.ReadAllText("Corpus/" + label.Text);
             }
-
+            
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -339,8 +311,6 @@ namespace SearchEngineProject
             rankCbox.ForeColor = Color.Gold;
             rankCbox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             rankCbox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
-
-            DisplayBooleanSearchResults();
         }
 
         private void checkBox2_Click(object sender, EventArgs e)
@@ -354,8 +324,6 @@ namespace SearchEngineProject
             boolCBox.ForeColor = Color.Gold;
             boolCBox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             boolCBox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
-
-            DisplayRankSearchResults();
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -397,72 +365,42 @@ namespace SearchEngineProject
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            _currentPage++;
-            UpdateDisplayResults(_currentPage);
+            pageLabel.Text = (int.Parse(pageLabel.Text) + 1).ToString();
+            UpdateDisplayResults((int.Parse(pageLabel.Text)));
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            _currentPage--;
-            UpdateDisplayResults(_currentPage);
+            pageLabel.Text = (int.Parse(pageLabel.Text) - 1).ToString();
+            UpdateDisplayResults((int.Parse(pageLabel.Text)));
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
         {
-            if(previousButton.Visible)
-                UpdateNumberOfResultsDisplayed();
+            updateNumberOfResultsDisplayed();
         }
 
-        private void UpdateNumberOfResultsDisplayed()
+        private void updateNumberOfResultsDisplayed()
         {
             int tmp = Size.Height;
-            _numberOfResultsByPage = 14;
+            numberOfResultsByPage = 14;
             tableLayoutPanel1.RowCount = 0;
 
             while (tmp > MinimumSize.Height + 32)
             {
-                _numberOfResultsByPage += 2;
+                numberOfResultsByPage += 2;
                 tmp -= 32;
             }
 
-            UpdatePageNumber();
-            UpdateDisplayResults(_currentPage);
+            DisplaySearchResults();
         }
 
         private void MainWindow_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowState != formerWindowsState && previousButton.Visible)
+            if (WindowState != formerWindowsState)
             {
                 formerWindowsState = WindowState;
-                UpdateNumberOfResultsDisplayed();
-            }
-        }
-
-        private void nextButton_EnabledChanged(object sender, EventArgs e)
-        {
-            if (nextButton.Enabled)
-            {
-                nextButton.BackColor = Color.Gold;
-                nextButton.ForeColor = Color.Black;
-            }
-            else
-            {
-                nextButton.BackColor = Color.FromArgb(64, 64, 64);
-                nextButton.ForeColor = Color.Gold;
-            }
-        }
-
-        private void previousButton_EnabledChanged(object sender, EventArgs e)
-        {
-            if (previousButton.Enabled)
-            {
-                previousButton.BackColor = Color.Gold;
-                previousButton.ForeColor = Color.Black;
-            }
-            else
-            {
-                previousButton.BackColor = Color.FromArgb(64, 64, 64);
-                previousButton.ForeColor = Color.Gold;
+                updateNumberOfResultsDisplayed();
             }
         }
     }
