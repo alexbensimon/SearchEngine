@@ -33,13 +33,13 @@ namespace SearchEngineProject
             {
                 IndexFiles(subfolder, index, window);
             }
-            
+
             //Hide the progress bar to allow the user to start searching for terms
             window.HideProgressBar();
 
             index.ComputeStatistics();
             index.StatToDisk(folder);
-                
+
             // at this point, "index" contains the in-memory inverted index 
             // now we save the index to disk, building three files: the postings index,
             // the vocabulary list, and the vocabulary table.
@@ -149,22 +149,48 @@ namespace SearchEngineProject
             var documentId = 0;
 
             Console.WriteLine("Indexing " + Path.Combine(Environment.CurrentDirectory, folder));
-            foreach (string fileName in Directory.EnumerateFiles(
-                Path.Combine(Environment.CurrentDirectory, folder)))
+            foreach (string fileName in Directory.EnumerateFiles(Path.Combine(Environment.CurrentDirectory,
+                folder)))
             {
                 if (fileName.EndsWith(".txt"))
                 {
                     IndexFile(fileName, index, documentId);
                     documentId++;
                 }
+
+                // Calculate document weight. 
+
+                // Build term to occurence Hashmap.
+                var termToOccurence = new Dictionary<string, int>();
+                foreach (var term in index.GetDictionary())
+                {
+                    var positions = new List<int>();
+                    if (index.GetPostings(term).TryGetValue(documentId, out positions))
+                        termToOccurence.Add(term, positions.Count);
+                }
+                
+                // Compute all wdts.
+                var wdts = new List<double>();
+                foreach (var pair in termToOccurence)
+                    wdts.Add(1 + Math.Log(pair.Value));
+
+                // Calculate ld for this document.
+                double sumTemp = 0;
+                foreach (var wdt in wdts)
+                    sumTemp += wdt*wdt;
+                double ld = Math.Sqrt(sumTemp);
+
+                // Write ld in docWeights.bin.
+                var writer = new StreamWriter("docWeights.bin", true, Encoding.Default, 8);
+                writer.Write(ld);
+                writer.Close();
+
                 window.IncrementProgressBar();
             }
         }
 
-        private static void IndexFile(string fileName, PositionalInvertedIndex index,
-         int documentId)
+        private static void IndexFile(string fileName, PositionalInvertedIndex index, int documentId)
         {
-
             try
             {
                 SimpleTokenStream stream = new SimpleTokenStream(fileName);

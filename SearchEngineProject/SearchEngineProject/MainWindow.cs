@@ -25,10 +25,18 @@ namespace SearchEngineProject
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            DisplaySearchResults();
+            if(boolCBox.Checked)
+                DisplayBooleanSearchResults();
+            else if(rankCbox.Checked)
+                DisplayRankSearchResults();
         }
 
-        private void DisplaySearchResults()
+        private void DisplayRankSearchResults()
+        {
+            
+        }
+
+        private void DisplayBooleanSearchResults()
         {
             tableLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
@@ -308,6 +316,8 @@ namespace SearchEngineProject
             rankCbox.ForeColor = Color.Gold;
             rankCbox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             rankCbox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+
+            DisplayBooleanSearchResults();
         }
 
         private void checkBox2_Click(object sender, EventArgs e)
@@ -321,6 +331,8 @@ namespace SearchEngineProject
             boolCBox.ForeColor = Color.Gold;
             boolCBox.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             boolCBox.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+
+            DisplayRankSearchResults();
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)

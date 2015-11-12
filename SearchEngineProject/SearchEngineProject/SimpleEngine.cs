@@ -147,6 +147,27 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
+        public static void ProcessRankQuery(string query, DiskPositionalIndex index)
+        {
+            int numberOfDocuments = index.FileNames.Count;
+            var ads = new Dictionary<double, int>();
+
+            foreach (var term in SplitWhiteSpace(query))
+            {
+                var postings = index.GetPostings(term, false);
+                var dft = postings.Count();
+                double wqt = Math.Log(1 + numberOfDocuments / dft);
+
+                double ad = 0;
+                foreach (var documentId in GetDocIds(postings))
+                {
+                    int tftd = index.GetPostings(term, false)[documentId].Count();
+                    double wdt = 1 + Math.Log(tftd);
+                    ad += wqt*wdt;
+                }
+            }
+        }
+
         public static List<int> ProcessQuery(string query, DiskPositionalIndex index)
         {
             //Empty the potential misspelled words
@@ -255,7 +276,7 @@ namespace SearchEngineProject
                             {
                                 term = term.Replace("-", "");
                                 var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
-                                if(postings != null)
+                                if (postings != null)
                                     notQueriesTempList.Add(GetDocIds(postings));
                             }
 
@@ -294,7 +315,7 @@ namespace SearchEngineProject
                 else
                     // Merge all the results in a AND query.
                     if (andQueryItemsResultsDocIds.Count > 0)
-                        orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
+                    orQueryItemsResultsDocIds.Add(MergeAndResults(andQueryItemsResultsDocIds).Last());
             }
 
             // Merge all the OR query items results.
