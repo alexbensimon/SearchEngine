@@ -26,6 +26,107 @@ namespace SearchEngineProject
             labelIndexing.Hide();
         }
 
+        #region Menu
+
+        #region Index menu item
+
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Dispose();
+            Close();
+        }
+
+        private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var statistics = new StringBuilder();
+            statistics.Append("Number of terms in the index: ");
+            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
+
+            statistics.Append("Average number of documents in the postings list: ");
+            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
+
+            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
+            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
+            {
+                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
+            }
+            statistics.AppendLine("\n");
+
+            statistics.Append("Approximate memory requirement of the index: ");
+            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
+
+            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
+        }
+
+        private void indexADirectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fbd = new FolderBrowserDialog
+            {
+                ShowNewFolderButton = false,
+                Description = "Choose the directory you want to index"
+            };
+            fbd.ShowDialog();
+            _directoryPath = fbd.SelectedPath;
+
+            if (string.IsNullOrEmpty(_directoryPath)) return;
+
+            var filenames = Directory.GetFiles(_directoryPath, "*.bin")
+                                     .Select(Path.GetFileNameWithoutExtension)
+                                     .ToArray();
+
+            DialogResult result = DialogResult.No;
+            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWord"))
+                result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.YesNo);
+
+            if (result == DialogResult.No)
+            {
+                if (_index != null)
+                    _index.Dispose();
+                labelNumberResults.Hide();
+                labelIndexing.Show();
+                Update();
+                var writer = new IndexWriter(_directoryPath);
+                writer.BuildIndex(this);
+
+                //Write the KGram Index to the disk
+                KGramIndex.ToDisk(_directoryPath);
+            }
+
+            //Load the Disk positional index into memory
+            _index = new DiskPositionalIndex(_directoryPath);
+
+            //Load the KGram index in memory
+            KGramIndex.ToMemory(_directoryPath);
+
+            toolStripMenuItemStatistics.Enabled = true;
+            labelIndexing.Hide();
+            textBoxSearch.Enabled = true;
+            textBoxSearch.Select();
+            textBoxSearch.Text = "Indexing done ^^";
+            textBoxSearch.SelectionStart = 0;
+            textBoxSearch.SelectionLength = textBoxSearch.Text.Length;
+        }
+
+        #endregion
+
+        #region Index menu help
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Class: CECS 529\n" +
+                "Project: Milestone 2\n" +
+                "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" +
+                "Category A options: Wildcard queries and spelling correction\n" +
+                "Category B options: Syntax checking, GUI, Statistics, K-gram index on disk\n" +
+                "Category C options: NOT queries", "About");
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Search textBox
+
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (checkBoxBool.Checked)
@@ -33,6 +134,16 @@ namespace SearchEngineProject
             else if (checkBoxRank.Checked)
                 DisplayRankSearchResults();
         }
+
+        private void searchTextBox_Click(object sender, EventArgs e)
+        {
+            if (textBoxSearch.Text == "Indexing done ^^")
+                textBoxSearch.Clear();
+        }
+
+        #endregion
+
+        #region Retrieval modes
 
         private void DisplayRankSearchResults()
         {
@@ -56,7 +167,7 @@ namespace SearchEngineProject
                 labelNumberResults.Text = numberOfResults + " results";
 
                 _finalResults = new List<string>();
-                for (int i = 0; i < numberOfResults/2; i++)
+                for (int i = 0; i < numberOfResults / 2; i++)
                 {
                     _finalResults.Add(_index.FileNames[results.ElementAt(i).Value]);
                     _finalResults.Add(results.ElementAt(i).Key.ToString());
@@ -152,29 +263,45 @@ namespace SearchEngineProject
             }
         }
 
-        private void UpdatePageNumber()
+        #endregion
+
+        #region RetrievalMods Checkboxes
+
+        private void checkBox1_Click(object sender, EventArgs e)
         {
-            int numberOfResults = int.Parse(labelNumberResults.Text.Remove(labelNumberResults.Text.Length - 8));
-            _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
+            checkBoxBool.CheckState = CheckState.Checked;
+            checkBoxBool.ForeColor = Color.Black;
+            checkBoxBool.FlatAppearance.MouseOverBackColor = Color.Gold;
+            checkBoxBool.FlatAppearance.MouseDownBackColor = Color.Gold;
 
-            while (_currentPage > _numberOfPages) _currentPage--;
+            checkBoxRank.CheckState = CheckState.Unchecked;
+            checkBoxRank.ForeColor = Color.Gold;
+            checkBoxRank.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            checkBoxRank.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
 
-            labelPage.Text = _currentPage + "/" + _numberOfPages;
+            DisplayBooleanSearchResults();
         }
 
-        private void AddNewLabel(string text)
+        private void checkBox2_Click(object sender, EventArgs e)
         {
-            var fileNameLabel = new Label
-            {
-                Text = text,
-                AutoSize = true,
-                Font = new Font("Segoe Print", (float)14.25)
-            };
-            fileNameLabel.Click += FileNameLabel_Click;
-            fileNameLabel.MouseEnter += FileNameLabel_MouseEnter;
-            fileNameLabel.MouseLeave += FileNameLabel_MouseLeave;
-            tableLayoutPanelResults.Controls.Add(fileNameLabel);
+            checkBoxRank.CheckState = CheckState.Checked;
+            checkBoxRank.ForeColor = Color.Black;
+            checkBoxRank.FlatAppearance.MouseOverBackColor = Color.Gold;
+            checkBoxRank.FlatAppearance.MouseDownBackColor = Color.Gold;
+
+            checkBoxBool.CheckState = CheckState.Unchecked;
+            checkBoxBool.ForeColor = Color.Gold;
+            checkBoxBool.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            checkBoxBool.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
+
+            DisplayRankSearchResults();
         }
+
+        #endregion
+
+        #region Results display
+
+        #region Filename labels
 
         private void UpdateDisplayResults(int pageToDisplay)
         {
@@ -191,48 +318,6 @@ namespace SearchEngineProject
             buttonPrevious.Enabled = _currentPage != 1;
 
             buttonNext.Enabled = _currentPage != _numberOfPages;
-        }
-
-        private void FileNameLabel_Click(object sender, EventArgs e)
-        {
-            var label = sender as Label;
-
-            if (label != null)
-            {
-                foreach (Label tempLabel in tableLayoutPanelResults.Controls)
-                {
-                    tempLabel.ForeColor = Color.Black;
-                }
-                label.ForeColor = Color.Gold;
-
-                textBoxArticle.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
-
-                // Highlight the search terms.
-                HighlightText();
-            }
-
-        }
-
-        public void HighlightText()
-        {
-
-            int sStart = textBoxArticle.SelectionStart, startIndex = 0;
-
-            foreach (var articleWord in textBoxArticle.Text.Split(new char[] { ' ', '-' }))
-            {
-                var cleanWord = Regex.Replace(articleWord, @"[^-\w\s]*", "").ToLower();
-                if (SimpleEngine.FoundTerms.Contains(PorterStemmer.ProcessToken(cleanWord)))
-                {
-                    var index = textBoxArticle.Text.IndexOf(articleWord, startIndex, StringComparison.Ordinal);
-                    textBoxArticle.Select(index, articleWord.Length);
-                    textBoxArticle.SelectionColor = Color.Gold;
-                    textBoxArticle.SelectionBackColor = Color.Black;
-                }
-                startIndex += articleWord.Length + 1;
-            }
-
-            textBoxArticle.SelectionStart = sStart;
-            textBoxArticle.SelectionLength = 0;
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -257,88 +342,179 @@ namespace SearchEngineProject
             }
         }
 
-        private string prettyBytes(long numberOfBytes)
+        private void AddNewLabel(string text)
         {
-            var counter = 0;
-            var unit = new[] { "B", "KB", "MB", "GB" };
-            while (numberOfBytes > 1024)
+            var fileNameLabel = new Label
             {
-                numberOfBytes /= 1024;
-                counter++;
-            }
-            return numberOfBytes + unit[counter];
-        }
-
-        private void statisticsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var statistics = new StringBuilder();
-            statistics.Append("Number of terms in the index: ");
-            statistics.AppendLine(_index.IndexSize.ToString() + " terms\n");
-
-            statistics.Append("Average number of documents in the postings list: ");
-            statistics.AppendLine(_index.AvgNumberDocsInPostingsList.ToString() + " documents\n");
-
-            statistics.AppendLine("Proportion of documents that contain each of the 10 most frequent terms:");
-            foreach (var pair in _index.ProportionDocContaining10MostFrequent)
-            {
-                statistics.Append(pair.Key + ": " + Math.Round(pair.Value, 2) * 100 + "%; ");
-            }
-            statistics.AppendLine("\n");
-
-            statistics.Append("Approximate memory requirement of the index: ");
-            statistics.Append(prettyBytes(_index.IndexSizeInMemory));
-
-            MessageBox.Show(statistics.ToString(), Resources.StatMessageBoxTitle);
-        }
-
-        private void indexADirectoryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var fbd = new FolderBrowserDialog
-            {
-                ShowNewFolderButton = false,
-                Description = "Choose the directory you want to index"
+                Text = text,
+                AutoSize = true,
+                Font = new Font("Segoe Print", (float)14.25)
             };
-            fbd.ShowDialog();
-            _directoryPath = fbd.SelectedPath;
+            fileNameLabel.Click += FileNameLabel_Click;
+            fileNameLabel.MouseEnter += FileNameLabel_MouseEnter;
+            fileNameLabel.MouseLeave += FileNameLabel_MouseLeave;
+            tableLayoutPanelResults.Controls.Add(fileNameLabel);
+        }
 
-            if (string.IsNullOrEmpty(_directoryPath)) return;
+        private void FileNameLabel_Click(object sender, EventArgs e)
+        {
+            var label = sender as Label;
 
-            var filenames = Directory.GetFiles(_directoryPath, "*.bin")
-                                     .Select(Path.GetFileNameWithoutExtension)
-                                     .ToArray();
-
-            DialogResult result = DialogResult.No;
-            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWord"))
-                result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.YesNo);
-
-            if (result == DialogResult.No)
+            if (label != null)
             {
-                if (_index != null)
-                    _index.Dispose();
-                labelNumberResults.Hide();
-                labelIndexing.Show();
-                Update();
-                var writer = new IndexWriter(_directoryPath);
-                writer.BuildIndex(this);
+                foreach (Label tempLabel in tableLayoutPanelResults.Controls)
+                {
+                    tempLabel.ForeColor = Color.Black;
+                }
+                label.ForeColor = Color.Gold;
 
-                //Write the KGram Index to the disk
-                KGramIndex.ToDisk(_directoryPath);
+                textBoxArticle.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
+
+                // Highlight the search terms.
+                HighlightText();
             }
 
-            //Load the Disk positional index into memory
-            _index = new DiskPositionalIndex(_directoryPath);
-
-            //Load the KGram index in memory
-            KGramIndex.ToMemory(_directoryPath);
-
-            toolStripMenuItemStatistics.Enabled = true;
-            labelIndexing.Hide();
-            textBoxSearch.Enabled = true;
-            textBoxSearch.Select();
-            textBoxSearch.Text = "Indexing done ^^";
-            textBoxSearch.SelectionStart = 0;
-            textBoxSearch.SelectionLength = textBoxSearch.Text.Length;
         }
+
+        #endregion
+
+        #region Error correction
+
+        private void correctedWordLabel_MouseEnter(object sender, EventArgs e)
+        {
+            labelCorrectedWord.Font = new Font(labelCorrectedWord.Font, FontStyle.Underline);
+        }
+
+        private void correctedWordLabel_MouseLeave(object sender, EventArgs e)
+        {
+            labelCorrectedWord.Font = new Font(labelCorrectedWord.Font, FontStyle.Regular);
+        }
+
+        private void correctedWordLabel_MouseClick(object sender, MouseEventArgs e)
+        {
+            textBoxSearch.Text = labelCorrectedWord.Text.Replace("Did you mean: ", "").Replace("?", "");
+        }
+
+        #endregion
+
+        #region Page management
+
+        private void nextButton_Click(object sender, EventArgs e)
+        {
+            _currentPage++;
+            UpdateDisplayResults(_currentPage);
+        }
+
+        private void previousButton_Click(object sender, EventArgs e)
+        {
+            _currentPage--;
+            UpdateDisplayResults(_currentPage);
+        }
+
+        private void UpdateNumberOfResultsDisplayed()
+        {
+            int tmp = Size.Height;
+            _numberOfResultsByPage = 14;
+            tableLayoutPanelResults.RowCount = 0;
+
+            while (tmp > MinimumSize.Height + 32)
+            {
+                _numberOfResultsByPage += 2;
+                tmp -= 32;
+            }
+
+            UpdatePageNumber();
+            UpdateDisplayResults(_currentPage);
+        }
+
+        private void nextButton_EnabledChanged(object sender, EventArgs e)
+        {
+            if (buttonNext.Enabled)
+            {
+                buttonNext.BackColor = Color.Gold;
+                buttonNext.ForeColor = Color.Black;
+            }
+            else
+            {
+                buttonNext.BackColor = Color.FromArgb(64, 64, 64);
+                buttonNext.ForeColor = Color.Gold;
+            }
+        }
+
+        private void previousButton_EnabledChanged(object sender, EventArgs e)
+        {
+            if (buttonPrevious.Enabled)
+            {
+                buttonPrevious.BackColor = Color.Gold;
+                buttonPrevious.ForeColor = Color.Black;
+            }
+            else
+            {
+                buttonPrevious.BackColor = Color.FromArgb(64, 64, 64);
+                buttonPrevious.ForeColor = Color.Gold;
+            }
+        }
+
+        private void UpdatePageNumber()
+        {
+            int numberOfResults = int.Parse(labelNumberResults.Text.Remove(labelNumberResults.Text.Length - 8));
+            _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
+
+            while (_currentPage > _numberOfPages) _currentPage--;
+
+            labelPage.Text = _currentPage + "/" + _numberOfPages;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Article textBox
+
+        public void HighlightText()
+        {
+
+            int sStart = textBoxArticle.SelectionStart, startIndex = 0;
+
+            foreach (var articleWord in textBoxArticle.Text.Split(new char[] { ' ', '-' }))
+            {
+                var cleanWord = Regex.Replace(articleWord, @"[^-\w\s]*", "").ToLower();
+                if (SimpleEngine.FoundTerms.Contains(PorterStemmer.ProcessToken(cleanWord)))
+                {
+                    var index = textBoxArticle.Text.IndexOf(articleWord, startIndex, StringComparison.Ordinal);
+                    textBoxArticle.Select(index, articleWord.Length);
+                    textBoxArticle.SelectionColor = Color.Gold;
+                    textBoxArticle.SelectionBackColor = Color.Black;
+                }
+                startIndex += articleWord.Length + 1;
+            }
+
+            textBoxArticle.SelectionStart = sStart;
+            textBoxArticle.SelectionLength = 0;
+        }
+
+        #endregion
+
+        #region Form
+
+        private void MainWindow_ResizeEnd(object sender, EventArgs e)
+        {
+            if (buttonPrevious.Visible)
+                UpdateNumberOfResultsDisplayed();
+        }
+
+        private void MainWindow_SizeChanged(object sender, EventArgs e)
+        {
+            if (WindowState != _formerWindowsState && buttonPrevious.Visible)
+            {
+                _formerWindowsState = WindowState;
+                UpdateNumberOfResultsDisplayed();
+            }
+        }
+
+        #endregion
+
+        #region ProgressBar
 
         public void InitiateprogressBar(string directory)
         {
@@ -381,142 +557,22 @@ namespace SearchEngineProject
             progressBar.Hide();
         }
 
-        private void checkBox1_Click(object sender, EventArgs e)
+        #endregion
+
+        #region Others
+
+        private string prettyBytes(long numberOfBytes)
         {
-            checkBoxBool.CheckState = CheckState.Checked;
-            checkBoxBool.ForeColor = Color.Black;
-            checkBoxBool.FlatAppearance.MouseOverBackColor = Color.Gold;
-            checkBoxBool.FlatAppearance.MouseDownBackColor = Color.Gold;
-
-            checkBoxRank.CheckState = CheckState.Unchecked;
-            checkBoxRank.ForeColor = Color.Gold;
-            checkBoxRank.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
-            checkBoxRank.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
-
-            DisplayBooleanSearchResults();
-        }
-
-        private void checkBox2_Click(object sender, EventArgs e)
-        {
-            checkBoxRank.CheckState = CheckState.Checked;
-            checkBoxRank.ForeColor = Color.Black;
-            checkBoxRank.FlatAppearance.MouseOverBackColor = Color.Gold;
-            checkBoxRank.FlatAppearance.MouseDownBackColor = Color.Gold;
-
-            checkBoxBool.CheckState = CheckState.Unchecked;
-            checkBoxBool.ForeColor = Color.Gold;
-            checkBoxBool.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
-            checkBoxBool.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 64, 64);
-
-            DisplayRankSearchResults();
-        }
-
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Dispose();
-            Close();
-        }
-
-        private void correctedWordLabel_MouseClick(object sender, MouseEventArgs e)
-        {
-            textBoxSearch.Text = labelCorrectedWord.Text.Replace("Did you mean: ", "").Replace("?", "");
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Class: CECS 529\n" +
-                "Project: Milestone 2\n" +
-                "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" +
-                "Category A options: Wildcard queries and spelling correction\n" +
-                "Category B options: Syntax checking, GUI, Statistics, K-gram index on disk\n" +
-                "Category C options: NOT queries", "About");
-        }
-
-        private void correctedWordLabel_MouseEnter(object sender, EventArgs e)
-        {
-            labelCorrectedWord.Font = new Font(labelCorrectedWord.Font, FontStyle.Underline);
-        }
-
-        private void correctedWordLabel_MouseLeave(object sender, EventArgs e)
-        {
-            labelCorrectedWord.Font = new Font(labelCorrectedWord.Font, FontStyle.Regular);
-        }
-
-        private void searchTextBox_Click(object sender, EventArgs e)
-        {
-            if (textBoxSearch.Text == "Indexing done ^^")
-                textBoxSearch.Clear();
-        }
-
-        private void nextButton_Click(object sender, EventArgs e)
-        {
-            _currentPage++;
-            UpdateDisplayResults(_currentPage);
-        }
-
-        private void previousButton_Click(object sender, EventArgs e)
-        {
-            _currentPage--;
-            UpdateDisplayResults(_currentPage);
-        }
-
-        private void MainWindow_ResizeEnd(object sender, EventArgs e)
-        {
-            if (buttonPrevious.Visible)
-                UpdateNumberOfResultsDisplayed();
-        }
-
-        private void UpdateNumberOfResultsDisplayed()
-        {
-            int tmp = Size.Height;
-            _numberOfResultsByPage = 14;
-            tableLayoutPanelResults.RowCount = 0;
-
-            while (tmp > MinimumSize.Height + 32)
+            var counter = 0;
+            var unit = new[] { "B", "KB", "MB", "GB" };
+            while (numberOfBytes > 1024)
             {
-                _numberOfResultsByPage += 2;
-                tmp -= 32;
+                numberOfBytes /= 1024;
+                counter++;
             }
-
-            UpdatePageNumber();
-            UpdateDisplayResults(_currentPage);
+            return numberOfBytes + unit[counter];
         }
 
-        private void MainWindow_SizeChanged(object sender, EventArgs e)
-        {
-            if (WindowState != _formerWindowsState && buttonPrevious.Visible)
-            {
-                _formerWindowsState = WindowState;
-                UpdateNumberOfResultsDisplayed();
-            }
-        }
-
-        private void nextButton_EnabledChanged(object sender, EventArgs e)
-        {
-            if (buttonNext.Enabled)
-            {
-                buttonNext.BackColor = Color.Gold;
-                buttonNext.ForeColor = Color.Black;
-            }
-            else
-            {
-                buttonNext.BackColor = Color.FromArgb(64, 64, 64);
-                buttonNext.ForeColor = Color.Gold;
-            }
-        }
-
-        private void previousButton_EnabledChanged(object sender, EventArgs e)
-        {
-            if (buttonPrevious.Enabled)
-            {
-                buttonPrevious.BackColor = Color.Gold;
-                buttonPrevious.ForeColor = Color.Black;
-            }
-            else
-            {
-                buttonPrevious.BackColor = Color.FromArgb(64, 64, 64);
-                buttonPrevious.ForeColor = Color.Gold;
-            }
-        }
+        #endregion
     }
 }
