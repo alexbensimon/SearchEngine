@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,8 @@ namespace SearchEngineProject
     {
         private DiskPositionalIndex _index;
         private List<string> _finalResults;
+        private int numberOfResultsByPage = 14;
+        private FormWindowState formerWindowsState = FormWindowState.Normal;
 
         public MainWindow()
         {
@@ -134,8 +137,8 @@ namespace SearchEngineProject
         private void UpdateDisplayResults(int pageToDisplay)
         {
             tableLayoutPanel1.Controls.Clear();
-
-            for (int i = (pageToDisplay * 10) - 10; i < pageToDisplay * 10; i++)
+            
+            for (int i = (pageToDisplay * numberOfResultsByPage) - numberOfResultsByPage; i < pageToDisplay * numberOfResultsByPage; i++)
             {
                 if (_finalResults.Count <= i) break;
                 AddNewLabel(_finalResults.ElementAt(i));
@@ -382,6 +385,35 @@ namespace SearchEngineProject
         {
             pageLabel.Text = (int.Parse(pageLabel.Text) - 1).ToString();
             UpdateDisplayResults((int.Parse(pageLabel.Text)));
+        }
+
+        private void MainWindow_ResizeEnd(object sender, EventArgs e)
+        {
+            updateNumberOfResultsDisplayed();
+        }
+
+        private void updateNumberOfResultsDisplayed()
+        {
+            int tmp = Size.Height;
+            numberOfResultsByPage = 14;
+            tableLayoutPanel1.RowCount = 0;
+
+            while (tmp > MinimumSize.Height + 32)
+            {
+                numberOfResultsByPage += 2;
+                tmp -= 32;
+            }
+
+            DisplaySearchResults();
+        }
+
+        private void MainWindow_SizeChanged(object sender, EventArgs e)
+        {
+            if (WindowState != formerWindowsState)
+            {
+                formerWindowsState = WindowState;
+                updateNumberOfResultsDisplayed();
+            }
         }
     }
 }
