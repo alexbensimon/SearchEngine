@@ -180,7 +180,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -244,9 +244,9 @@
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.panel1.Controls.Add(this.nextButton);
             this.panel1.Controls.Add(this.previousButton);
             this.panel1.Controls.Add(this.pageLabel);
+            this.panel1.Controls.Add(this.nextButton);
             this.panel1.Controls.Add(this.tableLayoutPanel1);
             this.panel1.Controls.Add(this.correctedWordLabel);
             this.panel1.Controls.Add(this.numberResultsLabel);
@@ -265,13 +265,14 @@
             this.previousButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.previousButton.Font = new System.Drawing.Font("Segoe Print", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.previousButton.ForeColor = System.Drawing.Color.Gold;
-            this.previousButton.Location = new System.Drawing.Point(4, 265);
+            this.previousButton.Location = new System.Drawing.Point(3, 263);
             this.previousButton.Name = "previousButton";
             this.previousButton.Size = new System.Drawing.Size(75, 31);
             this.previousButton.TabIndex = 7;
             this.previousButton.Text = "Previous";
             this.previousButton.UseVisualStyleBackColor = false;
             this.previousButton.Visible = false;
+            this.previousButton.EnabledChanged += new System.EventHandler(this.previousButton_EnabledChanged);
             this.previousButton.Click += new System.EventHandler(this.previousButton_Click);
             // 
             // pageLabel
@@ -301,6 +302,7 @@
             this.nextButton.Text = "Next";
             this.nextButton.UseVisualStyleBackColor = false;
             this.nextButton.Visible = false;
+            this.nextButton.EnabledChanged += new System.EventHandler(this.nextButton_EnabledChanged);
             this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
             // tableLayoutPanel1
