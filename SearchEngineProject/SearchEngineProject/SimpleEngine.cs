@@ -224,7 +224,18 @@ namespace SearchEngineProject
                             Array.Reverse(buffer);
                         double ld = BitConverter.ToDouble(buffer, 0);
 
-                        if (ad != 0) ads.Add(ad / ld, documentId);
+                        if (ad != 0)
+                        {
+                            try
+                            {
+                                ads.Add(ad / ld, documentId);
+                            }
+                            catch (Exception)
+                            {
+                                throw;
+                            }
+                            
+                        }
                     }
                 }
             }
