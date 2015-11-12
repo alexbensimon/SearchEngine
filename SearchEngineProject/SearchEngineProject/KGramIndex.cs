@@ -74,8 +74,10 @@ namespace SearchEngineProject
             var usableWildcardQuery = '$' + wildcardQuery.Trim() + '$';
             var finalKgrams = new List<string>();
             var tempKgrams = usableWildcardQuery.Split('*');
+
             foreach (var kgram in tempKgrams)
             {
+                if (kgram == "") continue;
                 if (kgram.Length <= 3 && kgram != "$")
                     finalKgrams.Add(kgram);
                 else
@@ -267,7 +269,7 @@ namespace SearchEngineProject
                     if (potentialCorrectedWords.Contains(type) ||
                         PorterStemmer.ProcessToken(type) == PorterStemmer.ProcessToken(misspelledTerm)) continue;
                     float jaccardCoefficient = getJaccardCoefficient(kgrams, GenerateKgrams(type, false, 1));
-                    if (jaccardCoefficient >= 0.5)
+                    if (jaccardCoefficient >= 0.1)
                     {
                         int editDistance = getEditDistance(misspelledTerm, type);
                         if (editDistance < smallestEditDistance)
