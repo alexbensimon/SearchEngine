@@ -17,7 +17,9 @@ namespace SearchEngineProject
     {
         private DiskPositionalIndex _index;
         private List<string> _finalResults;
-        private int numberOfResultsByPage = 14;
+        private int _numberOfResultsByPage = 14;
+        private int _currentPage = 1;
+        private int _numberOfPages;
         private FormWindowState formerWindowsState = FormWindowState.Normal;
 
         public MainWindow()
@@ -28,15 +30,15 @@ namespace SearchEngineProject
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if(boolCBox.Checked)
+            if (boolCBox.Checked)
                 DisplayBooleanSearchResults();
-            else if(rankCbox.Checked)
+            else if (rankCbox.Checked)
                 DisplayRankSearchResults();
         }
 
         private void DisplayRankSearchResults()
         {
-            
+
         }
 
         private void DisplayBooleanSearchResults()
@@ -72,8 +74,10 @@ namespace SearchEngineProject
                 {
                     _finalResults.Add(_index.FileNames[docId]);
                 }
-                pageLabel.Text = "1";
-                UpdateDisplayResults(1);
+
+                UpdateDisplayResults(_currentPage);
+                previousButton.Visible = true;
+                nextButton.Visible = true;
             }
 
             //Display potential correction of search terms if needed
@@ -120,6 +124,16 @@ namespace SearchEngineProject
             }
         }
 
+        private void UpdatePageNumber()
+        {
+            int numberOfResults = int.Parse(numberResultsLabel.Text.Remove(numberResultsLabel.Text.Length - 8));
+            _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
+
+            while (_currentPage > _numberOfPages) _currentPage--;
+
+            pageLabel.Text = _currentPage + "/" + _numberOfPages;
+        }
+
         private void AddNewLabel(string text)
         {
             var fileNameLabel = new Label
@@ -137,12 +151,18 @@ namespace SearchEngineProject
         private void UpdateDisplayResults(int pageToDisplay)
         {
             tableLayoutPanel1.Controls.Clear();
-            
-            for (int i = (pageToDisplay * numberOfResultsByPage) - numberOfResultsByPage; i < pageToDisplay * numberOfResultsByPage; i++)
+
+            for (int i = (pageToDisplay * _numberOfResultsByPage) - _numberOfResultsByPage; i < pageToDisplay * _numberOfResultsByPage; i++)
             {
                 if (_finalResults.Count <= i) break;
                 AddNewLabel(_finalResults.ElementAt(i));
             }
+
+            UpdatePageNumber();
+
+            previousButton.Enabled = _currentPage != 1;           
+
+            nextButton.Enabled = _currentPage != _numberOfPages;
         }
 
         private void FileNameLabel_Click(object sender, EventArgs e)
@@ -159,7 +179,7 @@ namespace SearchEngineProject
 
                 articleTextBox.Text = File.ReadAllText("Corpus/" + label.Text);
             }
-            
+
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -377,42 +397,72 @@ namespace SearchEngineProject
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            pageLabel.Text = (int.Parse(pageLabel.Text) + 1).ToString();
-            UpdateDisplayResults((int.Parse(pageLabel.Text)));
+            _currentPage++;
+            UpdateDisplayResults(_currentPage);
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            pageLabel.Text = (int.Parse(pageLabel.Text) - 1).ToString();
-            UpdateDisplayResults((int.Parse(pageLabel.Text)));
+            _currentPage--;
+            UpdateDisplayResults(_currentPage);
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
         {
-            updateNumberOfResultsDisplayed();
+            if(previousButton.Visible)
+                UpdateNumberOfResultsDisplayed();
         }
 
-        private void updateNumberOfResultsDisplayed()
+        private void UpdateNumberOfResultsDisplayed()
         {
             int tmp = Size.Height;
-            numberOfResultsByPage = 14;
+            _numberOfResultsByPage = 14;
             tableLayoutPanel1.RowCount = 0;
 
             while (tmp > MinimumSize.Height + 32)
             {
-                numberOfResultsByPage += 2;
+                _numberOfResultsByPage += 2;
                 tmp -= 32;
             }
 
-            DisplaySearchResults();
+            UpdatePageNumber();
+            UpdateDisplayResults(_currentPage);
         }
 
         private void MainWindow_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowState != formerWindowsState)
+            if (WindowState != formerWindowsState && previousButton.Visible)
             {
                 formerWindowsState = WindowState;
-                updateNumberOfResultsDisplayed();
+                UpdateNumberOfResultsDisplayed();
+            }
+        }
+
+        private void nextButton_EnabledChanged(object sender, EventArgs e)
+        {
+            if (nextButton.Enabled)
+            {
+                nextButton.BackColor = Color.Gold;
+                nextButton.ForeColor = Color.Black;
+            }
+            else
+            {
+                nextButton.BackColor = Color.FromArgb(64, 64, 64);
+                nextButton.ForeColor = Color.Gold;
+            }
+        }
+
+        private void previousButton_EnabledChanged(object sender, EventArgs e)
+        {
+            if (previousButton.Enabled)
+            {
+                previousButton.BackColor = Color.Gold;
+                previousButton.ForeColor = Color.Black;
+            }
+            else
+            {
+                previousButton.BackColor = Color.FromArgb(64, 64, 64);
+                previousButton.ForeColor = Color.Gold;
             }
         }
     }
