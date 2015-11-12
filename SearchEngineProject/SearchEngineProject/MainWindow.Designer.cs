@@ -1,4 +1,6 @@
-﻿namespace SearchEngineProject
+﻿using System.Windows.Forms;
+
+namespace SearchEngineProject
 {
     partial class MainWindow
     {
@@ -53,6 +55,7 @@
             this.indexingLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.jkjhToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -369,6 +372,12 @@
             this.panel3.Size = new System.Drawing.Size(268, 33);
             this.panel3.TabIndex = 15;
             // 
+            // jkjhToolStripMenuItem
+            // 
+            this.jkjhToolStripMenuItem.Name = "jkjhToolStripMenuItem";
+            this.jkjhToolStripMenuItem.Size = new System.Drawing.Size(39, 21);
+            this.jkjhToolStripMenuItem.Text = "jkjh";
+            // 
             // MainWindow
             // 
             this.AcceptButton = this.searchButton;
@@ -431,6 +440,7 @@
         private System.Windows.Forms.Button previousButton;
         private System.Windows.Forms.Button nextButton;
         private System.Windows.Forms.Label pageLabel;
+        private ToolStripMenuItem jkjhToolStripMenuItem;
     }
 }
 
