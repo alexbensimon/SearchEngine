@@ -11,7 +11,7 @@ namespace SearchEngineProject
         private readonly Dictionary<string, Dictionary<int, List<int>>> _mIndex = new Dictionary<string, Dictionary<int, List<int>>>();
         private int _indexSize;
         private int _avgNumberDocsInPostingsList;
-        private Dictionary<string, double> _proportionDocContaining10MostFrequent =
+        private readonly Dictionary<string, double> _proportionDocContaining10MostFrequent =
             new Dictionary<string, double>();
         private long _indexSizeInMemory;
         private int _corpusSize;
@@ -36,7 +36,6 @@ namespace SearchEngineProject
                 // If not.
                 else
                     _mIndex[term].Add(documentId, new List<int> { position });
-
             }
             else
             {
@@ -133,19 +132,19 @@ namespace SearchEngineProject
 
         public void StatToDisk(string folder)
         {
-            //Create the stats file
+            // Create the stats file.
             FileStream statsFile = new FileStream(Path.Combine(folder, "statistics.bin"), FileMode.Create);
-            //Create the top 10 most frequent word file
+            // Create the top 10 most frequent word file.
             StreamWriter mostFreqWordFile = new StreamWriter(Path.Combine(folder, "mostFreqWord.bin"), false,
                 Encoding.ASCII);
 
-            //Write the index size
+            // Write the index size.
             byte[] indexSizeBytes = BitConverter.GetBytes(_indexSize);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(indexSizeBytes);
             statsFile.Write(indexSizeBytes, 0, indexSizeBytes.Length);
 
-            //Write the average number of docs in postings list
+            // Write the average number of docs in postings list.
             byte[] avgNumberBytes = BitConverter.GetBytes(_avgNumberDocsInPostingsList);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(avgNumberBytes);
@@ -153,23 +152,23 @@ namespace SearchEngineProject
 
             foreach (var word in _proportionDocContaining10MostFrequent.Keys)
             {
-                //Write the length of the word to the binary file
+                // Write the length of the word to the binary file.
                 byte[] lengthBytes = BitConverter.GetBytes(word.Length);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(lengthBytes);
                 statsFile.Write(lengthBytes, 0, lengthBytes.Length);
 
-                //Write the word to the other file
+                // Write the word to the other file.
                 mostFreqWordFile.Write(word);
 
-                //Write the percentage of the 10 most frequent words
+                // Write the percentage of the 10 most frequent words.
                 byte[] percentageBytes = BitConverter.GetBytes(_proportionDocContaining10MostFrequent[word]);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(percentageBytes);
                 statsFile.Write(percentageBytes, 0, percentageBytes.Length);
             }
 
-            //Write the size of the index in memory
+            // Write the size of the index in memory.
             byte[] indexSizeInMemoryBytes = BitConverter.GetBytes(_indexSizeInMemory);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(indexSizeInMemoryBytes);

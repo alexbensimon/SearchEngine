@@ -7,11 +7,10 @@ namespace SearchEngineProject
 {
     public class DiskPositionalIndex : IDisposable
     {
-        private string mPath;
-        private FileStream mVocabList;
-        private FileStream mPostings;
-        private long[] mVocabTable;
-        private List<string> mFileNames;
+        private string _mPath;
+        private readonly FileStream _mVocabList;
+        private readonly FileStream _mPostings;
+        private readonly long[] _mVocabTable;
         public int IndexSize { get; private set; }
         public int AvgNumberDocsInPostingsList { get; private set; }
         public Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
@@ -19,41 +18,40 @@ namespace SearchEngineProject
 
         public DiskPositionalIndex(string path)
         {
-            // open the vocabulary table and read it into memory. 
-            // we will end up with an array of T pairs of longs, where the first value is
-            // a position in the vocabularyTable file, and the second is a position in
-            // the postings file.
+            // Open the vocabulary table and read it into memory. We will end up with an array of T pairs
+            // of longs, where the first value is a position in the vocabularyTable file, and the second is
+            // a position in the postings file.
 
-            mPath = path;
+            _mPath = path;
 
-            mVocabList = new FileStream(Path.Combine(path, "vocab.bin"), FileMode.Open, FileAccess.Read);
-            mPostings = new FileStream(Path.Combine(path, "postings.bin"), FileMode.Open, FileAccess.Read);
+            _mVocabList = new FileStream(Path.Combine(path, "vocab.bin"), FileMode.Open, FileAccess.Read);
+            _mPostings = new FileStream(Path.Combine(path, "postings.bin"), FileMode.Open, FileAccess.Read);
 
-            mVocabTable = ReadVocabTable(path);
-            mFileNames = ReadFileNames(path);
+            _mVocabTable = ReadVocabTable(path);
+            FileNames = ReadFileNames(path);
 
-            //Read index statistics
-            readStats(path);
+            // Read index statistics.
+            ReadStats(path);
         }
 
-        private static int[][] ReadPostingsFromFile(FileStream postings, long postingsPosition, bool positionsRequested)
+        private static int[][] ReadPostingsFromFile(FileStream postings, long postingsPosition, 
+            bool positionsRequested)
         {
-            // seek the specified position in the file
+            // Seek the specified position in the file.
             postings.Seek(postingsPosition, SeekOrigin.Begin);
 
-            // read 4 bytes from the file into a buffer, for the document frequency
+            // Read 4 bytes from the file into a buffer, for the document frequency.
             byte[] buffer = new byte[4];
             postings.Read(buffer, 0, buffer.Length);
 
-            // the next two lines deal with Endianness issues and should be used every time
-            // a read is done.
+            // The next two lines deal with Endianness issues and should be used every time a read is done.
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(buffer);
 
-            // convert the byte array to an int
+            // Convert the byte array to an int.
             int documentFrequency = BitConverter.ToInt32(buffer, 0);
 
-            // initialize the array of document IDs to return.
+            // Initialize the array of document IDs to return.
             int[][] postingsArray = new int[documentFrequency][];
 
             int previousDocId = 0;
@@ -103,7 +101,7 @@ namespace SearchEngineProject
                     postingsArray[i] = new int[1];
                     postingsArray[i][0] = previousDocId;
 
-                    //TODO Ameliorer cett partie, on peut seek plus loin peut etre
+                    // TODO: Améliorer cette partie, on peut seek plus loin peut etre.
                     buffer = new byte[4 * termFrequency];
                     postings.Read(buffer, 0, buffer.Length);
 
@@ -119,40 +117,40 @@ namespace SearchEngineProject
         {
             long postingsPosition = BinarySearchVocabulary(term);
             if (postingsPosition >= 0)
-                return ReadPostingsFromFile(mPostings, postingsPosition, positionsRequested);
+                return ReadPostingsFromFile(_mPostings, postingsPosition, positionsRequested);
             return null;
         }
 
         private long BinarySearchVocabulary(string term)
         {
-            // do a binary search over the vocabulary, using the vocabTable and the file vocabList.
-            int i = 0, j = mVocabTable.Length / 2 - 1;
+            // Do a binary search over the vocabulary, using the vocabTable and the file vocabList.
+            int i = 0, j = _mVocabTable.Length / 2 - 1;
             while (i <= j)
             {
                 int m = (i + j) / 2;
-                long vListPosition = mVocabTable[m * 2];
+                long vListPosition = _mVocabTable[m * 2];
                 int termLength;
-                if (m == mVocabTable.Length / 2 - 1)
+                if (m == _mVocabTable.Length / 2 - 1)
                 {
-                    termLength = (int)(mVocabList.Length - mVocabTable[m * 2]);
+                    termLength = (int)(_mVocabList.Length - _mVocabTable[m * 2]);
                 }
                 else
                 {
-                    termLength = (int)(mVocabTable[(m + 1) * 2] - vListPosition);
+                    termLength = (int)(_mVocabTable[(m + 1) * 2] - vListPosition);
                 }
-                mVocabList.Seek(vListPosition, SeekOrigin.Begin);
+                _mVocabList.Seek(vListPosition, SeekOrigin.Begin);
 
                 byte[] buffer = new byte[termLength];
-                mVocabList.Read(buffer, 0, termLength);
+                _mVocabList.Read(buffer, 0, termLength);
                 string fileTerm = Encoding.ASCII.GetString(buffer);
 
                 int compareValue = term.CompareTo(fileTerm);
                 if (compareValue == 0)
                 {
                     // found it!
-                    return mVocabTable[m * 2 + 1];
+                    return _mVocabTable[m * 2 + 1];
                 }
-                else if (compareValue < 0)
+                if (compareValue < 0)
                 {
                     j = m - 1;
                 }
@@ -166,7 +164,7 @@ namespace SearchEngineProject
 
         private static List<string> ReadFileNames(string indexName)
         {
-            List<string> names = new List<string>();
+            var names = new List<string>();
             foreach (string fileName in Directory.EnumerateFiles(
                 Path.Combine(Environment.CurrentDirectory, indexName)))
             {
@@ -180,8 +178,6 @@ namespace SearchEngineProject
 
         private static long[] ReadVocabTable(string indexName)
         {
-            long[] vocabTable;
-
             FileStream tableFile = new FileStream(
                 Path.Combine(indexName, "vocabTable.bin"),
                 FileMode.Open, FileAccess.Read);
@@ -192,11 +188,11 @@ namespace SearchEngineProject
                 Array.Reverse(byteBuffer);
 
             int tableIndex = 0;
-            vocabTable = new long[BitConverter.ToInt32(byteBuffer, 0) * 2];
+            var vocabTable = new long[BitConverter.ToInt32(byteBuffer, 0) * 2];
             byteBuffer = new byte[8];
 
             while (tableFile.Read(byteBuffer, 0, byteBuffer.Length) > 0)
-            { // while we keep reading 4 bytes
+            { // While we keep reading 4 bytes.
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(byteBuffer);
                 vocabTable[tableIndex] = BitConverter.ToInt64(byteBuffer, 0);
@@ -206,38 +202,35 @@ namespace SearchEngineProject
             return vocabTable;
         }
 
-        public List<string> FileNames
-        {
-            get { return mFileNames; }
-        }
+        public List<string> FileNames { get; }
 
         public int TermCount
         {
-            get { return mVocabTable.Length / 2; }
+            get { return _mVocabTable.Length / 2; }
         }
 
         public void Dispose()
         {
-            if (mVocabList != null)
-                mVocabList.Close();
-            if (mPostings != null)
-                mPostings.Close();
+            if (_mVocabList != null)
+                _mVocabList.Close();
+            if (_mPostings != null)
+                _mPostings.Close();
         }
 
-        private void readStats(string path)
+        private void ReadStats(string path)
         {
             var statFile = new FileStream(Path.Combine(path, "statistics.bin"), FileMode.Open, FileAccess.Read);
             var mostFreqFile = new FileStream(Path.Combine(path, "mostFreqWord.bin"), FileMode.Open, FileAccess.Read);
-            ProportionDocContaining10MostFrequent=new Dictionary<string, double>();
+            ProportionDocContaining10MostFrequent = new Dictionary<string, double>();
 
-            //Read the index size
+            // Read the index size.
             var buffer = new byte[4];
             statFile.Read(buffer, 0, buffer.Length);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(buffer);
             IndexSize = BitConverter.ToInt32(buffer, 0);
 
-            //Average number of docs in postings list
+            // Average number of docs in postings list.
             buffer = new byte[4];
             statFile.Read(buffer, 0, buffer.Length);
             if (BitConverter.IsLittleEndian)
@@ -246,26 +239,26 @@ namespace SearchEngineProject
 
             for (int i = 0; i < 10; i++)
             {
-                //Read the length of the word
+                // Read the length of the word.
                 buffer = new byte[4];
                 statFile.Read(buffer, 0, buffer.Length);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(buffer);
                 int wordLength = BitConverter.ToInt32(buffer, 0);
 
-                //Read the word
+                // Read the word.
                 buffer = new byte[wordLength];
                 mostFreqFile.Read(buffer, 0, wordLength);
                 string word = Encoding.ASCII.GetString(buffer);
 
-                //Read the frequency
+                // Read the frequency.
                 buffer = new byte[8];
                 statFile.Read(buffer, 0, buffer.Length);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(buffer);
                 double frequency = BitConverter.ToDouble(buffer, 0);
 
-                //Add to the dictionnary
+                // Add to the dictionnary.
                 ProportionDocContaining10MostFrequent.Add(word, frequency);
             }
 

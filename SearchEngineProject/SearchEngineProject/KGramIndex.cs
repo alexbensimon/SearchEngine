@@ -1,27 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace SearchEngineProject
 {
     internal class KGramIndex
     {
-        private static readonly Dictionary<string, List<string>>[] _kGramIndexes = new Dictionary<string, List<string>>[3] { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>() };
-        private static readonly HashSet<string> _typeList = new HashSet<string>();
+        private static readonly Dictionary<string, List<string>>[] KGramIndexes = 
+            { new Dictionary<string, List<string>>(), new Dictionary<string, List<string>>(),
+            new Dictionary<string, List<string>>() };
+        private static readonly HashSet<string> TypeList = new HashSet<string>();
 
         public static List<string> GenerateKgrams(string type, bool add, int kMin)
         {
             if (add)
             {
-                if (_typeList.Contains(type))
+                if (TypeList.Contains(type))
                     return null;
 
-                _typeList.Add(type);
+                TypeList.Add(type);
             }
 
             var modifiedType = '$' + type + '$';
@@ -47,10 +47,10 @@ namespace SearchEngineProject
 
                     if (add)
                     {
-                        if (_kGramIndexes[counter].ContainsKey(kGram))
-                            _kGramIndexes[counter][kGram].Add(type);
+                        if (KGramIndexes[counter].ContainsKey(kGram))
+                            KGramIndexes[counter][kGram].Add(type);
                         else if (kGram != "$")
-                            _kGramIndexes[counter].Add(kGram, new List<string>() { type });
+                            KGramIndexes[counter].Add(kGram, new List<string>() { type });
                     }
                     else
                     {
@@ -64,8 +64,8 @@ namespace SearchEngineProject
 
         private static List<string> GetTypes(string kGram)
         {
-            if (_kGramIndexes[kGram.Length - 1].ContainsKey(kGram))
-                return _kGramIndexes[kGram.Length - 1][kGram];
+            if (KGramIndexes[kGram.Length - 1].ContainsKey(kGram))
+                return KGramIndexes[kGram.Length - 1][kGram];
             return null;
         }
 
@@ -142,44 +142,44 @@ namespace SearchEngineProject
 
         public static void ToDisk(string folder)
         {
-            //Create the kgramIndex file
+            // Create the kgramIndex file.
             FileStream kGramIndexFile = new FileStream(Path.Combine(folder, "kGramIndex.bin"), FileMode.Create);
-            //Create the kGramVocabList
+            // Create the kGramVocabList.
             StreamWriter kGramVocabList = new StreamWriter(Path.Combine(folder, "kGramVocab.bin"), false, Encoding.ASCII);
-            //Create the kGramList
+            // Create the kGramList.
             StreamWriter kGramList = new StreamWriter(Path.Combine(folder, "kGram.bin"), false, Encoding.ASCII);
 
-            //Write the array to the file
-            foreach (var kGramIndex in _kGramIndexes)
+            // Write the array to the file.
+            foreach (var kGramIndex in KGramIndexes)
             {
-                //Write number of kgrams
+                // Write number of kgrams.
                 byte[] kGramNumbBytes = BitConverter.GetBytes(kGramIndex.Count);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(kGramNumbBytes);
                 kGramIndexFile.Write(kGramNumbBytes, 0, kGramNumbBytes.Length);
 
-                //Write the dictionnary to the file
+                // Write the dictionnary to the file.
                 foreach (var kGram in kGramIndex.Keys)
                 {
-                    //Write the kgram
+                    // Write the kgram.
                     kGramList.Write(kGram);
 
-                    //Wtite the number of words associated to the kGram
+                    // Wtite the number of words associated to the kGram.
                     byte[] wordNumbBytes = BitConverter.GetBytes(kGramIndex[kGram].Count);
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(wordNumbBytes);
                     kGramIndexFile.Write(wordNumbBytes, 0, wordNumbBytes.Length);
 
-                    //Write the words to the file
+                    // Write the words to the file.
                     foreach (var word in kGramIndex[kGram])
                     {
-                        //Write the length of the word
+                        // Write the length of the word.
                         byte[] wordPosBytes = BitConverter.GetBytes(word.Length);
                         if (BitConverter.IsLittleEndian)
                             Array.Reverse(wordPosBytes);
                         kGramIndexFile.Write(wordPosBytes, 0, wordPosBytes.Length);
 
-                        //Write the word
+                        // Write the word.
                         kGramVocabList.Write(word);
                     }
                 }
@@ -196,29 +196,29 @@ namespace SearchEngineProject
             var kGramVocabList = new FileStream(Path.Combine(path, "kGramVocab.bin"), FileMode.Open, FileAccess.Read);
             var kGramList = new FileStream(Path.Combine(path, "kGram.bin"), FileMode.Open, FileAccess.Read);
 
-            //Rank of the GramIndex
+            // Rank of the GramIndex.
             int k = 1;
 
-            foreach (var kGramIndex in _kGramIndexes)
+            foreach (var kGramIndex in KGramIndexes)
             {
                 kGramIndex.Clear();
 
-                //Read size of the the kGramIndex
+                // Read size of the the kGramIndex.
                 var buffer = new byte[4];
                 kGramIndexFile.Read(buffer, 0, buffer.Length);
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(buffer);
                 int kGramIndexSize = BitConverter.ToInt32(buffer, 0);
 
-                //Read the kgram
+                // Read the kgram.
                 for (int i = 0; i < kGramIndexSize; i++)
                 {
                     buffer = new byte[k];
                     kGramList.Read(buffer, 0, k);
                     string kGram = Encoding.ASCII.GetString(buffer);
-                    _kGramIndexes[k - 1].Add(kGram, new List<string>());
+                    KGramIndexes[k - 1].Add(kGram, new List<string>());
 
-                    //Read the number of words associated to the kgram
+                    // Read the number of words associated to the kgram.
                     buffer = new byte[4];
                     kGramIndexFile.Read(buffer, 0, buffer.Length);
                     if (BitConverter.IsLittleEndian)
@@ -227,20 +227,20 @@ namespace SearchEngineProject
 
                     for (int j = 0; j < wordsNumber; j++)
                     {
-                        //Read the length of the word
+                        // Read the length of the word.
                         buffer = new byte[4];
                         kGramIndexFile.Read(buffer, 0, buffer.Length);
                         if (BitConverter.IsLittleEndian)
                             Array.Reverse(buffer);
                         int wordLength = BitConverter.ToInt32(buffer, 0);
 
-                        //Read the word
+                        // Read the word.
                         buffer = new byte[wordLength];
                         kGramVocabList.Read(buffer, 0, wordLength);
                         string word = Encoding.ASCII.GetString(buffer);
 
-                        //Add the word to index list
-                        _kGramIndexes[k - 1][kGram].Add(word);
+                        // Add the word to index list.
+                        KGramIndexes[k - 1][kGram].Add(word);
                     }
                 }
 
@@ -252,7 +252,7 @@ namespace SearchEngineProject
             kGramList.Close();
         }
 
-        public static HashSet<string> getCorrectedWord(string misspelledTerm)
+        public static HashSet<string> GetCorrectedWord(string misspelledTerm)
         {
             var kgrams = GenerateKgrams(misspelledTerm, false, 1);
             HashSet<string> potentialCorrectedWords = new HashSet<string>();
@@ -268,10 +268,10 @@ namespace SearchEngineProject
                 {
                     if (potentialCorrectedWords.Contains(type) ||
                         PorterStemmer.ProcessToken(type) == PorterStemmer.ProcessToken(misspelledTerm)) continue;
-                    float jaccardCoefficient = getJaccardCoefficient(kgrams, GenerateKgrams(type, false, 1));
+                    float jaccardCoefficient = GetJaccardCoefficient(kgrams, GenerateKgrams(type, false, 1));
                     if (jaccardCoefficient >= 0.1)
                     {
-                        int editDistance = getEditDistance(misspelledTerm, type);
+                        int editDistance = GetEditDistance(misspelledTerm, type);
                         if (editDistance < smallestEditDistance)
                         {
                             smallestEditDistance = editDistance;
@@ -286,7 +286,7 @@ namespace SearchEngineProject
             return potentialCorrectedWords;
         }
 
-        private static float getJaccardCoefficient(List<string> kgramsMisspelledTerm, List<string> kgramsVocabularyType)
+        private static float GetJaccardCoefficient(List<string> kgramsMisspelledTerm, List<string> kgramsVocabularyType)
         {
             float intersection = kgramsMisspelledTerm.Intersect(kgramsVocabularyType).Count();
             float union = kgramsMisspelledTerm.Count() + kgramsVocabularyType.Count() - intersection;
@@ -294,7 +294,7 @@ namespace SearchEngineProject
             return intersection / union;
         }
 
-        private static int getEditDistance(string misspelledTerm, string type)
+        private static int GetEditDistance(string misspelledTerm, string type)
         {
             int[,] m = new int[misspelledTerm.Length + 1, type.Length + 1];
 
@@ -312,13 +312,7 @@ namespace SearchEngineProject
             {
                 for (int j = 1; j <= type.Length; j++)
                 {
-                    int offset;
-                    if (misspelledTerm[i - 1] == type[j - 1])
-                        offset = 0;
-                    else
-                    {
-                        offset = 1;
-                    }
+                    var offset = misspelledTerm[i - 1] == type[j - 1] ? 0 : 1;
 
                     m[i, j] = Math.Min(m[i - 1, j - 1] + offset, Math.Min(m[i - 1, j] + 1, m[i, j - 1] + 1));
                 }

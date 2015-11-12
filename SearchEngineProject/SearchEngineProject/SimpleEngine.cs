@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
@@ -11,7 +9,7 @@ namespace SearchEngineProject
     public class SimpleEngine
     {
         public static HashSet<string> PotentialMisspelledWords = new HashSet<string>();
-        public static HashSet<string> FoundTerms = new HashSet<string>(); 
+        public static HashSet<string> FoundTerms = new HashSet<string>();
 
         public static bool IsQuerySyntaxCorrect(string query)
         {
@@ -200,7 +198,7 @@ namespace SearchEngineProject
             {
                 var postings = index.GetPostings(term, false);
                 var dft = postings.Count();
-                double wqt = Math.Log(1.0 + numberOfDocuments / dft);
+                double wqt = Math.Log(1.0 + (double)numberOfDocuments / dft);
 
                 for (int i = 0; i < postings.Count(); i++)
                 {
@@ -281,31 +279,31 @@ namespace SearchEngineProject
                         string term = termTemp.Trim();
                         if (term == string.Empty) continue;
 
-                            // If Wildcard query.
-                            if (Regex.IsMatch(term, @"(.*\*.*)+"))
-                                secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
-                            else
-                            {
+                        // If Wildcard query.
+                        if (Regex.IsMatch(term, @"(.*\*.*)+"))
+                            secondAndQueryItemsResultsDocIds.Add(ProcessWildcardQuery(term, index));
+                        else
+                        {
                             var processedTerm = PorterStemmer.ProcessToken(term);
                             var postings = index.GetPostings(processedTerm, false);
 
                             //Add the term to to  liste of the found term
                             if (!FoundTerms.Contains(processedTerm))
                                 FoundTerms.Add(processedTerm);
-                                if (postings == null)
-                                {
-                                    secondAndQueryItemsResultsDocIds.Add(new List<int>());
-                                    if (!PotentialMisspelledWords.Contains(term))
-                                        PotentialMisspelledWords.Add(term);
-                                }
-                                else
-                                {
-                                    secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
-                                    if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
-                                        PotentialMisspelledWords.Add(term);
-                                }
+                            if (postings == null)
+                            {
+                                secondAndQueryItemsResultsDocIds.Add(new List<int>());
+                                if (!PotentialMisspelledWords.Contains(term))
+                                    PotentialMisspelledWords.Add(term);
+                            }
+                            else
+                            {
+                                secondAndQueryItemsResultsDocIds.Add(GetDocIds(postings));
+                                if (!PotentialMisspelledWords.Contains(term) && postings.Count() < 5)
+                                    PotentialMisspelledWords.Add(term);
                             }
                         }
+                    }
                     if (secondAndQueryItemsResultsDocIds.Count > 0)
                         andQueryItemsResultsDocIds.Add(MergeAndResults(secondAndQueryItemsResultsDocIds).Last());
                 }
@@ -368,7 +366,7 @@ namespace SearchEngineProject
                                         FoundTerms.Add(processedTerm);
 
                                     notQueriesTempList.Add(GetDocIds(postings));
-                            }
+                                }
                             }
 
                             // Simple word.  

@@ -15,10 +15,8 @@ namespace SearchEngineProject
         // A sequence of vowels; the second/third/etc cannot be 'y'.
         private const string V = v + "[aeiou]*";
 
-
         // This regex tests if the token has measure > 0 [at least one VC].
         private static readonly Regex MGr0 = new Regex("^(" + C + ")?" + V + C);
-
 
         // Add more Regex variables for the following patterns.
         // M equals 1: token has measure == 1.
@@ -100,7 +98,7 @@ namespace SearchEngineProject
         public static string ProcessToken(string token)
         {
             // Token must be at least 3 chars.
-            if (token.Length < 3) return token; 
+            if (token.Length < 3) return token;
 
             // Step 1a.
             if (token.EndsWith("sses") || token.EndsWith("ies"))

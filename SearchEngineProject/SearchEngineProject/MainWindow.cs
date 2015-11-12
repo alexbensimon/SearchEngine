@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
 using SearchEngineProject.Properties;
 
@@ -43,7 +39,7 @@ namespace SearchEngineProject
             tableLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
             var query = searchTextBox.Text.ToLower();
-            if (query != String.Empty)
+            if (query != string.Empty)
             {
                 var results = SimpleEngine.ProcessRankQuery(query, _index);
                 foreach (var pair in results)
@@ -102,7 +98,7 @@ namespace SearchEngineProject
 
                 foreach (var potentialMisspelledWord in SimpleEngine.PotentialMisspelledWords)
                 {
-                    var correctedWords = KGramIndex.getCorrectedWord(potentialMisspelledWord);
+                    var correctedWords = KGramIndex.GetCorrectedWord(potentialMisspelledWord);
 
                     if (correctedWords.Count > 1)
                     {
@@ -193,7 +189,7 @@ namespace SearchEngineProject
 
                 articleTextBox.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
 
-                //Highlight the search terms
+                // Highlight the search terms.
                 HighlightText();
             }
 
@@ -246,7 +242,7 @@ namespace SearchEngineProject
         private string prettyBytes(long numberOfBytes)
         {
             var counter = 0;
-            var unit = new string[] { "B", "KB", "MB", "GB" };
+            var unit = new[] { "B", "KB", "MB", "GB" };
             while (numberOfBytes > 1024)
             {
                 numberOfBytes /= 1024;
@@ -354,7 +350,7 @@ namespace SearchEngineProject
 
         public void HideProgressBar()
         {
-            var t = new System.Windows.Forms.Timer { Interval = 3000 };
+            var t = new Timer { Interval = 3000 };
             indexingLabel.Show();
 
             t.Tick += (s, e) =>
