@@ -39,14 +39,32 @@ namespace SearchEngineProject
             tableLayoutPanel1.Controls.Clear();
             numberResultsLabel.Text = string.Empty;
             var query = searchTextBox.Text.ToLower();
-            if (query != string.Empty)
-            {
-                var results = SimpleEngine.ProcessRankQuery(query, _index);
-                foreach (var pair in results)
+            var results = SimpleEngine.ProcessRankQuery(query, _index, _directoryPath);
+            if (!results.Any())
+                tableLayoutPanel1.Controls.Add(new Label
                 {
-                    AddNewLabel(pair.Key.ToString());
-                    AddNewLabel(_index.FileNames[pair.Value]);
+                    Text = "No results",
+                    AutoSize = true,
+                    Font = new Font("Segoe Print", (float)14.25)
+                });
+            else
+            {
+                int numberOfResults;
+                if (results.Count() < 10) numberOfResults = results.Count() * 2;
+                else numberOfResults = 20;
+
+                numberResultsLabel.Text = numberOfResults + " results";
+
+                _finalResults = new List<string>();
+                for (int i = 0; i < numberOfResults/2; i++)
+                {
+                    _finalResults.Add(_index.FileNames[results.ElementAt(i).Value]);
+                    _finalResults.Add(results.ElementAt(i).Key.ToString());
                 }
+
+                UpdateDisplayResults(_currentPage);
+                previousButton.Visible = true;
+                nextButton.Visible = true;
             }
         }
 
@@ -200,17 +218,17 @@ namespace SearchEngineProject
 
             int sStart = articleTextBox.SelectionStart, startIndex = 0;
 
-            foreach (var articleWord in articleTextBox.Text.Split(new char[]{' ', '-'}))
+            foreach (var articleWord in articleTextBox.Text.Split(new char[] { ' ', '-' }))
             {
                 var cleanWord = Regex.Replace(articleWord, @"[^-\w\s]*", "").ToLower();
                 if (SimpleEngine.FoundTerms.Contains(PorterStemmer.ProcessToken(cleanWord)))
                 {
                     var index = articleTextBox.Text.IndexOf(articleWord, startIndex, StringComparison.Ordinal);
                     articleTextBox.Select(index, articleWord.Length);
-                    articleTextBox.SelectionColor=Color.Gold;
-                    articleTextBox.SelectionBackColor=Color.Black;
+                    articleTextBox.SelectionColor = Color.Gold;
+                    articleTextBox.SelectionBackColor = Color.Black;
                 }
-                startIndex += articleWord.Length+1;
+                startIndex += articleWord.Length + 1;
             }
 
             articleTextBox.SelectionStart = sStart;

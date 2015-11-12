@@ -132,6 +132,7 @@ namespace SearchEngineProject
             // also build an array associating each term with its byte location in this file.
             int vocabI = 0;
             StreamWriter vocabList = new StreamWriter(Path.Combine(folder, "vocab.bin"), false, Encoding.ASCII);
+
             int vocabPos = 0;
             foreach (string vocabWord in dictionary)
             {
@@ -147,6 +148,7 @@ namespace SearchEngineProject
         private static void IndexFiles(string folder, PositionalInvertedIndex index, MainWindow window)
         {
             var documentId = 0;
+            FileStream writer = new FileStream("docWeights.bin", FileMode.Create);
 
             Console.WriteLine("Indexing " + Path.Combine(Environment.CurrentDirectory, folder));
             foreach (string fileName in Directory.EnumerateFiles(Path.Combine(Environment.CurrentDirectory,
@@ -160,7 +162,6 @@ namespace SearchEngineProject
 
                     // Build term to occurence Hashmap.
                     var termToOccurence = new Dictionary<string, int>();
-
                     foreach (var term in index.GetDictionary())
                     {
                         var postings = index.GetPostings(term);
@@ -171,7 +172,7 @@ namespace SearchEngineProject
                     // Compute all wdts.
                     var wdts = new List<double>();
                     foreach (var pair in termToOccurence)
-                        wdts.Add(1.0 + Math.Log(pair.Value));
+                        wdts.Add(1.0 + Math.Log10(pair.Value));
 
                     // Calculate ld for this document.
                     double sumTemp = 0;
@@ -180,15 +181,17 @@ namespace SearchEngineProject
                     double ld = Math.Sqrt(sumTemp);
 
                     // Write ld in docWeights.bin.
-                    var writer = new StreamWriter("docWeights.bin", true, Encoding.Default, 8);
-                    writer.Write(ld);
-                    writer.Close();
+                    var buffer = BitConverter.GetBytes(ld);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                    writer.Write(buffer, 0, buffer.Length);
 
                     documentId++;
                 }
 
                 window.IncrementProgressBar();
             }
+            writer.Close();
         }
 
         private static void IndexFile(string fileName, PositionalInvertedIndex index, int documentId)
