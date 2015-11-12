@@ -87,6 +87,36 @@ namespace SearchEngineProject
 
         public static List<List<int>> MergeAndNotResults(List<List<int>> andNotQueryItemsResultsDocIds)
         {
+            for (int i = 0; i < andNotQueryItemsResultsDocIds.Count - 1; i++)
+            {
+                var andNotMergedList = new List<int>();
+                int a = 0;
+                int b = 0;
+                while (a < andNotQueryItemsResultsDocIds[i].Count)
+                {
+                    if (b >= andNotQueryItemsResultsDocIds[i + 1].Count)
+                    {
+                        andNotMergedList.Add(andNotQueryItemsResultsDocIds[i][a]);
+                        a++;
+                    }
+                    else if (andNotQueryItemsResultsDocIds[i][a] == andNotQueryItemsResultsDocIds[i + 1][b])
+                    {
+                        a++;
+                        b++;
+                    }
+                    else
+                    {
+                        if (andNotQueryItemsResultsDocIds[i][a] < andNotQueryItemsResultsDocIds[i + 1][b])
+                        {
+                            andNotMergedList.Add(andNotQueryItemsResultsDocIds[i][a]);
+                            a++;
+                        }
+                        else
+                            b++;
+                    }
+                }
+                andNotQueryItemsResultsDocIds[i + 1] = andNotMergedList;
+            }
             return andNotQueryItemsResultsDocIds;
         }
 
