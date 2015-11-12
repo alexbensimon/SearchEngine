@@ -18,12 +18,14 @@ namespace SearchEngineProject
             var aPlusSign = new Regex(@"\+");
             var aQuoteSign = new Regex(@"""");
             var aStar = new Regex(@"\*");
+            var aMinusSign = new Regex(@"-");
 
             // Correct patterns.
             var matchingParentheses = new Regex(@"^([^()]*\([^()]*\)[^()]*)+$");
             var matchingQuoteSigns = new Regex(@"^([^""]*""[^""]*""[^""]*)+$");
             var noAloneStarLeft = new Regex(@"^([^*]*\S\*[^*]*)+$");
             var noAloneStarRight = new Regex(@"^([^*]*\*\S[^*]*)+$");
+            var somethingAfterMinusSign = new Regex(@"^([^-]*-\S[^-]*)+$");
 
             // If the query follows a certain pattern, verify the partern is correct.
             if ((aParenthese.IsMatch(query)) && (!(matchingParentheses.IsMatch(query))))
@@ -43,6 +45,10 @@ namespace SearchEngineProject
                 return false;
 
             if ((aStar.IsMatch(query)) && (!(noAloneStarLeft.IsMatch(query))) && (!(noAloneStarRight.IsMatch(query))))
+                return false;
+
+            // Not query.
+            if ((aMinusSign.IsMatch(query)) && (!(somethingAfterMinusSign.IsMatch(query))))
                 return false;
 
             return true;
@@ -203,7 +209,7 @@ namespace SearchEngineProject
                 {
                     int tftd = postings[documentId].Count();
                     double wdt = 1 + Math.Log(tftd);
-                    ad += wqt*wdt;
+                    ad += wqt * wdt;
                 }
             }
         }
@@ -233,6 +239,9 @@ namespace SearchEngineProject
             // Process each Q: 
             foreach (string qTemp in qList)
             {
+                int positiveLiterals = 0;
+                bool notQuery;
+
                 string q = qTemp.Trim();
 
                 var andQueryItemsResultsDocIds = new List<List<int>>();
@@ -240,6 +249,12 @@ namespace SearchEngineProject
                 var notQueriesTempList = new List<List<int>>();
 
                 // Parentheses.
+                if (Regex.IsMatch(q, @"-\((.+?)\)")) notQuery = true;
+                else
+                {
+                    notQuery = false;
+                    positiveLiterals++;
+                }
                 var parentheses = Regex.Matches(q, @"\((.+?)\)")
                     .Cast<Match>()
                     .Select(m => m.Groups[1].Value)
@@ -286,6 +301,12 @@ namespace SearchEngineProject
                 q = Regex.Replace(q, @"\((.+?)\)", "");
 
                 // Phrase queries with " ".
+                if (Regex.IsMatch(q, "-\"(.+?)\"")) notQuery = true;
+                else
+                {
+                    notQuery = false;
+                    positiveLiterals++;
+                }
                 var phraseQueries = Regex.Matches(q, "\"(.+?)\"")
                     .Cast<Match>()
                     .Select(m => m.Groups[1].Value)
@@ -295,12 +316,19 @@ namespace SearchEngineProject
                     var phraseQueryTerms = SplitWhiteSpace(phraseQuery.Trim());
                     var results = ProcessPhraseQuery(index, phraseQueryTerms);
                     if (results == null)
-                        andQueryItemsResultsDocIds.Add(new List<int>());
+                    {
+                        if (notQuery) notQueriesTempList.Add(new List<int>());
+                        else andQueryItemsResultsDocIds.Add(new List<int>());
+                    }
                     else
-                        andQueryItemsResultsDocIds.Add(results.Keys.ToList());
+                    {
+                        if (notQuery) notQueriesTempList.Add(results.Keys.ToList());
+                        else andQueryItemsResultsDocIds.Add(results.Keys.ToList());
+                    }
                 }
                 // Remove phrase queries from the Q.
-                q = Regex.Replace(q, "\"(.+?)\"", "");
+                if (notQuery) q = Regex.Replace(q, "-\"(.+?)\"", "");
+                else q = Regex.Replace(q, "\"(.+?)\"", "");
 
                 // In the Q, it only remains simple words.
                 if (q != string.Empty)
@@ -355,6 +383,8 @@ namespace SearchEngineProject
                         }
                     }
                 }
+
+                if (positiveLiterals == 0) return null;
 
                 // If there are NOT queries.
                 if (notQueriesTempList.Count > 0)
