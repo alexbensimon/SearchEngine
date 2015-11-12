@@ -155,35 +155,37 @@ namespace SearchEngineProject
                 if (fileName.EndsWith(".txt"))
                 {
                     IndexFile(fileName, index, documentId);
+                    
+                    // Calculate document weight. 
+
+                    // Build term to occurence Hashmap.
+                    var termToOccurence = new Dictionary<string, int>();
+
+                    foreach (var term in index.GetDictionary())
+                    {
+                        var postings = index.GetPostings(term);
+                        if (postings.ContainsKey(documentId))
+                            termToOccurence.Add(term, postings[documentId].Count);
+                    }
+                        
+                    // Compute all wdts.
+                    var wdts = new List<double>();
+                    foreach (var pair in termToOccurence)
+                        wdts.Add(1.0 + Math.Log(pair.Value));
+
+                    // Calculate ld for this document.
+                    double sumTemp = 0;
+                    foreach (var wdt in wdts)
+                        sumTemp += wdt*wdt;
+                    double ld = Math.Sqrt(sumTemp);
+
+                    // Write ld in docWeights.bin.
+                    var writer = new StreamWriter("docWeights.bin", true, Encoding.Default, 8);
+                    writer.Write(ld);
+                    writer.Close();
+
                     documentId++;
                 }
-
-                // Calculate document weight. 
-
-                // Build term to occurence Hashmap.
-                var termToOccurence = new Dictionary<string, int>();
-                foreach (var term in index.GetDictionary())
-                {
-                    var positions = new List<int>();
-                    if (index.GetPostings(term).TryGetValue(documentId, out positions))
-                        termToOccurence.Add(term, positions.Count);
-                }
-                
-                // Compute all wdts.
-                var wdts = new List<double>();
-                foreach (var pair in termToOccurence)
-                    wdts.Add(1 + Math.Log(pair.Value));
-
-                // Calculate ld for this document.
-                double sumTemp = 0;
-                foreach (var wdt in wdts)
-                    sumTemp += wdt*wdt;
-                double ld = Math.Sqrt(sumTemp);
-
-                // Write ld in docWeights.bin.
-                var writer = new StreamWriter("docWeights.bin", true, Encoding.Default, 8);
-                writer.Write(ld);
-                writer.Close();
 
                 window.IncrementProgressBar();
             }

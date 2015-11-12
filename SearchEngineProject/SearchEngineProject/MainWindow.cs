@@ -38,7 +38,18 @@ namespace SearchEngineProject
 
         private void DisplayRankSearchResults()
         {
-
+            tableLayoutPanel1.Controls.Clear();
+            numberResultsLabel.Text = string.Empty;
+            var query = searchTextBox.Text.ToLower();
+            if (query != String.Empty)
+            {
+                var results = SimpleEngine.ProcessRankQuery(query, _index);
+                foreach (var pair in results)
+                {
+                    AddNewLabel(pair.Key.ToString());
+                    AddNewLabel(_index.FileNames[pair.Value]);
+                }
+            }
         }
 
         private void DisplayBooleanSearchResults()

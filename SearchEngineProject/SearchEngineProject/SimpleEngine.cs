@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SearchEngineProject
@@ -183,7 +185,7 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
-        public static void ProcessRankQuery(string query, DiskPositionalIndex index)
+        public static IEnumerable<KeyValuePair<double, int>> ProcessRankQuery(string query, DiskPositionalIndex index)
         {
             int numberOfDocuments = index.FileNames.Count;
             var ads = new Dictionary<double, int>();
@@ -192,16 +194,30 @@ namespace SearchEngineProject
             {
                 var postings = index.GetPostings(term, false);
                 var dft = postings.Count();
-                double wqt = Math.Log(1 + numberOfDocuments / dft);
+                double wqt = Math.Log(1.0 + numberOfDocuments / dft);
 
-                double ad = 0;
-                foreach (var documentId in GetDocIds(postings))
+                for (int i = 0; i < postings.Count(); i++)
                 {
-                    int tftd = postings[documentId].Count();
-                    double wdt = 1 + Math.Log(tftd);
+                    int documentId = postings[i][0];
+                    double ad = 0;
+                    int tftd = postings[i].Count() - 1;
+                    double wdt = 1.0 + Math.Log(tftd);
                     ad += wqt * wdt;
+
+                    // Read Ld in file and divide Ad by Ld
+                    var reader = new FileStream("docWeights.bin", FileMode.Open, FileAccess.Read);
+                    reader.Seek(documentId, SeekOrigin.Begin);
+                    var buffer = new byte[8];
+                    reader.Read(buffer, 0, buffer.Length);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                    double ld = BitConverter.ToDouble(buffer, 0);
+
+                    if (ad != 0) ads.Add(ad / ld, documentId);
+
                 }
             }
+            return ads.OrderByDescending(i => i.Key); ;
         }
 
         public static List<int> ProcessQuery(string query, DiskPositionalIndex index)
