@@ -205,6 +205,7 @@ namespace SearchEngineProject
             this.checkBoxBool.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBoxBool.Checked = true;
             this.checkBoxBool.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxBool.Enabled = false;
             this.checkBoxBool.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.checkBoxBool.FlatAppearance.CheckedBackColor = System.Drawing.Color.Gold;
             this.checkBoxBool.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Gold;
@@ -225,6 +226,7 @@ namespace SearchEngineProject
             this.checkBoxRank.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxRank.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.checkBoxRank.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.checkBoxRank.Enabled = false;
             this.checkBoxRank.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.checkBoxRank.FlatAppearance.CheckedBackColor = System.Drawing.Color.Gold;
             this.checkBoxRank.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));

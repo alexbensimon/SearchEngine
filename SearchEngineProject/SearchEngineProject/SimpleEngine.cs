@@ -230,11 +230,10 @@ namespace SearchEngineProject
                             {
                                 ads.Add(ad / ld, documentId);
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
-                                throw;
+                                Console.WriteLine(e);
                             }
-                            
                         }
                     }
                 }

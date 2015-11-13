@@ -105,6 +105,9 @@ namespace SearchEngineProject
             textBoxSearch.Text = "Indexing done ^^";
             textBoxSearch.SelectionStart = 0;
             textBoxSearch.SelectionLength = textBoxSearch.Text.Length;
+
+            checkBoxBool.Enabled = true;
+            checkBoxRank.Enabled = true;
         }
 
         #endregion
@@ -151,7 +154,7 @@ namespace SearchEngineProject
             labelNumberResults.Text = string.Empty;
             var query = textBoxSearch.Text.ToLower();
             var results = SimpleEngine.ProcessRankQuery(query, _index, _directoryPath);
-            if (!results.Any())
+            if (!results.Any() || results != null)
                 tableLayoutPanelResults.Controls.Add(new Label
                 {
                     Text = "No results",
