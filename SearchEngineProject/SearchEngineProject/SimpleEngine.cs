@@ -204,15 +204,19 @@ namespace SearchEngineProject
 
             var reader = new FileStream(Path.Combine(folder, "docWeights.bin"), FileMode.Open, FileAccess.Read);
 
+            //double ad=0;
+
             foreach (var term in SplitWhiteSpace(query))
             {
-                var postings = index.GetPostings(term, true);
+                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
 
                 if (postings != null)
                 {
                     double dft = postings.Count();
 
-                    double wqt = Math.Log(1.0 + numberOfDocuments / dft);
+                    double ad = 0;
+
+                    double wqt = Math.Log(1.0 + (numberOfDocuments / dft));
 
                     for (int i = 0; i < postings.Count(); i++)
                     {
@@ -222,7 +226,8 @@ namespace SearchEngineProject
 
                         double wdt = 1.0 + Math.Log(tftd);
 
-                        double ad = wqt * wdt;
+                        ad += wqt * wdt;
+                    }
 
                         // Read Ld in file and divide Ad by Ld.
                         reader.Seek(documentId * 8, SeekOrigin.Begin);
@@ -243,7 +248,7 @@ namespace SearchEngineProject
                                 Console.WriteLine(e);
                             }
                         }
-                    }
+
                 }
             }
             reader.Close();
