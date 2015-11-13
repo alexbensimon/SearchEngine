@@ -82,8 +82,11 @@ namespace SearchEngineProject
             {
                 if (_index != null)
                     _index.Dispose();
-                labelNumberResults.Hide();
+                
                 labelIndexing.Show();
+                panelArticle.Hide();
+                panelResults.Hide();
+                panelSearch.Hide();
                 labelIndexing.BringToFront();
                 progressBar.BringToFront();
                 Update();
@@ -569,6 +572,11 @@ namespace SearchEngineProject
         {
             labelIndexing.Hide();
             progressBar.Hide();
+            Update();
+            panelArticle.Show();
+            panelResults.Show();
+            panelSearch.Show();
+            Update();
         }
 
         #endregion
