@@ -230,24 +230,24 @@ namespace SearchEngineProject
                         ads[postings[j][0]] += wqt * wdt;
                     }
                 }
-            }
+                    }
 
             for (int i = 0; i < ads.Count; i++)
             {
                 if (ads.ElementAt(i).Value > 0)
                 {
-                    // Read Ld in file and divide Ad by Ld.
+                        // Read Ld in file and divide Ad by Ld.
                     reader.Seek(ads.ElementAt(i).Key * 8, SeekOrigin.Begin);
-                    var buffer = new byte[8];
-                    reader.Read(buffer, 0, buffer.Length);
-                    if (BitConverter.IsLittleEndian)
-                        Array.Reverse(buffer);
-                    double ld = BitConverter.ToDouble(buffer, 0);
+                        var buffer = new byte[8];
+                        reader.Read(buffer, 0, buffer.Length);
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(buffer);
+                        double ld = BitConverter.ToDouble(buffer, 0);
 
                     ads[ads.ElementAt(i).Key] = ads.ElementAt(i).Value / ld;
-                }
-            }
-            
+                            }
+                        }
+
             reader.Close();
             return ads.OrderByDescending(i => i.Value);
         }
