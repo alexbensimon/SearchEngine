@@ -195,16 +195,21 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
-        public static IEnumerable<KeyValuePair<double, int>> ProcessRankQuery(string query,
+        public static IEnumerable<KeyValuePair<int, double>> ProcessRankQuery(string query,
             DiskPositionalIndex index, string folder)
         {
+            if (string.IsNullOrWhiteSpace(query)) return null;
+
             double numberOfDocuments = index.FileNames.Count;
 
-            var ads = new Dictionary<double, int>();
+            var ads = new Dictionary<int, double>();
 
             var reader = new FileStream(Path.Combine(folder, "docWeights.bin"), FileMode.Open, FileAccess.Read);
 
-            //double ad=0;
+            for (int i = 0; i < numberOfDocuments; i++)
+            {
+                ads.Add(i, 0);
+            }
 
             foreach (var term in SplitWhiteSpace(query))
             {
@@ -214,45 +219,37 @@ namespace SearchEngineProject
                 {
                     double dft = postings.Count();
 
-                    double ad = 0;
-
                     double wqt = Math.Log(1.0 + (numberOfDocuments / dft));
 
-                    for (int i = 0; i < postings.Count(); i++)
+                    for (int j = 0; j < postings.Count(); j++)
                     {
-                        int documentId = postings[i][0];
-
-                        double tftd = postings[i].Count();
+                        double tftd = postings[j].Count() - 1;
 
                         double wdt = 1.0 + Math.Log(tftd);
 
-                        ad += wqt * wdt;
+                        ads[postings[j][0]] += wqt * wdt;
                     }
-
-                        // Read Ld in file and divide Ad by Ld.
-                        reader.Seek(documentId * 8, SeekOrigin.Begin);
-                        var buffer = new byte[8];
-                        reader.Read(buffer, 0, buffer.Length);
-                        if (BitConverter.IsLittleEndian)
-                            Array.Reverse(buffer);
-                        double ld = BitConverter.ToDouble(buffer, 0);
-
-                        if (ad > 0)
-                        {
-                            try
-                            {
-                                ads.Add(ad / ld, documentId);
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e);
-                            }
-                        }
-
                 }
             }
+
+            for (int i = 0; i < ads.Count; i++)
+            {
+                if (ads.ElementAt(i).Value > 0)
+                {
+                    // Read Ld in file and divide Ad by Ld.
+                    reader.Seek(ads.ElementAt(i).Key * 8, SeekOrigin.Begin);
+                    var buffer = new byte[8];
+                    reader.Read(buffer, 0, buffer.Length);
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(buffer);
+                    double ld = BitConverter.ToDouble(buffer, 0);
+
+                    ads[ads.ElementAt(i).Key] = ads.ElementAt(i).Value / ld;
+                }
+            }
+            
             reader.Close();
-            return ads.OrderByDescending(i => i.Key); ;
+            return ads.OrderByDescending(i => i.Value);
         }
 
         public static List<int> ProcessQuery(string query, DiskPositionalIndex index)

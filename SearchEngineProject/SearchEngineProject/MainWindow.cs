@@ -159,7 +159,8 @@ namespace SearchEngineProject
 
             var results = SimpleEngine.ProcessRankQuery(query, _index, _directoryPath);
 
-            var keyValuePairs = results as IList<KeyValuePair<double, int>> ?? results.ToList();
+            IList<KeyValuePair<int, double>> keyValuePairs = new List<KeyValuePair<int, double>>();
+            if(results != null) keyValuePairs = results as IList<KeyValuePair<int, double>> ?? results.ToList();
 
             if (!keyValuePairs.Any() || results == null)
                 tableLayoutPanelResults.Controls.Add(new Label
@@ -179,8 +180,8 @@ namespace SearchEngineProject
                 _finalResults = new List<string>();
                 for (int i = 0; i < numberOfResults / 2; i++)
                 {
-                    _finalResults.Add(_index.FileNames[keyValuePairs.ElementAt(i).Value]);
-                    _finalResults.Add(keyValuePairs.ElementAt(i).Key.ToString());
+                    _finalResults.Add(_index.FileNames[keyValuePairs.ElementAt(i).Key]);
+                    _finalResults.Add(keyValuePairs.ElementAt(i).Value.ToString());
                 }
 
                 UpdateDisplayResults(_currentPage);
