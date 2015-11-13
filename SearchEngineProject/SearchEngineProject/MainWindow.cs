@@ -560,7 +560,7 @@ namespace SearchEngineProject
 
         public void HideProgressBar()
         {
-            var t = new Timer { Interval = 3000 };
+            /*var t = new Timer { Interval = 3000 };
             labelIndexing.Show();
 
             t.Tick += (s, e) =>
@@ -568,7 +568,7 @@ namespace SearchEngineProject
                 labelIndexing.Hide();
                 t.Stop();
             };
-            t.Start();
+            t.Start();*/
             labelIndexing.Hide();
             progressBar.Hide();
         }

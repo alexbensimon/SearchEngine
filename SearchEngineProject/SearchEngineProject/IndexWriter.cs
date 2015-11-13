@@ -150,26 +150,14 @@ namespace SearchEngineProject
             var documentId = 0;
             FileStream writer = new FileStream(Path.Combine(folder, "docWeights.bin"), FileMode.Create);
 
-            Console.WriteLine("Indexing " + Path.Combine(Environment.CurrentDirectory, folder));
-
             foreach (string fileName in Directory.EnumerateFiles(Path.Combine(Environment.CurrentDirectory,
                 folder)))
             {
                 if (fileName.EndsWith(".txt"))
                 {
-                    IndexFile(fileName, index, documentId);
+                    var termToOccurence = IndexFile(fileName, index, documentId);
                     
-                    // Calculate document weight. 
-
-                    // Build term to occurence Hashmap.
-                    var termToOccurence = new Dictionary<string, int>();
-                    foreach (var term in index.GetDictionary())
-                    {
-                        var postings = index.GetPostings(term);
-                        if (postings.ContainsKey(documentId))
-                            termToOccurence.Add(term, postings[documentId].Count);
-                    }
-                        
+                    // Calculate document weight.    
                     // Compute all wdts.
                     var wdts = new List<double>();
                     foreach (var pair in termToOccurence)
@@ -195,8 +183,10 @@ namespace SearchEngineProject
             writer.Close();
         }
 
-        private static void IndexFile(string fileName, PositionalInvertedIndex index, int documentId)
+        private static Dictionary<string, int> IndexFile(string fileName, PositionalInvertedIndex index, int documentId)
         {
+            var tftds = new Dictionary<string, int>();
+
             try
             {
                 SimpleTokenStream stream = new SimpleTokenStream(fileName);
@@ -210,11 +200,25 @@ namespace SearchEngineProject
                     {
                         foreach (var tokenHyphen in token.Split('-'))
                         {
-                            index.AddTerm(PorterStemmer.ProcessToken(tokenHyphen), documentId, position);
+                            var termHyphen = PorterStemmer.ProcessToken(tokenHyphen);
+                            index.AddTerm(termHyphen, documentId, position);
+                            if (tftds.ContainsKey(termHyphen))
+                                tftds[termHyphen]++;
+                            else
+                            {
+                                tftds.Add(termHyphen, 1);
+                            }
                             KGramIndex.GenerateKgrams(tokenHyphen, true, 0);
                         }
                     }
-                    index.AddTerm(PorterStemmer.ProcessToken(token.Replace("-", "")), documentId, position);
+                    var term = PorterStemmer.ProcessToken(token.Replace("-", ""));
+                    index.AddTerm(term, documentId, position);
+                    if (tftds.ContainsKey(term))
+                        tftds[term]++;
+                    else
+                    {
+                        tftds.Add(term, 1);
+                    }
                     KGramIndex.GenerateKgrams(token.Replace("-", ""), true, 0);
                     position++;
                 }
@@ -224,6 +228,8 @@ namespace SearchEngineProject
             {
                 Console.WriteLine(ex);
             }
+
+            return tftds;
         }
     }
 }
