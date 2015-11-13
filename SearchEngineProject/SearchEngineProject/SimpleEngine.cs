@@ -232,7 +232,7 @@ namespace SearchEngineProject
                             Array.Reverse(buffer);
                         double ld = BitConverter.ToDouble(buffer, 0);
 
-                        if (ad != 0.0)
+                        if (ad > 0)
                         {
                             try
                             {
