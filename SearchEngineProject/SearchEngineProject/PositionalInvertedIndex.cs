@@ -8,7 +8,7 @@ namespace SearchEngineProject
 {
     public class PositionalInvertedIndex
     {
-        private readonly Dictionary<string, Dictionary<int, List<int>>> _mIndex = new Dictionary<string, Dictionary<int, List<int>>>();
+        private readonly Dictionary<string, SortedDictionary<int, List<int>>> _mIndex = new Dictionary<string, SortedDictionary<int, List<int>>>();
         private int _indexSize;
         private int _avgNumberDocsInPostingsList;
         private readonly Dictionary<string, double> _proportionDocContaining10MostFrequent =
@@ -40,7 +40,7 @@ namespace SearchEngineProject
             else
             {
                 var list = new List<int> { position };
-                var dict = new Dictionary<int, List<int>> { { documentId, list } };
+                var dict = new SortedDictionary<int, List<int>> { { documentId, list } };
                 _mIndex.Add(term, dict);
             }
 
@@ -60,7 +60,7 @@ namespace SearchEngineProject
             // TO-DO: return the postings list for the given term from the index Dictionary.
             try
             {
-                return _mIndex[term];
+                return new Dictionary<int, List<int>>(_mIndex[term]);
             }
             catch (KeyNotFoundException)
             {

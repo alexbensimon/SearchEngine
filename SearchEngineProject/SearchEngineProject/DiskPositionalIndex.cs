@@ -154,7 +154,7 @@ namespace SearchEngineProject
                 _mVocabList.Read(buffer, 0, termLength);
                 string fileTerm = Encoding.ASCII.GetString(buffer);
 
-                int compareValue = term.CompareTo(fileTerm);
+                int compareValue = String.Compare(term, fileTerm, StringComparison.Ordinal);
                 if (compareValue == 0)
                 {
                     // found it!
