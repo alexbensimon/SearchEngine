@@ -165,22 +165,28 @@ namespace SearchEngineProject
             if(results != null) keyValuePairs = results as IList<KeyValuePair<int, double>> ?? results.ToList();
 
             if (!keyValuePairs.Any() || results == null)
+            {
                 tableLayoutPanelResults.Controls.Add(new Label
                 {
                     Text = "No results",
                     AutoSize = true,
                     Font = new Font("Segoe Print", (float)14.25)
                 });
+                labelNumberResults.Hide();
+                UpdatePageNumber();
+            }
+                
             else
             {
-                int numberOfResults;
-                if (keyValuePairs.Count() < 10) numberOfResults = keyValuePairs.Count() * 2;
-                else numberOfResults = 20;
+                var temp = SimpleEngine.ProcessQuery(query, _index);
+                int numberOfResults = temp.Count;
+                if (numberOfResults > 10) numberOfResults = 10;
 
+                labelNumberResults.Show();
                 labelNumberResults.Text = numberOfResults + " results";
 
                 _finalResults = new List<string>();
-                for (int i = 0; i < numberOfResults / 2; i++)
+                for (int i = 0; i < numberOfResults; i++)
                 {
                     _finalResults.Add(_index.FileNames[keyValuePairs.ElementAt(i).Key]);
                     _finalResults.Add(keyValuePairs.ElementAt(i).Value.ToString());
@@ -202,12 +208,17 @@ namespace SearchEngineProject
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
             if (resultsDocIds == null)
+            {
                 tableLayoutPanelResults.Controls.Add(new Label
                 {
                     Text = "Wrong syntax",
                     AutoSize = true,
                     Font = new Font("Segoe Print", (float)14.25)
                 });
+                labelNumberResults.Hide();
+                UpdatePageNumber();
+            }
+                
             else if (resultsDocIds.Count == 0)
             {
                 tableLayoutPanelResults.Controls.Add(new Label
@@ -216,10 +227,15 @@ namespace SearchEngineProject
                     AutoSize = true,
                     Font = new Font("Segoe Print", (float) 14.25)
                 });
+                labelNumberResults.Hide();
+                UpdatePageNumber();
             }
             else
             {
+                labelCorrectedWord.Show();
+
                 // Display the number of returned documents.
+                labelNumberResults.Show();
                 labelNumberResults.Text = resultsDocIds.Count + " results";
 
                 // Build the results.
@@ -322,17 +338,16 @@ namespace SearchEngineProject
         {
             tableLayoutPanelResults.Controls.Clear();
 
-            for (int i = (pageToDisplay * _numberOfResultsByPage) - _numberOfResultsByPage; i < pageToDisplay * _numberOfResultsByPage; i++)
-            {
-                if (_finalResults.Count <= i) break;
-                AddNewLabel(_finalResults.ElementAt(i));
-            }
-
             UpdatePageNumber();
 
-            buttonPrevious.Enabled = _currentPage != 1;
-
-            buttonNext.Enabled = _currentPage != _numberOfPages;
+            if (_currentPage != 0)
+            {
+                for (int i = (pageToDisplay * _numberOfResultsByPage) - _numberOfResultsByPage; i < pageToDisplay * _numberOfResultsByPage; i++)
+                {
+                    if (_finalResults.Count <= i) break;
+                    AddNewLabel(_finalResults.ElementAt(i));
+                }
+            }
         }
 
         private void FileNameLabel_MouseEnter(object sender, EventArgs e)
@@ -478,12 +493,22 @@ namespace SearchEngineProject
 
         private void UpdatePageNumber()
         {
-            int numberOfResults = int.Parse(labelNumberResults.Text.Remove(labelNumberResults.Text.Length - 8));
+            int numberOfResults = 0;
+            if (labelNumberResults.Visible)
+                numberOfResults = int.Parse(labelNumberResults.Text.Remove(labelNumberResults.Text.Length - 8));
+            if (checkBoxRank.Checked) numberOfResults = numberOfResults*2;
             _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
+
+            if (_numberOfPages == 0) _numberOfPages = 1;
+            if (_currentPage == 0) _currentPage = 1;
 
             while (_currentPage > _numberOfPages) _currentPage--;
 
             labelPage.Text = _currentPage + "/" + _numberOfPages;
+
+            buttonPrevious.Enabled = _currentPage != 1;
+
+            buttonNext.Enabled = _currentPage != _numberOfPages;
         }
 
         #endregion
