@@ -213,10 +213,15 @@ namespace SearchEngineProject
 
             foreach (var term in SplitWhiteSpace(query))
             {
-                var postings = index.GetPostings(PorterStemmer.ProcessToken(term), true);
+                var processedTerm = PorterStemmer.ProcessToken(term);
+                var postings = index.GetPostings(processedTerm, true);
 
                 if (postings != null)
                 {
+                    //Add the term to to  liste of the found term
+                    if (!FoundTerms.Contains(processedTerm))
+                        FoundTerms.Add(processedTerm);
+
                     double dft = postings.Count();
 
                     double wqt = Math.Log(1.0 + (numberOfDocuments / dft));
@@ -230,23 +235,23 @@ namespace SearchEngineProject
                         ads[postings[j][0]] += wqt * wdt;
                     }
                 }
-            }
+                    }
 
             for (int i = 0; i < ads.Count; i++)
             {
                 if (ads.ElementAt(i).Value > 0)
                 {
-                    // Read Ld in file and divide Ad by Ld.
+                        // Read Ld in file and divide Ad by Ld.
                     reader.Seek(ads.ElementAt(i).Key * 8, SeekOrigin.Begin);
-                    var buffer = new byte[8];
-                    reader.Read(buffer, 0, buffer.Length);
-                    if (BitConverter.IsLittleEndian)
-                        Array.Reverse(buffer);
-                    double ld = BitConverter.ToDouble(buffer, 0);
+                        var buffer = new byte[8];
+                        reader.Read(buffer, 0, buffer.Length);
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(buffer);
+                        double ld = BitConverter.ToDouble(buffer, 0);
 
                     ads[ads.ElementAt(i).Key] = Math.Truncate(10000000 * ads.ElementAt(i).Value / ld) / 10000000;
-                }
-            }
+                            }
+                        }
 
             reader.Close();
             return ads.OrderByDescending(i => i.Value);
