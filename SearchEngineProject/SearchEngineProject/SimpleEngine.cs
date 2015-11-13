@@ -230,18 +230,18 @@ namespace SearchEngineProject
                     }
 
                     // Read Ld in file and divide Ad by Ld.
-                    //reader.Seek(documentId * 8, SeekOrigin.Begin);
+                    reader.Seek(documentId * 8, SeekOrigin.Begin);
                     var buffer = new byte[8];
                     reader.Read(buffer, 0, buffer.Length);
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(buffer);
                     double ld = BitConverter.ToDouble(buffer, 0);
 
-                    if (ad != 0.0)
+                        if (ad > 0)
                     {
                         try
                         {
-                            //ads.Add(ad / ld, documentId);
+                            ads.Add(ad / ld, documentId);
                         }
                         catch (Exception e)
                         {
