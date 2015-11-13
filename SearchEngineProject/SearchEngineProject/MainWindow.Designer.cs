@@ -188,11 +188,12 @@ namespace SearchEngineProject
             // 
             // progressBar
             // 
-            this.progressBar.BackColor = System.Drawing.Color.White;
+            this.progressBar.BackColor = System.Drawing.Color.Black;
+            this.progressBar.Cursor = System.Windows.Forms.Cursors.WaitCursor;
             this.progressBar.ForeColor = System.Drawing.Color.Gold;
-            this.progressBar.Location = new System.Drawing.Point(8, 34);
+            this.progressBar.Location = new System.Drawing.Point(79, 206);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(268, 33);
+            this.progressBar.Size = new System.Drawing.Size(753, 10);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 10;
             this.progressBar.UseWaitCursor = true;
@@ -343,11 +344,11 @@ namespace SearchEngineProject
             this.labelIndexing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelIndexing.Font = new System.Drawing.Font("Segoe Print", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelIndexing.ForeColor = System.Drawing.Color.Gold;
-            this.labelIndexing.Location = new System.Drawing.Point(0, 0);
+            this.labelIndexing.Location = new System.Drawing.Point(0, 25);
             this.labelIndexing.Name = "labelIndexing";
-            this.labelIndexing.Size = new System.Drawing.Size(916, 386);
+            this.labelIndexing.Size = new System.Drawing.Size(916, 361);
             this.labelIndexing.TabIndex = 11;
-            this.labelIndexing.Text = "We are indexing the directory for you :)";
+            this.labelIndexing.Text = "We are indexing the directory for you :)\r\n20%";
             this.labelIndexing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panelArticle
@@ -381,12 +382,12 @@ namespace SearchEngineProject
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(916, 386);
             this.Controls.Add(this.progressBar);
+            this.Controls.Add(this.labelIndexing);
             this.Controls.Add(this.checkBoxRank);
             this.Controls.Add(this.checkBoxBool);
             this.Controls.Add(this.buttonSearch);
             this.Controls.Add(this.menu);
             this.Controls.Add(this.panelSearch);
-            this.Controls.Add(this.labelIndexing);
             this.Controls.Add(this.panelArticle);
             this.Controls.Add(this.panelResults);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -425,7 +426,6 @@ namespace SearchEngineProject
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemindexADirectory;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparatorIndex;
         private System.Windows.Forms.Panel panelResults;
-        private System.Windows.Forms.Label labelIndexing;
         private System.Windows.Forms.Label labelCorrectedWord;
         private System.Windows.Forms.Panel panelArticle;
         private System.Windows.Forms.Panel panelSearch;
@@ -435,6 +435,7 @@ namespace SearchEngineProject
         private System.Windows.Forms.Button buttonPrevious;
         private System.Windows.Forms.Button buttonNext;
         private System.Windows.Forms.Label labelPage;
+        private Label labelIndexing;
     }
 }
 

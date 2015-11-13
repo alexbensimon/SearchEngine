@@ -75,7 +75,7 @@ namespace SearchEngineProject
                                      .ToArray();
 
             DialogResult result = DialogResult.No;
-            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWord"))
+            if (filenames.Contains("kGramIndex") && filenames.Contains("kGramVocab") && filenames.Contains("kGram") && filenames.Contains("vocab") && filenames.Contains("vocabTable") && filenames.Contains("postings") && filenames.Contains("statistics") && filenames.Contains("mostFreqWord") && filenames.Contains("docWeights"))
                 result = MessageBox.Show("This directory is already indexed, let's skip the long indexation! :)", "Directory already indexed", MessageBoxButtons.YesNo);
 
             if (result == DialogResult.No)
@@ -84,6 +84,8 @@ namespace SearchEngineProject
                     _index.Dispose();
                 labelNumberResults.Hide();
                 labelIndexing.Show();
+                labelIndexing.BringToFront();
+                progressBar.BringToFront();
                 Update();
                 var writer = new IndexWriter(_directoryPath);
                 writer.BuildIndex(this);
@@ -207,12 +209,14 @@ namespace SearchEngineProject
                     Font = new Font("Segoe Print", (float)14.25)
                 });
             else if (resultsDocIds.Count == 0)
+            {
                 tableLayoutPanelResults.Controls.Add(new Label
                 {
                     Text = "No results",
                     AutoSize = true,
-                    Font = new Font("Segoe Print", (float)14.25)
+                    Font = new Font("Segoe Print", (float) 14.25)
                 });
+            }
             else
             {
                 // Display the number of returned documents.
@@ -557,19 +561,12 @@ namespace SearchEngineProject
         public void IncrementProgressBar()
         {
             progressBar.PerformStep();
+            labelIndexing.Text = "We are indexing the directory for you :)\n" + progressBar.Value*100/progressBar.Maximum+"%";
+            labelIndexing.Update();
         }
 
         public void HideProgressBar()
         {
-            /*var t = new Timer { Interval = 3000 };
-            labelIndexing.Show();
-
-            t.Tick += (s, e) =>
-            {
-                labelIndexing.Hide();
-                t.Stop();
-            };
-            t.Start();*/
             labelIndexing.Hide();
             progressBar.Hide();
         }
