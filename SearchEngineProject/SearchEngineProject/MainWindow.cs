@@ -151,10 +151,17 @@ namespace SearchEngineProject
         private void DisplayRankSearchResults()
         {
             tableLayoutPanelResults.Controls.Clear();
+            SimpleEngine.FoundTerms.Clear();
             labelNumberResults.Text = string.Empty;
+            labelCorrectedWord.Hide();
+
             var query = textBoxSearch.Text.ToLower();
+
             var results = SimpleEngine.ProcessRankQuery(query, _index, _directoryPath);
-            if (!results.Any() || results != null)
+
+            var keyValuePairs = results as IList<KeyValuePair<double, int>> ?? results.ToList();
+
+            if (!keyValuePairs.Any() || results == null)
                 tableLayoutPanelResults.Controls.Add(new Label
                 {
                     Text = "No results",
@@ -164,7 +171,7 @@ namespace SearchEngineProject
             else
             {
                 int numberOfResults;
-                if (results.Count() < 10) numberOfResults = results.Count() * 2;
+                if (keyValuePairs.Count() < 10) numberOfResults = keyValuePairs.Count() * 2;
                 else numberOfResults = 20;
 
                 labelNumberResults.Text = numberOfResults + " results";
@@ -172,8 +179,8 @@ namespace SearchEngineProject
                 _finalResults = new List<string>();
                 for (int i = 0; i < numberOfResults / 2; i++)
                 {
-                    _finalResults.Add(_index.FileNames[results.ElementAt(i).Value]);
-                    _finalResults.Add(results.ElementAt(i).Key.ToString());
+                    _finalResults.Add(_index.FileNames[keyValuePairs.ElementAt(i).Value]);
+                    _finalResults.Add(keyValuePairs.ElementAt(i).Key.ToString());
                 }
 
                 UpdateDisplayResults(_currentPage);
@@ -370,8 +377,14 @@ namespace SearchEngineProject
                     tempLabel.ForeColor = Color.Black;
                 }
                 label.ForeColor = Color.Gold;
-
-                textBoxArticle.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
+                try
+                {
+                    textBoxArticle.Text = File.ReadAllText(_directoryPath + "/" + label.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
 
                 // Highlight the search terms.
                 HighlightText();

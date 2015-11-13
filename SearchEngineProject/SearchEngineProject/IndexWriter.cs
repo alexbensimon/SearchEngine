@@ -148,9 +148,10 @@ namespace SearchEngineProject
         private static void IndexFiles(string folder, PositionalInvertedIndex index, MainWindow window)
         {
             var documentId = 0;
-            FileStream writer = new FileStream("docWeights.bin", FileMode.Create);
+            FileStream writer = new FileStream(Path.Combine(folder, "docWeights.bin"), FileMode.Create);
 
             Console.WriteLine("Indexing " + Path.Combine(Environment.CurrentDirectory, folder));
+
             foreach (string fileName in Directory.EnumerateFiles(Path.Combine(Environment.CurrentDirectory,
                 folder)))
             {
@@ -172,10 +173,10 @@ namespace SearchEngineProject
                     // Compute all wdts.
                     var wdts = new List<double>();
                     foreach (var pair in termToOccurence)
-                        wdts.Add(1.0 + Math.Log10(pair.Value));
+                        wdts.Add(1.0 + Math.Log(pair.Value));
 
                     // Calculate ld for this document.
-                    double sumTemp = 0;
+                    double sumTemp = 0.0;
                     foreach (var wdt in wdts)
                         sumTemp += wdt*wdt;
                     double ld = Math.Sqrt(sumTemp);

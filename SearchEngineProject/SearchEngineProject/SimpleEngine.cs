@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace SearchEngineProject
 {
@@ -194,37 +195,44 @@ namespace SearchEngineProject
             return MergeOrResults(orQueryItemsResultsDocIds).Last();
         }
 
-        public static IEnumerable<KeyValuePair<double, int>> ProcessRankQuery(string query, 
+        public static IEnumerable<KeyValuePair<double, int>> ProcessRankQuery(string query,
             DiskPositionalIndex index, string folder)
         {
-            int numberOfDocuments = index.FileNames.Count;
+            double numberOfDocuments = index.FileNames.Count;
+
             var ads = new Dictionary<double, int>();
-            var reader = new FileStream("docWeights.bin", FileMode.Open, FileAccess.Read);
+
+            var reader = new FileStream(Path.Combine(folder, "docWeights.bin"), FileMode.Open, FileAccess.Read);
+
             foreach (var term in SplitWhiteSpace(query))
             {
                 var postings = index.GetPostings(term, true);
+
                 if (postings != null)
                 {
-                    var dft = postings.Count();
-                    double wqt = Math.Log(1.0 + (double)numberOfDocuments / dft);
+                    double dft = postings.Count();
+
+                    double wqt = Math.Log(1.0 + numberOfDocuments / dft);
 
                     for (int i = 0; i < postings.Count(); i++)
                     {
                         int documentId = postings[i][0];
-                        double ad = 0;
-                        int tftd = postings[i].Count() - 1;
-                        double wdt = 1.0 + Math.Log10(tftd);
-                        ad += wqt * wdt;
+
+                        double tftd = postings[i].Count();
+
+                        double wdt = 1.0 + Math.Log(tftd);
+
+                        double ad = wqt * wdt;
 
                         // Read Ld in file and divide Ad by Ld.
-                        reader.Seek(documentId*8, SeekOrigin.Begin);
+                        reader.Seek(documentId * 8, SeekOrigin.Begin);
                         var buffer = new byte[8];
                         reader.Read(buffer, 0, buffer.Length);
                         if (BitConverter.IsLittleEndian)
                             Array.Reverse(buffer);
                         double ld = BitConverter.ToDouble(buffer, 0);
 
-                        if (ad != 0)
+                        if (ad != 0.0)
                         {
                             try
                             {
