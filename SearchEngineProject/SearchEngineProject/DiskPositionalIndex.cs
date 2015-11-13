@@ -7,22 +7,22 @@ namespace SearchEngineProject
 {
     public class DiskPositionalIndex : IDisposable
     {
-        private string _mPath;
         private readonly FileStream _mVocabList;
         private readonly FileStream _mPostings;
         private readonly long[] _mVocabTable;
+
         public int IndexSize { get; private set; }
         public int AvgNumberDocsInPostingsList { get; private set; }
         public Dictionary<string, double> ProportionDocContaining10MostFrequent { get; private set; }
         public long IndexSizeInMemory { get; private set; }
+        public List<string> FileNames { get; }
 
+        // CONSTRUCTOR
         public DiskPositionalIndex(string path)
         {
             // Open the vocabulary table and read it into memory. We will end up with an array of T pairs
             // of longs, where the first value is a position in the vocabularyTable file, and the second is
             // a position in the postings file.
-
-            _mPath = path;
 
             _mVocabList = new FileStream(Path.Combine(path, "vocab.bin"), FileMode.Open, FileAccess.Read);
             _mPostings = new FileStream(Path.Combine(path, "postings.bin"), FileMode.Open, FileAccess.Read);
@@ -34,6 +34,24 @@ namespace SearchEngineProject
             ReadStats(path);
         }
 
+        // PUBLIC FUNCTIONS 
+        public int[][] GetPostings(string term, bool positionsRequested)
+        {
+            long postingsPosition = BinarySearchVocabulary(term);
+            if (postingsPosition >= 0)
+                return ReadPostingsFromFile(_mPostings, postingsPosition, positionsRequested);
+            return null;
+        }
+
+        public void Dispose()
+        {
+            if (_mVocabList != null)
+                _mVocabList.Close();
+            if (_mPostings != null)
+                _mPostings.Close();
+        }
+
+        // PRIVATE FUNCTIONS
         private static int[][] ReadPostingsFromFile(FileStream postings, long postingsPosition, 
             bool positionsRequested)
         {
@@ -113,14 +131,6 @@ namespace SearchEngineProject
             return postingsArray;
         }
 
-        public int[][] GetPostings(string term, bool positionsRequested)
-        {
-            long postingsPosition = BinarySearchVocabulary(term);
-            if (postingsPosition >= 0)
-                return ReadPostingsFromFile(_mPostings, postingsPosition, positionsRequested);
-            return null;
-        }
-
         private long BinarySearchVocabulary(string term)
         {
             // Do a binary search over the vocabulary, using the vocabTable and the file vocabList.
@@ -144,7 +154,7 @@ namespace SearchEngineProject
                 _mVocabList.Read(buffer, 0, termLength);
                 string fileTerm = Encoding.ASCII.GetString(buffer);
 
-                int compareValue = term.CompareTo(fileTerm);
+                int compareValue = String.Compare(term, fileTerm, StringComparison.Ordinal);
                 if (compareValue == 0)
                 {
                     // found it!
@@ -200,21 +210,6 @@ namespace SearchEngineProject
             }
             tableFile.Close();
             return vocabTable;
-        }
-
-        public List<string> FileNames { get; }
-
-        public int TermCount
-        {
-            get { return _mVocabTable.Length / 2; }
-        }
-
-        public void Dispose()
-        {
-            if (_mVocabList != null)
-                _mVocabList.Close();
-            if (_mPostings != null)
-                _mPostings.Close();
         }
 
         private void ReadStats(string path)
