@@ -295,33 +295,39 @@ namespace SearchEngineProject
                 labelCorrectedWord.Show();
                 labelCorrectedWord.Text = "Did you mean: " + correctedQuery + "?";
             }
+            
             else
             {
                 // Display query proposition
-                var token = textBoxSearch.Text.Split(' ').First();
-                var wordsList = QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(token));
-                if (wordsList != null)
+                var newText = textBoxSearch.Text.Trim();
+                if (newText.Split(' ').Count() == 1 && newText != String.Empty)
                 {
-                    panelQueryPropositions.Controls.Clear();
-                    panelQueryPropositions.Show();
-                    panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", 11), ForeColor = Color.Firebrick });
-
-                    for (int i = 0; i < 3; i++)
+                    var token = newText;
+                    var wordsList = QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(token));
+                    if (wordsList != null)
                     {
-                        var propositionLabel = new Label
+                        panelQueryPropositions.Controls.Clear();
+                        panelQueryPropositions.Show();
+                        panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", 11), ForeColor = Color.Firebrick });
+
+                        for (int i = 0; i < 3; i++)
                         {
-                            Text = token + ' ' + wordsList.ElementAt(i),
-                            AutoSize = true,
-                            Font = new Font("Segoe Print", 10),
-                            ForeColor = Color.Firebrick
-                        };
-                        propositionLabel.Click += PropositionLabel_Click;
-                        propositionLabel.MouseEnter += PropositionLabel_MouseEnter;
-                        propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
-                        panelQueryPropositions.Controls.Add(propositionLabel);
+                            var propositionLabel = new Label
+                            {
+                                Text = token + ' ' + wordsList.ElementAt(i),
+                                AutoSize = true,
+                                Font = new Font("Segoe Print", 10),
+                                ForeColor = Color.Firebrick
+                            };
+                            propositionLabel.Click += PropositionLabel_Click;
+                            propositionLabel.MouseEnter += PropositionLabel_MouseEnter;
+                            propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
+                            panelQueryPropositions.Controls.Add(propositionLabel);
+                        }
                     }
                 }
             }
+            
         }
 
         #endregion
@@ -513,7 +519,7 @@ namespace SearchEngineProject
         private void UpdateNumberOfResultsDisplayed()
         {
             int tmp = Size.Height;
-            _numberOfResultsByPage = 14;
+            _numberOfResultsByPage = 10;
             tableLayoutPanelResults.RowCount = 0;
 
             while (tmp > MinimumSize.Height + 32)

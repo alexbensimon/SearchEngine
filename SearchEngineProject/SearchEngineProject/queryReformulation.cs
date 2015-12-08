@@ -741,7 +741,7 @@ namespace SearchEngineProject
                     double coocurenceCoefficient = 0;
                     for (var k = 0; k < numberOfDocuments; k++)
                     {
-                        coocurenceCoefficient += a[i][k]*b[k][j];
+                        coocurenceCoefficient += a[i][k] * b[k][j];
                     }
 
                     //Keep only the 3 best coocurence coefficient

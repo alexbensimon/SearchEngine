@@ -321,6 +321,8 @@ namespace SearchEngineProject
             // 
             // tableLayoutPanelResults
             // 
+            this.tableLayoutPanelResults.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanelResults.AutoScroll = true;
             this.tableLayoutPanelResults.ColumnCount = 2;
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.87531F));
