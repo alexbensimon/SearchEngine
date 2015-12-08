@@ -683,8 +683,10 @@ namespace SearchEngineProject
 "yourselves",
 "you've",
 "z",
-"zero"
-}.Contains(term)) return;
+"zero",
+"ha"
+}.Contains(term))
+                return;
 
             if (!TermDocumentMatrix.ContainsKey(term))
             {
@@ -708,7 +710,7 @@ namespace SearchEngineProject
                 matrix[i] = new double[numberOfDocuments];
                 foreach (var weight in pair.Value)
                 {
-                    matrix[i][j] = weight/pair.Value.Length;
+                    matrix[i][j] = weight / pair.Value.Length;
                     j++;
                 }
                 _termArray[i] = pair.Key;
@@ -731,13 +733,15 @@ namespace SearchEngineProject
             for (var i = 0; i < _numberOfTerms; i++)
             {
                 var coocurenceCoeffDictionary = new List<KeyValuePair<double, int>>();
-                
+
                 for (var j = 0; j < _numberOfTerms; j++)
                 {
+                    if (j == i) continue;
+
                     double coocurenceCoefficient = 0;
                     for (var k = 0; k < numberOfDocuments; k++)
                     {
-                        coocurenceCoefficient += a[i][k] * b[k][j];
+                        coocurenceCoefficient += a[i][k]*b[k][j];
                     }
 
                     //Keep only the 3 best coocurence coefficient
@@ -749,8 +753,7 @@ namespace SearchEngineProject
                         coocurenceCoeffDictionary.Remove(coocurenceCoeffDictionary.First());
                         coocurenceCoeffDictionary.Add(new KeyValuePair<double, int>(coocurenceCoefficient, j));
                     }
-                    coocurenceCoeffDictionary.Sort((apair,bpair)=> apair.Key.CompareTo(bpair.Key));
-                    
+                    coocurenceCoeffDictionary.Sort((apair, bpair) => apair.Key.CompareTo(bpair.Key));
                 }
                 //Add the associated TermIds to the dictionnary
                 var tab = new int[3];
