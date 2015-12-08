@@ -122,11 +122,11 @@ namespace SearchEngineProject
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Class: CECS 529\n" +
-                "Project: Milestone 2\n" +
+                "Search Engine Technology Project\n" +
                 "Authors: Alexandre Bensimon and Vincent Gagneux\n\n" +
-                "Category A options: Wildcard queries and spelling correction\n" +
-                "Category B options: Syntax checking, GUI, Statistics, K-gram index on disk\n" +
-                "Category C options: NOT queries", "About");
+                "Milestone 1 options: Wildcard queries, Syntax checking, GUI, Index statistics\n" +
+                "Milestone 2 options: Spelling correction, K-gram index on disk, NOT queries\n" +
+                "Milestone 3 options: Query expansion", "About");
         }
 
         #endregion
@@ -295,9 +295,10 @@ namespace SearchEngineProject
             else
             {
                 // Display query proposition
+                panelQueryPropositions.Controls.Clear();
                 panelQueryPropositions.Show();
                 List<string> wordsList = new List<string> {"hey", "you", "bou"}; // TODO: Insert correct method here
-                panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", (float)14.25) });
+                panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", 12), ForeColor = Color.Firebrick});
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -305,7 +306,8 @@ namespace SearchEngineProject
                     {
                         Text = wordsList.ElementAt(i),
                         AutoSize = true,
-                        Font = new Font("Segoe Print", (float)14.25)
+                        Font = new Font("Segoe Print", 11),
+                        ForeColor = Color.Firebrick
                     };
                     propositionLabel.Click += PropositionLabel_Click;
                     propositionLabel.MouseEnter += PropositionLabel_MouseEnter;

@@ -47,6 +47,7 @@ namespace SearchEngineProject
             this.checkBoxBool = new System.Windows.Forms.CheckBox();
             this.checkBoxRank = new System.Windows.Forms.CheckBox();
             this.panelResults = new System.Windows.Forms.Panel();
+            this.panelQueryPropositions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonPrevious = new System.Windows.Forms.Button();
             this.labelPage = new System.Windows.Forms.Label();
             this.buttonNext = new System.Windows.Forms.Button();
@@ -55,7 +56,6 @@ namespace SearchEngineProject
             this.labelIndexing = new System.Windows.Forms.Label();
             this.panelArticle = new System.Windows.Forms.Panel();
             this.panelSearch = new System.Windows.Forms.Panel();
-            this.panelQueryPropositions = new System.Windows.Forms.FlowLayoutPanel();
             this.menu.SuspendLayout();
             this.panelResults.SuspendLayout();
             this.panelArticle.SuspendLayout();
@@ -263,6 +263,13 @@ namespace SearchEngineProject
             this.panelResults.Size = new System.Drawing.Size(421, 299);
             this.panelResults.TabIndex = 14;
             // 
+            // panelQueryPropositions
+            // 
+            this.panelQueryPropositions.Location = new System.Drawing.Point(3, 2);
+            this.panelQueryPropositions.Name = "panelQueryPropositions";
+            this.panelQueryPropositions.Size = new System.Drawing.Size(415, 24);
+            this.panelQueryPropositions.TabIndex = 17;
+            // 
             // buttonPrevious
             // 
             this.buttonPrevious.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
@@ -375,13 +382,6 @@ namespace SearchEngineProject
             this.panelSearch.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.panelSearch.Size = new System.Drawing.Size(268, 33);
             this.panelSearch.TabIndex = 15;
-            // 
-            // panelQueryPropositions
-            // 
-            this.panelQueryPropositions.Location = new System.Drawing.Point(3, 2);
-            this.panelQueryPropositions.Name = "panelQueryPropositions";
-            this.panelQueryPropositions.Size = new System.Drawing.Size(415, 24);
-            this.panelQueryPropositions.TabIndex = 17;
             // 
             // MainWindow
             // 
