@@ -684,7 +684,8 @@ namespace SearchEngineProject
 "you've",
 "z",
 "zero",
-"ha"
+"ha",
+"hit"
 }.Contains(term))
                 return;
 
