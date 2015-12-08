@@ -14,7 +14,7 @@ namespace SearchEngineProject
     {
         private DiskPositionalIndex _index;
         private List<string> _finalResults;
-        private int _numberOfResultsByPage = 14;
+        private int _numberOfResultsByPage = 10;
         private int _currentPage = 1;
         private int _numberOfPages;
         private FormWindowState _formerWindowsState = FormWindowState.Normal;
@@ -298,27 +298,29 @@ namespace SearchEngineProject
             else
             {
                 // Display query proposition
-                panelQueryPropositions.Controls.Clear();
-                panelQueryPropositions.Show();
-                List<string> wordsList = new List<string> {"hey", "you", "bou"}; // TODO: Insert correct method here
-                panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", 12), ForeColor = Color.Firebrick});
-
-                for (int i = 0; i < 3; i++)
+                var token = textBoxSearch.Text.Split(' ').First();
+                var wordsList = QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(token));
+                if (wordsList != null)
                 {
-                    var propositionLabel = new Label
+                    panelQueryPropositions.Controls.Clear();
+                    panelQueryPropositions.Show();
+                    panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", 11), ForeColor = Color.Firebrick });
+
+                    for (int i = 0; i < 3; i++)
                     {
-                        Text = wordsList.ElementAt(i),
-                        AutoSize = true,
-                        Font = new Font("Segoe Print", 11),
-                        ForeColor = Color.Firebrick
-                    };
-                    propositionLabel.Click += PropositionLabel_Click;
-                    propositionLabel.MouseEnter += PropositionLabel_MouseEnter;
-                    propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
-                    panelQueryPropositions.Controls.Add(propositionLabel);
+                        var propositionLabel = new Label
+                        {
+                            Text = token + ' ' + wordsList.ElementAt(i),
+                            AutoSize = true,
+                            Font = new Font("Segoe Print", 10),
+                            ForeColor = Color.Firebrick
+                        };
+                        propositionLabel.Click += PropositionLabel_Click;
+                        propositionLabel.MouseEnter += PropositionLabel_MouseEnter;
+                        propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
+                        panelQueryPropositions.Controls.Add(propositionLabel);
+                    }
                 }
-                QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(textBoxSearch.Text.Split(' ').First()));
-                labelCorrectedWord.Hide();
             }
         }
 
