@@ -82,7 +82,7 @@ namespace SearchEngineProject
             {
                 if (_index != null)
                     _index.Dispose();
-
+                
                 labelIndexing.Show();
                 panelArticle.Hide();
                 panelResults.Hide();
@@ -102,6 +102,9 @@ namespace SearchEngineProject
 
             //Load the KGram index in memory
             KGramIndex.ToMemory(_directoryPath);
+
+            //Load the matrix to memory
+            QueryReformulation.ToMemory(_directoryPath);
 
             toolStripMenuItemStatistics.Enabled = true;
             labelIndexing.Hide();
@@ -179,7 +182,7 @@ namespace SearchEngineProject
                 labelNumberResults.Hide();
                 UpdatePageNumber();
             }
-
+                
             else
             {
                 var temp = SimpleEngine.ProcessQuery(query, _index);
@@ -224,7 +227,7 @@ namespace SearchEngineProject
                 labelNumberResults.Hide();
                 UpdatePageNumber();
             }
-
+                
             else if (resultsDocIds.Count == 0)
             {
                 tableLayoutPanelResults.Controls.Add(new Label
@@ -314,6 +317,8 @@ namespace SearchEngineProject
                     propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
                     panelQueryPropositions.Controls.Add(propositionLabel);
                 }
+                QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(textBoxSearch.Text.Split(' ').First()));
+                labelCorrectedWord.Hide();
             }
         }
 
@@ -618,21 +623,14 @@ namespace SearchEngineProject
 
         #region ProgressBar
 
-        public void InitiateprogressBar(string directory)
+        public void InitiateprogressBar(int numberOfDocuments)
         {
-            int counter = Directory.EnumerateFiles(directory).Count();
-            foreach (var subDirectory in Directory.EnumerateDirectories(directory))
-            {
-                counter += Directory.EnumerateFiles(subDirectory).Count();
-            }
-
-            //Initiate the progress bar
             // Display the ProgressBar control.
             progressBar.Visible = true;
             // Set Minimum to 1 to represent the first file being copied.
             progressBar.Minimum = 1;
             // Set Maximum to the total number of files to copy.
-            progressBar.Maximum = counter;
+            progressBar.Maximum = numberOfDocuments;
             // Set the initial value of the ProgressBar.
             progressBar.Value = 1;
             // Set the Step property to a value of 1 to represent each file being copied.

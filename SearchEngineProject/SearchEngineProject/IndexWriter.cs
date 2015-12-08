@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace SearchEngineProject
@@ -8,6 +9,7 @@ namespace SearchEngineProject
     public class IndexWriter
     {
         private readonly string _mPath;
+        private static int _numberOfDocuments ;
 
         public IndexWriter(string path)
         {
@@ -24,8 +26,11 @@ namespace SearchEngineProject
             // The inverted index.
             var index = new PositionalInvertedIndex();
 
+            //Get the number of documents
+            _numberOfDocuments = Directory.EnumerateFiles(folder, "*.txt").Count();
+
             //Initiate the progress Bar
-            window.InitiateprogressBar(folder);
+            window.InitiateprogressBar(_numberOfDocuments);
 
             // Index the directory using a naive index
             IndexFiles(folder, index, window);
@@ -161,7 +166,12 @@ namespace SearchEngineProject
                     // Compute all wdts.
                     var wdts = new List<double>();
                     foreach (var pair in termToOccurence)
-                        wdts.Add(1.0 + Math.Log(pair.Value));
+                    {
+                        var wdt = 1.0 + Math.Log(pair.Value);
+                        QueryReformulation.AddWeightToMatrix(pair.Key, pair.Value, documentId, _numberOfDocuments);
+                        wdts.Add(wdt);
+                    }
+                        
 
                     // Calculate ld for this document.
                     double sumTemp = 0.0;
@@ -180,6 +190,11 @@ namespace SearchEngineProject
 
                 window.IncrementProgressBar();
             }
+
+            //Compute the coocurence Matrix and put it to disk
+            QueryReformulation.CreateMatrix(_numberOfDocuments);
+            QueryReformulation.ToDisk(folder);
+
             writer.Close();
         }
 
