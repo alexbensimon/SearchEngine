@@ -887,7 +887,9 @@ namespace SearchEngineProject
 
         public static string[] GetExtendedQueries(string term)
         {
-            return _extensionDictionary[term];
+            if (_extensionDictionary.Keys.Contains(term))
+                return _extensionDictionary[term];
+            return null;
         }
 
     }

@@ -113,9 +113,9 @@ namespace SearchEngineProject
             this.labelNumberResults.BackColor = System.Drawing.Color.WhiteSmoke;
             this.labelNumberResults.Font = new System.Drawing.Font("Calibri Light", 14.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelNumberResults.ForeColor = System.Drawing.Color.Gray;
-            this.labelNumberResults.Location = new System.Drawing.Point(294, 2);
+            this.labelNumberResults.Location = new System.Drawing.Point(307, 2);
             this.labelNumberResults.Name = "labelNumberResults";
-            this.labelNumberResults.Size = new System.Drawing.Size(127, 24);
+            this.labelNumberResults.Size = new System.Drawing.Size(114, 24);
             this.labelNumberResults.TabIndex = 5;
             this.labelNumberResults.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -265,9 +265,9 @@ namespace SearchEngineProject
             // 
             // panelQueryPropositions
             // 
-            this.panelQueryPropositions.Location = new System.Drawing.Point(3, 2);
+            this.panelQueryPropositions.Location = new System.Drawing.Point(0, 2);
             this.panelQueryPropositions.Name = "panelQueryPropositions";
-            this.panelQueryPropositions.Size = new System.Drawing.Size(415, 24);
+            this.panelQueryPropositions.Size = new System.Drawing.Size(301, 53);
             this.panelQueryPropositions.TabIndex = 17;
             // 
             // buttonPrevious
@@ -325,12 +325,11 @@ namespace SearchEngineProject
             this.tableLayoutPanelResults.ColumnCount = 2;
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.87531F));
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.12469F));
-            this.tableLayoutPanelResults.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelResults.Location = new System.Drawing.Point(10, 25);
+            this.tableLayoutPanelResults.Location = new System.Drawing.Point(4, 61);
             this.tableLayoutPanelResults.Name = "tableLayoutPanelResults";
             this.tableLayoutPanelResults.RowCount = 1;
             this.tableLayoutPanelResults.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelResults.Size = new System.Drawing.Size(401, 234);
+            this.tableLayoutPanelResults.Size = new System.Drawing.Size(414, 198);
             this.tableLayoutPanelResults.TabIndex = 4;
             // 
             // labelCorrectedWord
