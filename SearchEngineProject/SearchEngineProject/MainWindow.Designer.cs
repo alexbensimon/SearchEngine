@@ -55,6 +55,7 @@ namespace SearchEngineProject
             this.labelIndexing = new System.Windows.Forms.Label();
             this.panelArticle = new System.Windows.Forms.Panel();
             this.panelSearch = new System.Windows.Forms.Panel();
+            this.panelQueryPropositions = new System.Windows.Forms.FlowLayoutPanel();
             this.menu.SuspendLayout();
             this.panelResults.SuspendLayout();
             this.panelArticle.SuspendLayout();
@@ -249,6 +250,7 @@ namespace SearchEngineProject
             this.panelResults.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.panelResults.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelResults.Controls.Add(this.panelQueryPropositions);
             this.panelResults.Controls.Add(this.buttonPrevious);
             this.panelResults.Controls.Add(this.labelPage);
             this.panelResults.Controls.Add(this.buttonNext);
@@ -344,9 +346,9 @@ namespace SearchEngineProject
             this.labelIndexing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelIndexing.Font = new System.Drawing.Font("Segoe Print", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelIndexing.ForeColor = System.Drawing.Color.Gold;
-            this.labelIndexing.Location = new System.Drawing.Point(0, 25);
+            this.labelIndexing.Location = new System.Drawing.Point(0, 0);
             this.labelIndexing.Name = "labelIndexing";
-            this.labelIndexing.Size = new System.Drawing.Size(916, 361);
+            this.labelIndexing.Size = new System.Drawing.Size(916, 386);
             this.labelIndexing.TabIndex = 11;
             this.labelIndexing.Text = "We are indexing the directory for you :)\r\n20%";
             this.labelIndexing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -374,6 +376,13 @@ namespace SearchEngineProject
             this.panelSearch.Size = new System.Drawing.Size(268, 33);
             this.panelSearch.TabIndex = 15;
             // 
+            // panelQueryPropositions
+            // 
+            this.panelQueryPropositions.Location = new System.Drawing.Point(3, 2);
+            this.panelQueryPropositions.Name = "panelQueryPropositions";
+            this.panelQueryPropositions.Size = new System.Drawing.Size(415, 24);
+            this.panelQueryPropositions.TabIndex = 17;
+            // 
             // MainWindow
             // 
             this.AcceptButton = this.buttonSearch;
@@ -381,15 +390,15 @@ namespace SearchEngineProject
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(916, 386);
+            this.Controls.Add(this.panelResults);
             this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.labelIndexing);
             this.Controls.Add(this.checkBoxRank);
             this.Controls.Add(this.checkBoxBool);
             this.Controls.Add(this.buttonSearch);
             this.Controls.Add(this.menu);
             this.Controls.Add(this.panelSearch);
             this.Controls.Add(this.panelArticle);
-            this.Controls.Add(this.panelResults);
+            this.Controls.Add(this.labelIndexing);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menu;
             this.MinimumSize = new System.Drawing.Size(932, 425);
@@ -436,6 +445,7 @@ namespace SearchEngineProject
         private System.Windows.Forms.Button buttonNext;
         private System.Windows.Forms.Label labelPage;
         private Label labelIndexing;
+        private FlowLayoutPanel panelQueryPropositions;
     }
 }
 

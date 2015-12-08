@@ -102,7 +102,7 @@ namespace SearchEngineProject
 
             //Load the KGram index in memory
             KGramIndex.ToMemory(_directoryPath);
-            
+
             //Load the matrix to memory
             QueryReformulation.ToMemory(_directoryPath);
 
@@ -162,13 +162,14 @@ namespace SearchEngineProject
             SimpleEngine.FoundTerms.Clear();
             labelNumberResults.Text = string.Empty;
             labelCorrectedWord.Hide();
+            panelQueryPropositions.Hide();
 
             var query = textBoxSearch.Text.ToLower();
 
             var results = SimpleEngine.ProcessRankQuery(query, _index, _directoryPath);
 
             IList<KeyValuePair<int, double>> keyValuePairs = new List<KeyValuePair<int, double>>();
-            if(results != null) keyValuePairs = results as IList<KeyValuePair<int, double>> ?? results.ToList();
+            if (results != null) keyValuePairs = results as IList<KeyValuePair<int, double>> ?? results.ToList();
 
             if (!keyValuePairs.Any() || results == null)
             {
@@ -210,6 +211,8 @@ namespace SearchEngineProject
             SimpleEngine.FoundTerms.Clear();
             labelNumberResults.Text = string.Empty;
             var query = textBoxSearch.Text.ToLower();
+            labelCorrectedWord.Hide();
+            panelQueryPropositions.Hide();
 
             var resultsDocIds = SimpleEngine.ProcessQuery(query, _index);
 
@@ -231,15 +234,13 @@ namespace SearchEngineProject
                 {
                     Text = "No results",
                     AutoSize = true,
-                    Font = new Font("Segoe Print", (float) 14.25)
+                    Font = new Font("Segoe Print", (float)14.25)
                 });
                 labelNumberResults.Hide();
                 UpdatePageNumber();
             }
             else
             {
-                labelCorrectedWord.Show();
-
                 // Display the number of returned documents.
                 labelNumberResults.Show();
                 labelNumberResults.Text = resultsDocIds.Count + " results";
@@ -296,6 +297,24 @@ namespace SearchEngineProject
             }
             else
             {
+                // Display query proposition
+                panelQueryPropositions.Show();
+                List<string> wordsList = new List<string> {"hey", "you", "bou"}; // TODO: Insert correct method here
+                panelQueryPropositions.Controls.Add(new Label { Text = "Try with:", AutoSize = true, Font = new Font("Segoe Print", (float)14.25) });
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var propositionLabel = new Label
+                    {
+                        Text = wordsList.ElementAt(i),
+                        AutoSize = true,
+                        Font = new Font("Segoe Print", (float)14.25)
+                    };
+                    propositionLabel.Click += PropositionLabel_Click;
+                    propositionLabel.MouseEnter += PropositionLabel_MouseEnter;
+                    propositionLabel.MouseLeave += PropositionLabel_MouseLeave;
+                    panelQueryPropositions.Controls.Add(propositionLabel);
+                }
                 QueryReformulation.GetExtendedQueries(PorterStemmer.ProcessToken(textBoxSearch.Text.Split(' ').First()));
                 labelCorrectedWord.Hide();
             }
@@ -354,6 +373,39 @@ namespace SearchEngineProject
                     if (_finalResults.Count <= i) break;
                     AddNewLabel(_finalResults.ElementAt(i));
                 }
+            }
+        }
+
+        private void PropositionLabel_Click(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                textBoxSearch.Text = label.Text;
+                DisplayBooleanSearchResults();
+            }
+        }
+
+        private void PropositionLabel_MouseEnter(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                label.Cursor = Cursors.Hand;
+                label.Font = new Font(label.Font.Name, label.Font.SizeInPoints, FontStyle.Underline);
+            }
+        }
+
+        private void PropositionLabel_MouseLeave(object sender, EventArgs e)
+        {
+            var label = sender as Label;
+
+            if (label != null)
+            {
+                label.Cursor = Cursors.Default;
+                label.Font = new Font(label.Font.Name, label.Font.SizeInPoints, FontStyle.Regular);
             }
         }
 
@@ -503,7 +555,7 @@ namespace SearchEngineProject
             int numberOfResults = 0;
             if (labelNumberResults.Visible)
                 numberOfResults = int.Parse(labelNumberResults.Text.Remove(labelNumberResults.Text.Length - 8));
-            if (checkBoxRank.Checked) numberOfResults = numberOfResults*2;
+            if (checkBoxRank.Checked) numberOfResults = numberOfResults * 2;
             _numberOfPages = (int)Math.Ceiling((double)numberOfResults / _numberOfResultsByPage);
 
             if (_numberOfPages == 0) _numberOfPages = 1;
@@ -586,7 +638,7 @@ namespace SearchEngineProject
         public void IncrementProgressBar()
         {
             progressBar.PerformStep();
-            labelIndexing.Text = "We are indexing the directory for you :)\n" + progressBar.Value*100/progressBar.Maximum+"%";
+            labelIndexing.Text = "We are indexing the directory for you :)\n" + progressBar.Value * 100 / progressBar.Maximum + "%";
             labelIndexing.Update();
         }
 
