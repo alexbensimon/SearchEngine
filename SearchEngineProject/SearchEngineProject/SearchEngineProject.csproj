@@ -58,6 +58,7 @@
     <Compile Include="PorterStemmer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="queryReformulation.cs" />
     <Compile Include="SimpleEngine.cs" />
     <Compile Include="SimpleTokenStream.cs" />
     <EmbeddedResource Include="MainWindow.resx">
