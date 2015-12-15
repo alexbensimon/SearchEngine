@@ -191,7 +191,7 @@ namespace SearchEngineProject
                 window.IncrementProgressBar();
             }
 
-            //Compute the coocurence Matrix and put it to disk
+            // Compute the coocurence Matrix and put it to disk.
             QueryReformulation.CreateMatrix(_numberOfDocuments);
             QueryReformulation.ToDisk(folder);
 
